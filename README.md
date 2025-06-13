@@ -2,6 +2,8 @@
 
 A beautiful, production-ready booking website inspired by Marriott.com with modern web design principles and comprehensive functionality.
 
+![ScreenRecording2025-06-13](https://github.com/user-attachments/assets/3ae79e30-3d5d-4cc5-963a-21d9a506aab6)
+
 ## 🌟 Features
 
 ### Core Functionality
