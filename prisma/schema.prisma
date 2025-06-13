@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String?
+  email     String    @unique
+  password  String
+  role      String    @default("USER")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  profile   Profile?
+  bookings  Booking[]
+  orders    Order[]
+
+  @@map("users")
+}
+
+model Profile {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @unique
+  user          User     @relation(fields: [userId], references: [id])
+  bonvoyNumber  String?  @unique
+  bonvoyPoints  Int      @default(0)
+  phoneNumber   String?
+  address       String?
+  city          String?
+  state         String?
+  zipCode       String?
+  country       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("profiles")
+}
+
+model Booking {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  hotelId     String
+  roomType    String
+  checkIn     DateTime
+  checkOut    DateTime
+  guests      Int
+  totalPrice  Float
+  status      String   @default("PENDING") // PENDING, CONFIRMED, CANCELLED
+  orderId     Int?
+  order       Order?   @relation(fields: [orderId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("bookings")
+}
+
+model Order {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id])
+  bookings      Booking[]
+  stripeId      String   @unique
+  amount        Float
+  currency      String   @default("USD")
+  status        String   @default("PENDING") // PENDING, PAID, FAILED
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("orders")
+}
+
+// For production, switch provider to "postgresql" and update DATABASE_URL accordingly. 
