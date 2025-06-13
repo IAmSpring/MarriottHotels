@@ -11,12 +11,14 @@ import DealsPage from './pages/DealsPage';
 import BookingsPage from './pages/BookingsPage';
 import LoginPage from './pages/LoginPage';
 import DiningPage from './pages/DiningPage';
+import RestaurantDetails from './pages/RestaurantDetails';
 import AdventuresPage from './pages/AdventuresPage';
 import BoutiquePage from './pages/BoutiquePage';
 import RewardsPage from './pages/RewardsPage';
 import ExperiencesPage from './pages/ExperiencesPage';
 import DestinationsPage from './pages/DestinationsPage';
 import AppPage from './pages/AppPage';
+import AIChatBot from './components/AIChatBot';
 
 console.log('App.tsx: Starting to initialize...');
 
@@ -36,6 +38,7 @@ const App: React.FC = () => {
               <Route path="/bookings" element={<BookingsPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/dining" element={<DiningPage />} />
+              <Route path="/dining/:id" element={<RestaurantDetails />} />
               <Route path="/adventures" element={<AdventuresPage />} />
               <Route path="/boutique" element={<BoutiquePage />} />
               <Route path="/rewards" element={<RewardsPage />} />
@@ -43,6 +46,7 @@ const App: React.FC = () => {
               <Route path="/destinations" element={<DestinationsPage />} />
               <Route path="/app" element={<AppPage />} />
             </Routes>
+            <AIChatBot />
           </div>
         </Router>
       </QueryClientProvider>
