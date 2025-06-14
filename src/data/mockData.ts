@@ -9,6 +9,8 @@ export interface Hotel {
   amenities: string[];
   type: 'standard' | 'boutique' | 'luxury';
   featured?: boolean;
+  reviews: number;
+  rooms: Room[];
 }
 
 export interface Restaurant {
@@ -68,7 +70,137 @@ export interface Reward {
   terms: string[];
 }
 
+export interface Room {
+  type: string;
+  price: number;
+  description: string;
+  beds: string;
+  occupancy: string;
+  size: string;
+}
+
 export const mockHotels: Hotel[] = [
+  {
+    id: 'sandbourne-santa-monica',
+    name: 'Sandbourne Santa Monica',
+    location: 'Santa Monica, California, USA',
+    description: 'A luxurious boutique hotel steps away from Santa Monica Beach, offering a perfect blend of coastal charm and modern luxury.',
+    price: 450,
+    rating: 4.9,
+    images: [
+      'https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg',
+      'https://images.pexels.com/photos/261156/pexels-photo-261156.jpeg',
+      'https://images.pexels.com/photos/261395/pexels-photo-261395.jpeg'
+    ],
+    amenities: ['Beach Access', 'Rooftop Pool', 'Spa', 'Restaurant', 'Fitness Center', 'Valet Parking'],
+    type: 'boutique',
+    featured: true,
+    reviews: 856,
+    rooms: [
+      {
+        type: 'Ocean View Room',
+        price: 450,
+        description: 'Elegant room with stunning ocean views and private balcony',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '475 sq ft'
+      },
+      {
+        type: 'Luxury Suite',
+        price: 750,
+        description: 'Spacious suite with separate living area and ocean views',
+        beds: '1 King',
+        occupancy: '3 Adults',
+        size: '750 sq ft'
+      },
+      {
+        type: 'Penthouse Suite',
+        price: 1200,
+        description: 'Ultimate luxury with panoramic views and private terrace',
+        beds: '2 King',
+        occupancy: '4 Adults',
+        size: '1,200 sq ft'
+      }
+    ]
+  },
+  {
+    id: 'trailborn-highlands',
+    name: 'Trailborn Highlands',
+    location: 'Asheville, North Carolina, USA',
+    description: 'Nestled in the Blue Ridge Mountains, this boutique retreat offers a perfect blend of rustic charm and modern comfort.',
+    price: 380,
+    rating: 4.8,
+    images: [
+      'https://images.pexels.com/photos/2662116/pexels-photo-2662116.jpeg',
+      'https://images.pexels.com/photos/2662117/pexels-photo-2662117.jpeg',
+      'https://images.pexels.com/photos/2662118/pexels-photo-2662118.jpeg'
+    ],
+    amenities: ['Mountain Views', 'Hiking Trails', 'Spa', 'Farm-to-Table Restaurant', 'Yoga Studio'],
+    type: 'boutique',
+    featured: true,
+    reviews: 634,
+    rooms: [
+      {
+        type: 'Mountain View Room',
+        price: 380,
+        description: 'Cozy room with stunning mountain views',
+        beds: '1 King or 2 Queen',
+        occupancy: '2-4 Adults',
+        size: '400 sq ft'
+      },
+      {
+        type: 'Highland Suite',
+        price: 580,
+        description: 'Luxurious suite with fireplace and private balcony',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '650 sq ft'
+      }
+    ]
+  },
+  {
+    id: 'park-lane-hong-kong',
+    name: 'Park Lane Hong Kong',
+    location: 'Causeway Bay, Hong Kong',
+    description: 'A sophisticated urban retreat in the heart of Hong Kong, offering stunning views of Victoria Harbour and the city skyline.',
+    price: 520,
+    rating: 4.9,
+    images: [
+      'https://images.pexels.com/photos/2417842/pexels-photo-2417842.jpeg',
+      'https://images.pexels.com/photos/2417843/pexels-photo-2417843.jpeg',
+      'https://images.pexels.com/photos/2417844/pexels-photo-2417844.jpeg'
+    ],
+    amenities: ['Harbour Views', 'Rooftop Bar', 'Spa', 'Fine Dining', 'Executive Lounge', 'Fitness Center'],
+    type: 'boutique',
+    featured: true,
+    reviews: 923,
+    rooms: [
+      {
+        type: 'Deluxe City View',
+        price: 520,
+        description: 'Modern room with city skyline views',
+        beds: '1 King or 2 Queen',
+        occupancy: '2-3 Adults',
+        size: '450 sq ft'
+      },
+      {
+        type: 'Harbour Suite',
+        price: 820,
+        description: 'Luxury suite with Victoria Harbour views',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '700 sq ft'
+      },
+      {
+        type: 'Executive Suite',
+        price: 1100,
+        description: 'Premium suite with lounge access and harbour views',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '900 sq ft'
+      }
+    ]
+  },
   {
     id: '1',
     name: 'Marriott Grand Plaza',
@@ -82,9 +214,299 @@ export const mockHotels: Hotel[] = [
     ],
     amenities: ['Pool', 'Spa', 'Restaurant', 'Gym', 'Room Service'],
     type: 'luxury',
-    featured: true
+    featured: true,
+    reviews: 1247,
+    rooms: [
+      {
+        type: 'City View Room',
+        price: 299,
+        description: 'Modern room with stunning city views',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '400 sq ft'
+      },
+      {
+        type: 'Executive Suite',
+        price: 499,
+        description: 'Spacious suite with separate living area',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '650 sq ft'
+      }
+    ]
   },
-  // Add more hotels...
+  {
+    id: 'obr-001',
+    name: 'Ocean Breeze Resort',
+    location: 'Miami Beach, FL',
+    description: 'Luxury beachfront resort with stunning ocean views and world-class amenities.',
+    price: 320,
+    rating: 4.8,
+    images: [
+      'https://images.pexels.com/photos/338504/pexels-photo-338504.jpeg',
+      'https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg',
+      'https://images.pexels.com/photos/261156/pexels-photo-261156.jpeg'
+    ],
+    amenities: ['WiFi', 'Pool', 'Spa', 'Restaurant', 'Beach Access', 'Fitness Center'],
+    type: 'luxury',
+    reviews: 1247,
+    rooms: [
+      {
+        type: 'Ocean View Room',
+        price: 320,
+        description: 'Spacious room with stunning ocean views',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '450 sq ft'
+      },
+      {
+        type: 'Luxury Suite',
+        price: 550,
+        description: 'Premium suite with separate living area',
+        beds: '1 King',
+        occupancy: '3 Adults',
+        size: '750 sq ft'
+      }
+    ]
+  },
+  {
+    id: 'cch-003',
+    name: 'City Central Hotel',
+    location: 'Manhattan, NY',
+    description: 'Modern urban hotel in the heart of Manhattan with easy access to attractions.',
+    price: 280,
+    rating: 4.3,
+    images: [
+      'https://images.pexels.com/photos/1134176/pexels-photo-1134176.jpeg',
+      'https://images.pexels.com/photos/260922/pexels-photo-260922.jpeg',
+      'https://images.pexels.com/photos/260931/pexels-photo-260931.jpeg'
+    ],
+    amenities: ['WiFi', 'Restaurant', 'Gym', 'Parking', 'Business Center'],
+    type: 'standard',
+    reviews: 2156,
+    rooms: [
+      {
+        type: 'City View Room',
+        price: 280,
+        description: 'Modern room with city views',
+        beds: '1 King or 2 Double',
+        occupancy: '2 Adults',
+        size: '350 sq ft'
+      },
+      {
+        type: 'Executive Suite',
+        price: 450,
+        description: 'Spacious suite with living area',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '600 sq ft'
+      }
+    ]
+  },
+  {
+    id: 'dos-004',
+    name: 'Desert Oasis Spa Resort',
+    location: 'Scottsdale, AZ',
+    description: 'Tranquil desert resort featuring award-winning spa treatments and golf course.',
+    price: 380,
+    rating: 4.7,
+    images: [
+      'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg',
+      'https://images.pexels.com/photos/258245/pexels-photo-258245.jpeg',
+      'https://images.pexels.com/photos/261327/pexels-photo-261327.jpeg'
+    ],
+    amenities: ['WiFi', 'Pool', 'Spa', 'Restaurant', 'Golf Course', 'Tennis Courts'],
+    type: 'luxury',
+    reviews: 743,
+    rooms: [
+      {
+        type: 'Desert View Room',
+        price: 380,
+        description: 'Room with desert landscape views',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '475 sq ft'
+      },
+      {
+        type: 'Spa Suite',
+        price: 580,
+        description: 'Suite with private spa bath',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '700 sq ft'
+      }
+    ]
+  },
+  {
+    id: 'cis-005',
+    name: 'Coastal Inn & Suites',
+    location: 'San Diego, CA',
+    description: 'Comfortable coastal accommodation with easy beach access and family-friendly amenities.',
+    price: 180,
+    rating: 4.1,
+    images: [
+      'https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg',
+      'https://images.pexels.com/photos/261156/pexels-photo-261156.jpeg',
+      'https://images.pexels.com/photos/261395/pexels-photo-261395.jpeg'
+    ],
+    amenities: ['WiFi', 'Pool', 'Parking', 'Beach Access', 'Kids Club'],
+    type: 'standard',
+    reviews: 1534,
+    rooms: [
+      {
+        type: 'Standard Room',
+        price: 180,
+        description: 'Comfortable room with basic amenities',
+        beds: '2 Queen',
+        occupancy: '4 Adults',
+        size: '400 sq ft'
+      },
+      {
+        type: 'Family Suite',
+        price: 280,
+        description: 'Suite with kitchenette',
+        beds: '2 Queen + Sofa Bed',
+        occupancy: '6 Adults',
+        size: '600 sq ft'
+      }
+    ]
+  },
+  {
+    id: 'hdb-006',
+    name: 'Historic Downtown Boutique',
+    location: 'Charleston, SC',
+    description: 'Charming boutique hotel in historic district with Southern hospitality and elegance.',
+    price: 220,
+    rating: 4.5,
+    images: [
+      'https://images.pexels.com/photos/2034335/pexels-photo-2034335.jpeg',
+      'https://images.pexels.com/photos/2417842/pexels-photo-2417842.jpeg',
+      'https://images.pexels.com/photos/2417843/pexels-photo-2417843.jpeg'
+    ],
+    amenities: ['WiFi', 'Restaurant', 'Spa', 'Garden', 'Afternoon Tea'],
+    type: 'boutique',
+    reviews: 687,
+    rooms: [
+      {
+        type: 'Historic Room',
+        price: 220,
+        description: 'Charming room with period features',
+        beds: '1 Queen',
+        occupancy: '2 Adults',
+        size: '300 sq ft'
+      },
+      {
+        type: 'Garden Suite',
+        price: 350,
+        description: 'Suite with garden views',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '500 sq ft'
+      }
+    ]
+  },
+  {
+    id: 'lsr-007',
+    name: 'Lakeside Retreat',
+    location: 'Lake Tahoe, CA',
+    description: 'Serene lakeside hotel with breathtaking mountain and water views.',
+    price: 290,
+    rating: 4.6,
+    images: [
+      'https://images.pexels.com/photos/753626/pexels-photo-753626.jpeg',
+      'https://images.pexels.com/photos/753619/pexels-photo-753619.jpeg',
+      'https://images.pexels.com/photos/753623/pexels-photo-753623.jpeg'
+    ],
+    amenities: ['WiFi', 'Restaurant', 'Gym', 'Parking', 'Lake Access', 'Water Sports'],
+    type: 'luxury',
+    reviews: 956,
+    rooms: [
+      {
+        type: 'Lake View Room',
+        price: 290,
+        description: 'Room with lake views',
+        beds: '1 King or 2 Queen',
+        occupancy: '4 Adults',
+        size: '425 sq ft'
+      },
+      {
+        type: 'Waterfront Suite',
+        price: 490,
+        description: 'Suite with private balcony',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '650 sq ft'
+      }
+    ]
+  },
+  {
+    id: 'bci-008',
+    name: 'Budget Comfort Inn',
+    location: 'Austin, TX',
+    description: 'Clean, comfortable, and affordable accommodation in the heart of Austin.',
+    price: 95,
+    rating: 3.8,
+    images: [
+      'https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg',
+      'https://images.pexels.com/photos/271619/pexels-photo-271619.jpeg',
+      'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg'
+    ],
+    amenities: ['WiFi', 'Parking', 'Continental Breakfast', 'Business Center'],
+    type: 'standard',
+    reviews: 2341,
+    rooms: [
+      {
+        type: 'Standard Room',
+        price: 95,
+        description: 'Basic comfortable room',
+        beds: '2 Double',
+        occupancy: '4 Adults',
+        size: '300 sq ft'
+      },
+      {
+        type: 'Business Room',
+        price: 120,
+        description: 'Room with work desk',
+        beds: '1 Queen',
+        occupancy: '2 Adults',
+        size: '325 sq ft'
+      }
+    ]
+  },
+  {
+    id: 'lms-009',
+    name: 'Luxury Metropolitan Suite',
+    location: 'Chicago, IL',
+    description: 'Ultra-luxury suites with panoramic city views and personalized concierge service.',
+    price: 520,
+    rating: 4.9,
+    images: [
+      'https://images.pexels.com/photos/260922/pexels-photo-260922.jpeg',
+      'https://images.pexels.com/photos/260932/pexels-photo-260932.jpeg',
+      'https://images.pexels.com/photos/260931/pexels-photo-260931.jpeg'
+    ],
+    amenities: ['WiFi', 'Spa', 'Restaurant', 'Gym', 'Concierge', 'Valet Parking'],
+    type: 'luxury',
+    reviews: 423,
+    rooms: [
+      {
+        type: 'City Suite',
+        price: 520,
+        description: 'Luxury suite with city views',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '800 sq ft'
+      },
+      {
+        type: 'Penthouse Suite',
+        price: 1200,
+        description: 'Ultimate luxury experience',
+        beds: '2 King',
+        occupancy: '4 Adults',
+        size: '1,500 sq ft'
+      }
+    ]
+  }
 ];
 
 export const mockRestaurants: Restaurant[] = [
@@ -103,6 +525,20 @@ export const mockRestaurants: Restaurant[] = [
     openingHours: '11:30 AM - 10:30 PM'
   },
   {
+    id: 'es-fum',
+    name: 'Es Fum',
+    cuisine: 'Mediterranean',
+    description: 'Michelin-starred restaurant offering innovative Mediterranean cuisine with a focus on local Mallorcan ingredients and stunning sea views.',
+    price: 180,
+    rating: 4.8,
+    images: [
+      'https://images.pexels.com/photos/3535383/pexels-photo-3535383.jpeg',
+      'https://images.pexels.com/photos/3535384/pexels-photo-3535384.jpeg',
+    ],
+    location: 'St. Regis Mardavall Mallorca Resort, Spain',
+    openingHours: '7:00 PM - 10:30 PM'
+  },
+  {
     id: '1',
     name: 'The Burgundy Room',
     cuisine: 'French',
@@ -115,8 +551,7 @@ export const mockRestaurants: Restaurant[] = [
     ],
     location: 'Marriott Grand Plaza, New York',
     openingHours: '5:30 PM - 10:30 PM'
-  },
-  // Add more restaurants...
+  }
 ];
 
 export const mockAdventures: Adventure[] = [
@@ -139,6 +574,48 @@ export const mockAdventures: Adventure[] = [
 
 export const mockExperiences: Experience[] = [
   {
+    id: 'resorts',
+    name: 'Resort Escapes',
+    type: 'Resort',
+    description: 'Indulge in luxury at our world-class resorts with pristine beaches, spa treatments, and unparalleled service.',
+    price: 599,
+    duration: '3-7 days',
+    location: 'Various Locations',
+    images: [
+      'https://images.pexels.com/photos/3225531/pexels-photo-3225531.jpeg',
+      'https://images.pexels.com/photos/3225532/pexels-photo-3225532.jpeg',
+    ],
+    highlights: ['Private Beach Access', 'Spa Treatments', 'Water Sports', 'Gourmet Dining', 'Luxury Accommodations']
+  },
+  {
+    id: 'cities',
+    name: 'City Getaways',
+    type: 'Urban',
+    description: 'Explore vibrant cities and urban adventures with curated experiences in the world\'s most exciting metropolises.',
+    price: 399,
+    duration: '2-5 days',
+    location: 'Global Cities',
+    images: [
+      'https://images.pexels.com/photos/5379219/pexels-photo-5379219.jpeg',
+      'https://images.pexels.com/photos/5379220/pexels-photo-5379220.jpeg',
+    ],
+    highlights: ['City Tours', 'Cultural Events', 'Shopping Districts', 'Local Cuisine', 'Nightlife']
+  },
+  {
+    id: 'dining',
+    name: 'Dining Excellence',
+    type: 'Culinary',
+    description: 'Savor exceptional culinary experiences with Michelin-starred chefs and unique gastronomic adventures.',
+    price: 299,
+    duration: '2-4 hours',
+    location: 'Select Restaurants',
+    images: [
+      'https://images.pexels.com/photos/2549018/pexels-photo-2549018.jpeg',
+      'https://images.pexels.com/photos/2549019/pexels-photo-2549019.jpeg',
+    ],
+    highlights: ['Chef\'s Table', 'Wine Pairing', 'Cooking Classes', 'Food Tours', 'Private Dining']
+  },
+  {
     id: '1',
     name: 'Wine Tasting Tour',
     type: 'Culinary',
@@ -151,13 +628,90 @@ export const mockExperiences: Experience[] = [
       'https://images.pexels.com/photos/39351/purple-grapes-vineyard-napa-valley-napa-vineyard-39351.jpeg',
     ],
     highlights: ['Private tour', 'Premium wines', 'Gourmet lunch', 'Expert guide']
-  },
-  // Add more experiences...
+  }
 ];
 
 export const mockDestinations: Destination[] = [
   {
-    id: '1',
+    id: 'new-york',
+    name: 'New York',
+    country: 'United States',
+    description: 'Experience the energy of the city that never sleeps, with world-class hotels, dining, shopping, and entertainment.',
+    images: [
+      'https://images.pexels.com/photos/378570/pexels-photo-378570.jpeg',
+      'https://images.pexels.com/photos/378571/pexels-photo-378571.jpeg',
+    ],
+    highlights: ['Times Square', 'Central Park', 'Broadway Shows', 'World-Class Shopping', 'Fine Dining'],
+    bestTimeToVisit: 'April to June or September to November',
+    popularHotels: ['marriott-marquis', 'st-regis-ny', 'ritz-carlton-ny']
+  },
+  {
+    id: 'dubai',
+    name: 'Dubai',
+    country: 'United Arab Emirates',
+    description: 'Discover a city of superlatives, where luxury meets tradition in the heart of the Arabian Desert.',
+    images: [
+      'https://images.pexels.com/photos/1519088/pexels-photo-1519088.jpeg',
+      'https://images.pexels.com/photos/1519089/pexels-photo-1519089.jpeg',
+    ],
+    highlights: ['Burj Khalifa', 'Dubai Mall', 'Desert Safaris', 'Palm Jumeirah', 'Gold Souk'],
+    bestTimeToVisit: 'November to March',
+    popularHotels: ['burj-al-arab', 'atlantis-palm', 'ritz-carlton-dubai']
+  },
+  {
+    id: 'paris',
+    name: 'Paris',
+    country: 'France',
+    description: 'Fall in love with the City of Light, where romance, culture, and gastronomy create unforgettable memories.',
+    images: [
+      'https://images.pexels.com/photos/2082103/pexels-photo-2082103.jpeg',
+      'https://images.pexels.com/photos/705764/pexels-photo-705764.jpeg'
+    ],
+    highlights: ['Eiffel Tower', 'Louvre Museum', 'Notre-Dame', 'Champs-Élysées', 'French Cuisine'],
+    bestTimeToVisit: 'June to August or September to October',
+    popularHotels: ['ritz-paris', 'four-seasons-paris', 'le-bristol']
+  },
+  {
+    id: 'tokyo',
+    name: 'Tokyo',
+    country: 'Japan',
+    description: 'Immerse yourself in a fascinating blend of ultra-modern technology and traditional culture in Japan\'s capital.',
+    images: [
+      'https://images.pexels.com/photos/1388030/pexels-photo-1388030.jpeg',
+      'https://images.pexels.com/photos/1388031/pexels-photo-1388031.jpeg',
+    ],
+    highlights: ['Shibuya Crossing', 'Imperial Palace', 'Tokyo Skytree', 'Tsukiji Market', 'Japanese Gardens'],
+    bestTimeToVisit: 'March to May or September to November',
+    popularHotels: ['park-hyatt-tokyo', 'mandarin-oriental-tokyo', 'ritz-carlton-tokyo']
+  },
+  {
+    id: 'mount-rainier',
+    name: 'Mount Rainier',
+    country: 'United States',
+    description: 'Experience the majestic beauty of the Pacific Northwest with stunning mountain views, pristine wilderness, and luxurious accommodations.',
+    images: [
+      'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg',
+      'https://images.pexels.com/photos/417075/pexels-photo-417075.jpeg',
+    ],
+    highlights: ['National Park Access', 'Hiking Trails', 'Wildlife Viewing', 'Scenic Drives', 'Mountain Climbing'],
+    bestTimeToVisit: 'July to September',
+    popularHotels: ['rainier-lodge', 'mountain-view-resort']
+  },
+  {
+    id: 'las-vegas',
+    name: 'Las Vegas',
+    country: 'United States',
+    description: 'Discover the entertainment capital of the world, featuring world-class shows, casinos, dining, and luxury resorts.',
+    images: [
+      'https://images.pexels.com/photos/415999/pexels-photo-415999.jpeg',
+      'https://images.pexels.com/photos/416000/pexels-photo-416000.jpeg',
+    ],
+    highlights: ['Casino Resorts', 'Live Shows', 'Fine Dining', 'Shopping', 'Nightlife'],
+    bestTimeToVisit: 'March to May and September to November',
+    popularHotels: ['bellagio', 'venetian', 'caesars-palace']
+  },
+  {
+    id: 'maldives',
     name: 'Maldives',
     country: 'Maldives',
     description: 'Paradise on Earth with crystal clear waters and luxury resorts.',
@@ -168,8 +722,7 @@ export const mockDestinations: Destination[] = [
     highlights: ['Overwater villas', 'Coral reefs', 'Water sports', 'Spa retreats'],
     bestTimeToVisit: 'November to April',
     popularHotels: ['1', '2', '3']
-  },
-  // Add more destinations...
+  }
 ];
 
 export const mockRewards: Reward[] = [

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MapPin, Calendar, Users } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import styles from './HeroSection.module.css';
 
 console.log('HeroSection.tsx: Starting to render');
 
@@ -15,9 +16,9 @@ const HeroSection: React.FC = () => {
     <div className="relative h-screen">
       {/* Background Image */}
       <div 
-        className="absolute inset-0 bg-cover bg-center"
+        className="absolute inset-0 bg-cover bg-center transition-transform duration-[8s] ease-in-out hover:scale-105"
         style={{
-          backgroundImage: 'url(https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg)',
+          backgroundImage: 'url(/images/hotel.gif)',
         }}
       >
         <div className="absolute inset-0 bg-black/40" />

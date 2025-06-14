@@ -38,7 +38,7 @@ const FeaturedHotels: React.FC = () => {
             >
               <div className="relative h-48">
                 <img
-                  src={hotel.image}
+                  src={hotel.images[0]}
                   alt={hotel.name}
                   className="w-full h-full object-cover rounded-t-lg"
                 />

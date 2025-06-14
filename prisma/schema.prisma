@@ -8,36 +8,18 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  name      String?
-  email     String    @unique
-  password  String
-  role      String    @default("USER")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  profile   Profile?
-  bookings  Booking[]
-  orders    Order[]
+  id            Int       @id @default(autoincrement())
+  name          String?
+  email         String    @unique
+  password      String
+  role          String    @default("USER")
+  bonvoyNumber  String?   @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  bookings      Booking[]
+  orders        Order[]
 
   @@map("users")
-}
-
-model Profile {
-  id            Int      @id @default(autoincrement())
-  userId        Int      @unique
-  user          User     @relation(fields: [userId], references: [id])
-  bonvoyNumber  String?  @unique
-  bonvoyPoints  Int      @default(0)
-  phoneNumber   String?
-  address       String?
-  city          String?
-  state         String?
-  zipCode       String?
-  country       String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  @@map("profiles")
 }
 
 model Booking {

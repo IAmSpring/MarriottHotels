@@ -3,17 +3,17 @@ import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import type { Request, Response } from 'express';
-import { hotels } from '../data/hotels';
+import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
+import { mockHotels } from '../data/mockData.js';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2023-10-16',
 });
 
-interface Context {
-  req: Request;
-  res: Response;
+export interface Context {
+  req: ExpressRequest;
+  res: ExpressResponse;
   prisma: typeof prisma;
   user?: {
     id: number;
@@ -82,16 +82,15 @@ export const appRouter = t.router({
       }
 
       const hashedPassword = await bcrypt.hash(input.password, 10);
+      const bonvoyNumber = `BV${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+      
       const user = await prisma.user.create({
         data: {
           email: input.email,
           password: hashedPassword,
           name: input.name,
-          profile: {
-            create: {
-              bonvoyNumber: `BV${Math.random().toString(36).substr(2, 9).toUpperCase()}`
-            }
-          }
+          role: 'USER',
+          bonvoyNumber
         }
       });
 
@@ -178,7 +177,9 @@ export const appRouter = t.router({
   // Hotel procedures
   hotels: t.procedure
     .query(() => {
-      return hotels;
+      console.log('Fetching hotels...');
+      console.log('Hotels data:', mockHotels);
+      return mockHotels;
     }),
 
   // Booking procedures
@@ -193,40 +194,41 @@ export const appRouter = t.router({
       totalPrice: z.number()
     }))
     .mutation(async ({ input, ctx }) => {
-      const booking = await prisma.booking.create({
-        data: {
-          userId: ctx.user!.id,
-          ...input,
-          checkIn: new Date(input.checkIn),
-          checkOut: new Date(input.checkOut)
-        }
-      });
-
       // Create Stripe payment intent
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(input.totalPrice * 100), // Convert to cents
         currency: 'usd',
         metadata: {
-          bookingId: booking.id.toString(),
           hotelId: input.hotelId,
           userId: ctx.user!.id.toString()
         }
       });
 
       // Create order
-      await prisma.order.create({
+      const order = await prisma.order.create({
         data: {
           userId: ctx.user!.id,
           stripeId: paymentIntent.id,
           amount: input.totalPrice,
           bookings: {
-            connect: { id: booking.id }
+            create: {
+              userId: ctx.user!.id,
+              hotelId: input.hotelId,
+              roomType: input.roomType,
+              checkIn: new Date(input.checkIn),
+              checkOut: new Date(input.checkOut),
+              guests: input.guests,
+              totalPrice: input.totalPrice
+            }
           }
+        },
+        include: {
+          bookings: true
         }
       });
 
       return {
-        booking,
+        order,
         clientSecret: paymentIntent.client_secret
       };
     }),
@@ -252,26 +254,13 @@ export const appRouter = t.router({
           order: true
         }
       });
-    }),
-
-  updateBooking: t.procedure
-    .use(isAdmin)
-    .input(z.object({
-      id: z.number(),
-      status: z.enum(['PENDING', 'CONFIRMED', 'CANCELLED'])
-    }))
-    .mutation(async ({ input }) => {
-      return prisma.booking.update({
-        where: { id: input.id },
-        data: { status: input.status }
-      });
     })
 });
 
 export type AppRouter = typeof appRouter;
 
-export const createContext = ({ req, res }: { req: Request; res: Response }): Context => ({
+export const createContext = ({ req, res }: { req: ExpressRequest; res: ExpressResponse }): Context => ({
   req,
   res,
   prisma
-}); 
+});

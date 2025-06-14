@@ -38,7 +38,7 @@ const HotelDetails: React.FC = () => {
       {/* Hero Section */}
       <div className="relative h-96">
         <img
-          src={hotel.image}
+          src={hotel.images[0]}
           alt={hotel.name}
           className="w-full h-full object-cover"
         />

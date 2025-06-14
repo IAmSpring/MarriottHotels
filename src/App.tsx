@@ -16,14 +16,13 @@ import AdventuresPage from './pages/AdventuresPage';
 import BoutiquePage from './pages/BoutiquePage';
 import RewardsPage from './pages/RewardsPage';
 import ExperiencesPage from './pages/ExperiencesPage';
+import ExperienceDetails from './pages/ExperienceDetails';
 import DestinationsPage from './pages/DestinationsPage';
+import DestinationDetails from './pages/DestinationDetails';
 import AppPage from './pages/AppPage';
 import AIChatBot from './components/AIChatBot';
 
-console.log('App.tsx: Starting to initialize...');
-
 const App: React.FC = () => {
-  console.log('App.tsx: Rendering component');
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
@@ -43,7 +42,9 @@ const App: React.FC = () => {
               <Route path="/boutique" element={<BoutiquePage />} />
               <Route path="/rewards" element={<RewardsPage />} />
               <Route path="/experiences" element={<ExperiencesPage />} />
+              <Route path="/experiences/:id" element={<ExperienceDetails />} />
               <Route path="/destinations" element={<DestinationsPage />} />
+              <Route path="/destinations/:id" element={<DestinationDetails />} />
               <Route path="/app" element={<AppPage />} />
             </Routes>
             <AIChatBot />

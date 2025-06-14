@@ -7,7 +7,6 @@ import DestinationGuides from '../components/DestinationGuides';
 import BoutiqueHotels from '../components/BoutiqueHotels';
 import DiningSection from '../components/DiningSection';
 import AdventureSection from '../components/AdventureSection';
-import BonvoyApp from '../components/BonvoyApp';
 import Footer from '../components/Footer';
 
 const Home: React.FC = () => {
@@ -22,7 +21,6 @@ const Home: React.FC = () => {
         <BonvoyRewards />
         <ExperienceSection />
         <DestinationGuides />
-        <BonvoyApp />
         <Footer />
       </main>
     </div>

@@ -1,3 +1,41 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Loading Animation */
+.loading-screen {
+  @apply fixed inset-0 bg-white z-50 flex flex-col items-center justify-center transition-opacity duration-500;
+}
+
+.loading-screen.loaded {
+  @apply opacity-0 pointer-events-none;
+}
+
+.loading-icon {
+  @apply relative mb-4;
+}
+
+.loading-spinner {
+  @apply absolute inset-0 animate-spin;
+}
+
+.loading-spinner-ring {
+  @apply h-full w-full rounded-full border-4 border-[#8B1538]/20 border-t-[#8B1538];
+}
+
+.loading-text {
+  @apply text-[#8B1538] font-medium;
+}
+
+/* Content Fade */
+.content-wrapper {
+  @apply transition-opacity duration-500;
+}
+
+.content-wrapper.loading {
+  @apply opacity-0;
+}
+
+.content-wrapper.loaded {
+  @apply opacity-100;
+}

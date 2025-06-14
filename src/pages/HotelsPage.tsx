@@ -3,17 +3,11 @@ import { Link } from 'react-router-dom';
 import { Star, Wifi, Waves, Coffee, UtensilsCrossed, Dumbbell, Car, Calendar, Users, Filter, MapPin } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { trpc } from '../utils/trpc';
+import { mockHotels } from '../data/mockData';
 import type { Hotel, BookingFilters } from '../types/hotel';
 import Footer from '../components/Footer';
 
 const HotelsPage = () => {
-  const { data: hotels, isLoading, error } = trpc.hotels.useQuery(undefined, {
-    retry: 3,
-    onError: (error) => {
-      console.error('Error fetching hotels:', error);
-    }
-  });
   const [filters, setFilters] = useState<BookingFilters>({
     priceRange: [0, 1000],
     minRating: 0,
@@ -33,7 +27,7 @@ const HotelsPage = () => {
   };
 
   const filteredHotels = useMemo(() => {
-    return hotels?.filter(hotel => {
+    return mockHotels.filter(hotel => {
       return (
         hotel.price >= filters.priceRange[0] &&
         hotel.price <= filters.priceRange[1] &&
@@ -44,26 +38,7 @@ const HotelsPage = () => {
           ))
       );
     });
-  }, [hotels, filters]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded relative" role="alert">
-          <strong className="font-bold">Error: </strong>
-          <span className="block sm:inline">{error.message}</span>
-        </div>
-      </div>
-    );
-  }
+  }, [filters]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -254,7 +229,7 @@ const HotelsPage = () => {
           {/* Hotel Listings */}
           <div className="flex-1">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredHotels?.map((hotel: Hotel) => (
+              {filteredHotels.map((hotel: Hotel) => (
                 <Link 
                   key={hotel.id} 
                   to={`/hotels/${hotel.id}`}
@@ -262,9 +237,13 @@ const HotelsPage = () => {
                 >
                   <div className="relative h-48">
                     <img 
-                      src={hotel.image} 
+                      src={hotel.images[0]} 
                       alt={hotel.name}
                       className="w-full h-full object-cover rounded-t-lg"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg';
+                      }}
                     />
                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center">
                       <Star className="w-4 h-4 text-yellow-400 fill-current" />

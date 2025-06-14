@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Star, Wifi, Waves, Coffee, UtensilsCrossed, Dumbbell, Car } from 'lucide-react';
-import { trpc } from '../utils/trpc';
+import { Star, Wifi, Waves, Coffee, UtensilsCrossed, Dumbbell, Car, MapPin, Users } from 'lucide-react';
+import { mockHotels } from '../data/mockData';
 import BookingModal from '../components/BookingModal';
 import type { Room } from '../types/hotel';
 
@@ -11,13 +11,14 @@ const amenityIcons = {
   'Spa': <Coffee className="w-5 h-5" />,
   'Restaurant': <UtensilsCrossed className="w-5 h-5" />,
   'Gym': <Dumbbell className="w-5 h-5" />,
-  'Parking': <Car className="w-5 h-5" />
+  'Parking': <Car className="w-5 h-5" />,
+  'Beach Access': <MapPin className="w-5 h-5" />,
+  'Room Service': <Users className="w-5 h-5" />
 };
 
 const HotelDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { data: hotels } = trpc.hotels.useQuery();
-  const hotel = hotels?.find(h => h.id === id);
+  const hotel = mockHotels.find(h => h.id === id);
 
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<Room | undefined>();
@@ -35,9 +36,13 @@ const HotelDetails: React.FC = () => {
       {/* Hero Section */}
       <div className="relative h-96">
         <img
-          src={hotel.image}
+          src={hotel.images[0]}
           alt={hotel.name}
           className="w-full h-full object-cover"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg';
+          }}
         />
         <div className="absolute inset-0 bg-black bg-opacity-40">
           <div className="container mx-auto px-4 h-full flex items-end pb-8">
@@ -50,8 +55,6 @@ const HotelDetails: React.FC = () => {
                 </div>
                 <span>•</span>
                 <span>{hotel.location}</span>
-                <span>•</span>
-                <span>{hotel.reviews} reviews</span>
               </div>
             </div>
           </div>
@@ -77,6 +80,28 @@ const HotelDetails: React.FC = () => {
               </div>
             </div>
 
+            {/* Image Gallery */}
+            {hotel.images && hotel.images.length > 1 && (
+              <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <h2 className="text-2xl font-bold mb-6">Gallery</h2>
+                <div className="grid grid-cols-2 gap-4">
+                  {hotel.images.slice(1).map((image, index) => (
+                    <div key={index} className="relative h-48 rounded-lg overflow-hidden">
+                      <img
+                        src={image}
+                        alt={`${hotel.name} - Image ${index + 2}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg';
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-2xl font-bold mb-6">Available Rooms</h2>
               <div className="space-y-6">
@@ -88,7 +113,7 @@ const HotelDetails: React.FC = () => {
                         <p className="text-gray-600">{room.description}</p>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-primary">${room.price}</div>
+                        <div className="text-2xl font-bold text-[#8B1538]">${room.price}</div>
                         <div className="text-gray-500">per night</div>
                       </div>
                     </div>
@@ -108,7 +133,7 @@ const HotelDetails: React.FC = () => {
                         setSelectedRoom(room);
                         setIsBookingModalOpen(true);
                       }}
-                      className="w-full bg-primary text-white py-2 rounded-lg font-semibold hover:bg-primary-dark transition"
+                      className="w-full bg-[#8B1538] text-white py-2 rounded-lg font-semibold hover:bg-[#6B1028] transition"
                     >
                       Book Now
                     </button>
@@ -122,7 +147,7 @@ const HotelDetails: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl shadow-sm p-6 sticky top-8">
               <div className="text-center mb-6">
-                <div className="text-3xl font-bold text-primary">
+                <div className="text-3xl font-bold text-[#8B1538]">
                   Starting from ${Math.min(...hotel.rooms.map(r => r.price))}
                 </div>
                 <div className="text-gray-500">per night</div>
@@ -132,7 +157,7 @@ const HotelDetails: React.FC = () => {
                   setSelectedRoom(undefined);
                   setIsBookingModalOpen(true);
                 }}
-                className="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-primary-dark transition"
+                className="w-full bg-[#8B1538] text-white py-3 rounded-lg font-semibold hover:bg-[#6B1028] transition"
               >
                 Check Availability
               </button>

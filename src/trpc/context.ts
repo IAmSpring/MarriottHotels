@@ -1,10 +1,20 @@
-import * as trpcExpress from '@trpc/server/adapters/express';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../lib/auth';
+import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
+import { prisma } from '../lib/prisma.js';
 
-export const createContext = async ({ req, res }: trpcExpress.CreateExpressContextOptions) => {
-  const session = await getServerSession(req, res, authOptions);
-  return { session };
-};
+export interface Context {
+  req: ExpressRequest;
+  res: ExpressResponse;
+  prisma: typeof prisma;
+  user?: {
+    id: number;
+    role: string;
+  };
+}
 
-export type Context = Awaited<ReturnType<typeof createContext>>; 
+export function createContext({ req, res }: { req: ExpressRequest; res: ExpressResponse }): Context {
+  return {
+    req,
+    res,
+    prisma,
+  };
+} 

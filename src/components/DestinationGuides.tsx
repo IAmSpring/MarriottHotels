@@ -19,7 +19,7 @@ const DestinationGuides = () => {
       link: '/destinations/dubai'
     },
     {
-      image: 'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg',
+      image: 'https://images.pexels.com/photos/2082103/pexels-photo-2082103.jpeg',
       city: 'Paris',
       country: 'France',
       properties: 10,

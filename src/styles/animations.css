@@ -1,0 +1,21 @@
+@keyframes playGif {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.05);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  95% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.hero-background {
+  animation: playGif 8s linear infinite;
+} 

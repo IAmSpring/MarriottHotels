@@ -31,13 +31,13 @@ const AdventureSection = () => {
             <Link
               key={index}
               to={destination.link}
-              className="group relative overflow-hidden rounded-xl"
+              className="group relative overflow-hidden rounded-xl h-[400px]"
             >
-              <div className="aspect-w-16 aspect-h-9">
+              <div className="w-full h-full">
                 <img
                   src={destination.image}
                   alt={destination.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent">
                   <div className="absolute bottom-6 left-6">

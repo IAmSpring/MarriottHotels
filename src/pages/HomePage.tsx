@@ -1,6 +1,5 @@
 import React from 'react';
 import HeroSection from '../components/HeroSection';
-import PromoBanner from '../components/PromoBanner';
 import FeaturedHotels from '../components/FeaturedHotels';
 import RecommendedCategories from '../components/RecommendedCategories';
 import ValueHighlights from '../components/ValueHighlights';
@@ -12,7 +11,6 @@ const HomePage = () => {
   return (
     <>
       <HeroSection />
-      <PromoBanner />
       <FeaturedHotels />
       <RecommendedCategories />
       <ValueHighlights />

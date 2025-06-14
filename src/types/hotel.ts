@@ -11,12 +11,14 @@ export interface Hotel {
   id: string;
   name: string;
   location: string;
-  rating: number;
-  price: number;
-  image: string;
   description: string;
-  reviews: number;
+  price: number;
+  rating: number;
+  images: string[];
   amenities: string[];
+  type: 'standard' | 'boutique' | 'luxury';
+  featured?: boolean;
+  reviews: number;
   rooms: Room[];
 }
 

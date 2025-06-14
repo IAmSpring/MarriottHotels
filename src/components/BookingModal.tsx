@@ -31,7 +31,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, hotel, sel
       if (!stripe) return;
 
       const { error } = await stripe.redirectToCheckout({
-        sessionId: data.clientSecret
+        sessionId: data.clientSecret as string,
       });
 
       if (error) {

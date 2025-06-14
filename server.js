@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { ApolloServer } from 'apollo-server-express';
 import { typeDefs, resolvers } from './src/graphql/schema.js';
@@ -17,10 +18,16 @@ const port = parseInt(process.env.PORT, 10) || 3000;
 async function main() {
   const app = express();
 
+  // Add cookie parser
+  app.use(cookieParser());
+
   // Configure CORS
   app.use(cors({
     origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-trpc-source'],
+    exposedHeaders: ['set-cookie']
   }));
 
   // Serve static admin UI
@@ -39,6 +46,15 @@ async function main() {
   app.use('/api/trpc', createExpressMiddleware({
     router: appRouter,
     createContext,
+    onError({ error, type, path, input, ctx, req }) {
+      console.error('tRPC error:', {
+        type,
+        path,
+        input,
+        error: error.message,
+        stack: error.stack
+      });
+    }
   }));
 
   // GraphQL for admin operations
