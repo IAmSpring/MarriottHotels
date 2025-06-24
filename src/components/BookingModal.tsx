@@ -17,16 +17,14 @@ interface BookingModalProps {
 
 const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, hotel, selectedRoom }) => {
   // Ensure we have a valid room ID
-  const defaultRoom: BookingRoom = {
-    ...(selectedRoom || hotel.rooms[0] || {
-      id: `${hotel.id}-default-room`,
-      type: 'Standard Room',
-      price: hotel.price,
-      description: 'Standard Room',
-      beds: '1 King',
-      occupancy: '2 Adults',
-      size: '400 sq ft'
-    })
+  const defaultRoom: BookingRoom = selectedRoom || {
+    id: hotel.rooms[0]?.id || `${hotel.id}-default-room`,
+    type: hotel.rooms[0]?.type || 'Standard Room',
+    price: hotel.rooms[0]?.price || hotel.price,
+    description: hotel.rooms[0]?.description || 'Standard Room',
+    beds: hotel.rooms[0]?.beds || '1 King',
+    occupancy: hotel.rooms[0]?.occupancy || '2 Adults',
+    size: hotel.rooms[0]?.size || '400 sq ft'
   };
 
   const [bookingDetails, setBookingDetails] = useState<BookingDetails>({

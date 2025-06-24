@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Star, Wifi, Waves, Coffee, UtensilsCrossed, Dumbbell, Car, MapPin, Users } from 'lucide-react';
 import { mockHotels } from '../data/mockData';
 import BookingModal from '../components/BookingModal';
-import type { Room } from '../types/hotel';
+import type { Room, BookingRoom } from '../types/hotel';
 
 const amenityIcons = {
   'WiFi': <Wifi className="w-5 h-5" />,
@@ -21,7 +21,16 @@ const HotelDetails: React.FC = () => {
   const hotel = mockHotels.find(h => h.id === id);
 
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [selectedRoom, setSelectedRoom] = useState<Room | undefined>();
+  const [selectedRoom, setSelectedRoom] = useState<BookingRoom | undefined>();
+
+  const handleRoomSelect = (room: Room) => {
+    const bookingRoom: BookingRoom = {
+      ...room,
+      id: room.id || `${hotel?.id}-${room.type.toLowerCase().replace(/\s+/g, '-')}`
+    };
+    setSelectedRoom(bookingRoom);
+    setIsBookingModalOpen(true);
+  };
 
   if (!hotel) {
     return (
@@ -129,10 +138,7 @@ const HotelDetails: React.FC = () => {
                       </div>
                     </div>
                     <button
-                      onClick={() => {
-                        setSelectedRoom(room);
-                        setIsBookingModalOpen(true);
-                      }}
+                      onClick={() => handleRoomSelect(room)}
                       className="w-full bg-[#8B1538] text-white py-2 rounded-lg font-semibold hover:bg-[#6B1028] transition"
                     >
                       Book Now
@@ -154,8 +160,13 @@ const HotelDetails: React.FC = () => {
               </div>
               <button
                 onClick={() => {
-                  setSelectedRoom(undefined);
-                  setIsBookingModalOpen(true);
+                  const defaultRoom = hotel.rooms[0];
+                  if (defaultRoom) {
+                    handleRoomSelect(defaultRoom);
+                  } else {
+                    setSelectedRoom(undefined);
+                    setIsBookingModalOpen(true);
+                  }
                 }}
                 className="w-full bg-[#8B1538] text-white py-3 rounded-lg font-semibold hover:bg-[#6B1028] transition"
               >
