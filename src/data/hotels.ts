@@ -213,6 +213,7 @@ export const hotels: Hotel[] = [
     ],
     rooms: [
       {
+        id: 'hdb-006-room-1',
         type: 'Historic Room',
         price: 220,
         description: 'Charming room with period features',
@@ -221,6 +222,7 @@ export const hotels: Hotel[] = [
         size: '300 sq ft'
       },
       {
+        id: 'hdb-006-room-2',
         type: 'Garden Suite',
         price: 350,
         description: 'Suite with garden views',
@@ -250,17 +252,19 @@ export const hotels: Hotel[] = [
     ],
     rooms: [
       {
+        id: 'lsr-007-room-1',
         type: 'Lake View Room',
         price: 290,
-        description: 'Room with lake views',
-        beds: '1 King or 2 Queen',
+        description: 'Room with stunning lake views',
+        beds: '2 Queen',
         occupancy: '4 Adults',
-        size: '425 sq ft'
+        size: '400 sq ft'
       },
       {
+        id: 'lsr-007-room-2',
         type: 'Waterfront Suite',
         price: 490,
-        description: 'Suite with private balcony',
+        description: 'Luxury suite with direct lake access',
         beds: '1 King',
         occupancy: '2 Adults',
         size: '650 sq ft'

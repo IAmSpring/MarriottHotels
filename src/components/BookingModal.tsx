@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import { loadStripe } from '@stripe/stripe-js';
 import { trpc } from '../utils/trpc';
-import type { Hotel, Room, BookingDetails } from '../types/hotel';
+import type { Hotel, Room, BookingDetails, BookingRoom } from '../types/hotel';
 
 const stripePromise = loadStripe(process.env.STRIPE_PUBLIC_KEY || '');
 
@@ -12,17 +12,30 @@ interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   hotel: Hotel;
-  selectedRoom?: Room;
+  selectedRoom?: BookingRoom;
 }
 
 const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, hotel, selectedRoom }) => {
+  // Ensure we have a valid room ID
+  const defaultRoom: BookingRoom = {
+    ...(selectedRoom || hotel.rooms[0] || {
+      id: `${hotel.id}-default-room`,
+      type: 'Standard Room',
+      price: hotel.price,
+      description: 'Standard Room',
+      beds: '1 King',
+      occupancy: '2 Adults',
+      size: '400 sq ft'
+    })
+  };
+
   const [bookingDetails, setBookingDetails] = useState<BookingDetails>({
     hotelId: hotel.id,
-    roomId: selectedRoom?.id || hotel.rooms[0].id,
+    roomId: defaultRoom.id,
     checkIn: '',
     checkOut: '',
     guests: 2,
-    totalPrice: selectedRoom?.price || hotel.rooms[0].price
+    totalPrice: defaultRoom.price
   });
 
   const createBooking = trpc.createBooking.useMutation({

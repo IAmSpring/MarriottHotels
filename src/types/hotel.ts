@@ -8,6 +8,10 @@ export interface Room {
   size: string;
 }
 
+export interface BookingRoom extends Room {
+  id: string;
+}
+
 export interface Hotel {
   id: string;
   name: string;
