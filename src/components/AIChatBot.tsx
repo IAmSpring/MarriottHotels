@@ -122,8 +122,9 @@ const AIChatBot: React.FC = () => {
         setThreadId(data.threadId);
       }
 
-      // Parse the message from the response
-      let messageText: string = '';
+      // Parse the message and audio from the response
+      let messageText = '';
+      let audioContent = data.audioData;
       try {
         // Handle string response
         if (typeof data.message === 'string') {
@@ -131,6 +132,10 @@ const AIChatBot: React.FC = () => {
           try {
             const parsedJson = JSON.parse(data.message) as AIResponse;
             messageText = parsedJson.response || JSON.stringify(parsedJson);
+            // Check if audio is in the parsed JSON
+            if (parsedJson.audioData) {
+              audioContent = parsedJson.audioData;
+            }
           } catch {
             // If not valid JSON, use the raw message
             messageText = data.message;
@@ -140,6 +145,10 @@ const AIChatBot: React.FC = () => {
         else if (data.message && typeof data.message === 'object') {
           const messageObj = data.message as AIResponse;
           messageText = messageObj.response || JSON.stringify(messageObj);
+          // Check if audio is in the message object
+          if (messageObj.audioData) {
+            audioContent = messageObj.audioData;
+          }
         }
 
         // If messageText is still a stringified JSON, try to parse it
@@ -147,6 +156,10 @@ const AIChatBot: React.FC = () => {
           try {
             const parsed = JSON.parse(messageText) as AIResponse;
             messageText = parsed.response || JSON.stringify(parsed);
+            // One final check for audio in the parsed JSON
+            if (parsed.audioData) {
+              audioContent = parsed.audioData;
+            }
           } catch {
             // Keep original if not valid JSON
           }
@@ -161,7 +174,7 @@ const AIChatBot: React.FC = () => {
         text: messageText,
         isUser: false,
         timestamp: new Date(),
-        audioData: data.audioData
+        audioData: audioContent
       };
       setMessages(prev => [...prev, aiResponse]);
     } catch (error) {
