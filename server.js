@@ -66,14 +66,25 @@ async function main() {
         body: req.body,
       };
       
+      let responseData;
       const mockRes = {
         status: (code) => ({
-          json: (data) => res.status(code).json(data)
-        })
+          json: (data) => {
+            responseData = data;
+            return mockRes;
+          }
+        }),
+        json: (data) => {
+          responseData = data;
+          return mockRes;
+        }
       };
 
       // Call the chat handler
       await chatHandler(mockReq, mockRes);
+      
+      // Send the actual response
+      res.json(responseData);
     } catch (error) {
       console.error('Chat API Error:', error);
       res.status(500).json({ error: 'Internal server error', details: error.message });

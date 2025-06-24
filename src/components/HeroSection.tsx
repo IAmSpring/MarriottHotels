@@ -3,6 +3,7 @@ import { MapPin, Calendar, Users } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import styles from './HeroSection.module.css';
+import OptimizedImage from './OptimizedImage';
 
 console.log('HeroSection.tsx: Starting to render');
 
@@ -15,12 +16,14 @@ const HeroSection: React.FC = () => {
   return (
     <div className="relative h-screen">
       {/* Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center transition-transform duration-[8s] ease-in-out hover:scale-105"
-        style={{
-          backgroundImage: 'url(/images/hotel.gif)',
-        }}
-      >
+      <div className="absolute inset-0 overflow-hidden">
+        <OptimizedImage
+          src="/images/hotel.gif"
+          alt="Luxury hotel view"
+          className="w-full h-full object-cover transition-transform duration-[8s] ease-in-out hover:scale-105"
+          priority={true}
+          unoptimized={true} // Required for GIFs to animate
+        />
         <div className="absolute inset-0 bg-black/40" />
       </div>
 

@@ -26,7 +26,7 @@ const App: React.FC = () => {
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        <Router>
+        <Router basename="/MarriottHotels">
           <div className="min-h-screen bg-gray-50">
             <Navbar />
             <Routes>

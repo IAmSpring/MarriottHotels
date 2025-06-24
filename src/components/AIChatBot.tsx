@@ -117,8 +117,17 @@ const AIChatBot: React.FC = () => {
         setThreadId(data.threadId);
       }
 
+      // Parse the message from the JSON response
+      let messageText = data.message;
+      try {
+        const parsedMessage = JSON.parse(data.message);
+        messageText = parsedMessage.response;
+      } catch (e) {
+        console.warn('Failed to parse message as JSON, using raw message');
+      }
+
       const aiResponse: Message = {
-        text: data.message,
+        text: messageText,
         isUser: false,
         timestamp: new Date(),
         audioData: data.audioData
@@ -302,4 +311,4 @@ const AIChatBot: React.FC = () => {
   );
 };
 
-export default AIChatBot; 
+export default AIChatBot;
