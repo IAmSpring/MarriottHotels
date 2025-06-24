@@ -18,7 +18,7 @@ interface BookingModalProps {
 const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, hotel, selectedRoom }) => {
   const [bookingDetails, setBookingDetails] = useState<BookingDetails>({
     hotelId: hotel.id,
-    roomType: selectedRoom?.type || hotel.rooms[0].type,
+    roomId: selectedRoom?.id || hotel.rooms[0].id,
     checkIn: '',
     checkOut: '',
     guests: 2,
@@ -79,19 +79,19 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, hotel, sel
                   Room Type
                 </label>
                 <select
-                  value={bookingDetails.roomType}
+                  value={bookingDetails.roomId}
                   onChange={(e) => {
-                    const room = hotel.rooms.find(r => r.type === e.target.value);
+                    const room = hotel.rooms.find(r => r.id === e.target.value);
                     setBookingDetails(prev => ({
                       ...prev,
-                      roomType: e.target.value,
+                      roomId: e.target.value,
                       totalPrice: room?.price || prev.totalPrice
                     }));
                   }}
                   className="w-full p-2 border rounded"
                 >
                   {hotel.rooms.map((room) => (
-                    <option key={room.type} value={room.type}>
+                    <option key={room.id} value={room.id}>
                       {room.type} - ${room.price}/night
                     </option>
                   ))}

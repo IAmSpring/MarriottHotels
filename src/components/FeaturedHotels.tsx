@@ -46,7 +46,7 @@ const FeaturedHotels: React.FC = () => {
   }
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-16 bg-white/90 backdrop-blur-sm bg-[#8B1538]/[0.25]">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-2">Featured Marriott Hotels</h2>
         <p className="text-gray-600 text-center mb-12">Discover our most popular destinations and exceptional properties</p>

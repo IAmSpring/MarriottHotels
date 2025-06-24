@@ -17,14 +17,12 @@ const HeroSection: React.FC = () => {
     <div className="relative h-screen">
       {/* Background Image */}
       <div className="absolute inset-0 overflow-hidden">
-        <OptimizedImage
-          src="/images/hotel.gif"
+        <img
+          src="/MarriottHotels/images/hotel.gif"
           alt="Luxury hotel view"
           className="w-full h-full object-cover transition-transform duration-[8s] ease-in-out hover:scale-105"
-          priority={true}
-          unoptimized={true} // Required for GIFs to animate
         />
-        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-black/20" />
       </div>
 
       {/* Content */}

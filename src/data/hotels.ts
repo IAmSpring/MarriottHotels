@@ -21,6 +21,7 @@ export const hotels: Hotel[] = [
     ],
     rooms: [
       {
+        id: 'ocean-breeze-resort-room-1',
         type: 'Ocean View Room',
         price: 320,
         description: 'Spacious room with stunning ocean views',
@@ -29,6 +30,7 @@ export const hotels: Hotel[] = [
         size: '450 sq ft'
       },
       {
+        id: 'ocean-breeze-resort-room-2',
         type: 'Luxury Suite',
         price: 550,
         description: 'Premium suite with separate living area',
@@ -58,6 +60,7 @@ export const hotels: Hotel[] = [
     ],
     rooms: [
       {
+        id: 'mpl-002-room-1',
         type: 'Mountain View Room',
         price: 450,
         description: 'Cozy room with mountain views',
@@ -66,6 +69,7 @@ export const hotels: Hotel[] = [
         size: '400 sq ft'
       },
       {
+        id: 'mpl-002-room-2',
         type: 'Alpine Suite',
         price: 750,
         description: 'Luxury suite with fireplace',
@@ -94,6 +98,7 @@ export const hotels: Hotel[] = [
     ],
     rooms: [
       {
+        id: 'cch-003-room-1',
         type: 'City View Room',
         price: 280,
         description: 'Modern room with city views',
@@ -102,6 +107,7 @@ export const hotels: Hotel[] = [
         size: '350 sq ft'
       },
       {
+        id: 'cch-003-room-2',
         type: 'Executive Suite',
         price: 450,
         description: 'Spacious suite with living area',
@@ -131,6 +137,7 @@ export const hotels: Hotel[] = [
     ],
     rooms: [
       {
+        id: 'dos-004-room-1',
         type: 'Desert View Room',
         price: 380,
         description: 'Room with desert landscape views',
@@ -139,6 +146,7 @@ export const hotels: Hotel[] = [
         size: '475 sq ft'
       },
       {
+        id: 'dos-004-room-2',
         type: 'Spa Suite',
         price: 580,
         description: 'Suite with private spa bath',
@@ -167,6 +175,7 @@ export const hotels: Hotel[] = [
     ],
     rooms: [
       {
+        id: 'cis-005-room-1',
         type: 'Standard Room',
         price: 180,
         description: 'Comfortable room with basic amenities',
@@ -175,6 +184,7 @@ export const hotels: Hotel[] = [
         size: '400 sq ft'
       },
       {
+        id: 'cis-005-room-2',
         type: 'Family Suite',
         price: 280,
         description: 'Suite with kitchenette',

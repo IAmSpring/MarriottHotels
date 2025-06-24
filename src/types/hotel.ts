@@ -1,4 +1,5 @@
 export interface Room {
+  id?: string;
   type: string;
   price: number;
   description: string;
@@ -34,7 +35,7 @@ export interface BookingFilters {
 
 export interface BookingDetails {
   hotelId: string;
-  roomType: string;
+  roomId: string;
   checkIn: string;
   checkOut: string;
   guests: number;

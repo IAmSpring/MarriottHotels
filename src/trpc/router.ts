@@ -192,7 +192,7 @@ export const appRouter = t.router({
     .use(isAuthenticated)
     .input(z.object({
       hotelId: z.string(),
-      roomType: z.string(),
+      roomId: z.string(),
       checkIn: z.string(),
       checkOut: z.string(),
       guests: z.number(),
@@ -219,7 +219,7 @@ export const appRouter = t.router({
             create: {
               userId: ctx.user!.id,
               hotelId: input.hotelId,
-              roomType: input.roomType,
+              roomId: input.roomId,
               checkIn: new Date(input.checkIn),
               checkOut: new Date(input.checkOut),
               guests: input.guests,
