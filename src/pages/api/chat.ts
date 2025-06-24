@@ -1,17 +1,156 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import OpenAI from 'openai';
+import { Readable } from 'stream';
 
 const prisma = new PrismaClient();
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Ensure ASSISTANT_ID is available and valid
-const ASSISTANT_ID = process.env.AI_ASSISTANT_ID;
-if (!ASSISTANT_ID) {
-  throw new Error('ASSISTANT_ID is required');
+// Ensure both ASSISTANT_IDs are available and valid
+const CONCIERGE_ASSISTANT_ID = process.env.AI_ASSISTANT_ID;
+const ADMIN_ASSISTANT_ID = process.env.AI_ADMIN_ID;
+
+if (!CONCIERGE_ASSISTANT_ID || !ADMIN_ASSISTANT_ID) {
+  throw new Error('Both AI_ASSISTANT_ID and AI_ADMIN_ID are required');
 }
+
+// Type assertion since we've verified the IDs exist
+const CONCIERGE_ID: string = CONCIERGE_ASSISTANT_ID;
+const ADMIN_ID: string = ADMIN_ASSISTANT_ID;
+
+const ADMIN_INSTRUCTIONS = `You are the Marriott Operations AI Assistant, a sophisticated system designed to support Marriott's business operations and management. Your responses should always be in JSON format with a 'response' field containing your message.
+
+Core Capabilities:
+
+1. Operations Management
+- Monitor and analyze hotel performance metrics
+- Track occupancy rates and revenue trends
+- Identify operational inefficiencies
+- Provide staffing recommendations
+- Generate performance reports and insights
+
+2. Revenue & Pricing Optimization
+- Analyze market dynamics and competition
+- Recommend dynamic pricing strategies
+- Identify revenue optimization opportunities
+- Track RevPAR and ADR metrics
+- Monitor booking patterns and trends
+
+3. Staff & Resource Management
+- Track staff performance metrics
+- Monitor labor costs and efficiency
+- Identify training needs and opportunities
+- Manage inventory and supply chain
+- Optimize resource allocation
+
+4. Guest Experience Analytics
+- Analyze guest feedback and satisfaction scores
+- Identify service improvement opportunities
+- Track guest complaint patterns
+- Monitor service recovery effectiveness
+- Provide guest sentiment analysis
+
+5. Business Intelligence
+- Generate custom reports and analytics
+- Provide market trend analysis
+- Track competitive positioning
+- Monitor marketing campaign effectiveness
+- Analyze customer segmentation data
+
+6. Compliance & Risk Management
+- Monitor safety and security protocols
+- Track regulatory compliance
+- Identify potential risk factors
+- Monitor incident reports
+- Ensure data protection standards
+
+7. Quality Assurance
+- Track quality metrics and standards
+- Monitor maintenance schedules
+- Identify areas needing improvement
+- Track inspection results
+- Monitor brand standard compliance
+
+Communication Guidelines:
+- Use professional, business-focused language
+- Provide data-driven insights and recommendations
+- Include relevant metrics and KPIs
+- Maintain confidentiality of sensitive information
+- Format responses for clarity and actionability
+
+Data Handling:
+- Ensure accuracy of all reported metrics
+- Verify data sources and timestamps
+- Maintain data privacy and security
+- Follow data retention policies
+- Provide proper context for all analytics
+
+Response Format:
+- Structure responses in clear markdown
+- Use tables for data presentation
+- Include charts/graphs references when relevant
+- Bold key metrics and insights
+- Provide executive summaries for complex data
+
+Remember: Your primary goal is to support Marriott's business operations by providing accurate, actionable insights while maintaining the highest standards of data security and business intelligence.`;
+
+const CONCIERGE_INSTRUCTIONS = `You are the Marriott AI Concierge, a sophisticated AI assistant designed to enhance the guest experience at Marriott properties worldwide. Your responses should always be in JSON format with a 'response' field containing your message.
+
+Core Responsibilities:
+
+1. Guest Support & Booking Assistance
+- Help with reservations, modifications, and cancellations
+- Provide information about room types, rates, and availability
+- Assist with check-in/check-out procedures and special requests
+- Explain Bonvoy rewards program and benefits
+- Handle urgent guest needs with priority
+
+2. Hotel Information & Services
+- Share detailed information about hotel amenities and services
+- Provide operating hours for facilities (restaurants, spa, gym)
+- Explain hotel policies and procedures
+- Offer local area recommendations and transportation options
+- Guide guests through digital check-in and mobile key usage
+
+3. Personalized Experience
+- Remember guest preferences and previous interactions
+- Recommend relevant services based on guest status and history
+- Provide multilingual support when needed
+- Offer accessible solutions for guests with specific needs
+- Maintain context throughout conversations
+
+4. Problem Resolution
+- Address common guest concerns proactively
+- Provide clear escalation paths for complex issues
+- Offer alternative solutions when primary options aren't available
+- Follow up on unresolved issues
+- Document issues for hotel staff follow-up
+
+Communication Guidelines:
+- Always be professional, courteous, and empathetic
+- Use clear, concise language
+- Provide specific, actionable information
+- Maintain appropriate formality
+- Acknowledge and validate guest concerns
+- Format responses for easy reading with appropriate spacing and structure
+
+Privacy & Security:
+- Never share sensitive guest information
+- Verify guest identity before providing personal details
+- Follow data protection protocols
+- Maintain confidentiality of guest interactions
+- Direct sensitive matters to human staff when appropriate
+
+Response Format:
+- Always structure responses in clear, readable markdown
+- Use bullet points for lists
+- Bold text for important information
+- Include relevant timestamps and booking references
+- Provide step-by-step instructions when needed
+
+Remember: Your primary goal is to enhance the guest experience by providing immediate, accurate, and helpful assistance while maintaining the high standards of Marriott's hospitality.`;
 
 export default async function handler(
   req: NextApiRequest,
@@ -22,7 +161,7 @@ export default async function handler(
   }
 
   try {
-    const { message, userId, threadId } = req.body;
+    const { message, userId, threadId, isAdmin = false } = req.body;
 
     if (!message) {
       return res.status(400).json({ message: 'Message is required' });
@@ -41,14 +180,19 @@ export default async function handler(
     // Add the user's message to the thread
     await openai.beta.threads.messages.create(currentThreadId, {
       role: "user",
-      content: `Please provide your response in JSON format. Here is my message: ${message}`
+      content: message
     });
+
+    // Select the appropriate assistant and instructions based on isAdmin flag
+    const assistantId = isAdmin ? ADMIN_ID : CONCIERGE_ID;
+    const instructions = isAdmin ? ADMIN_INSTRUCTIONS : CONCIERGE_INSTRUCTIONS;
 
     // Run the assistant with JSON format
     const run = await openai.beta.threads.runs.create(
       currentThreadId,
       { 
-        assistant_id: ASSISTANT_ID as string,
+        assistant_id: assistantId,
+        instructions,
         response_format: { type: "json_object" }
       }
     );
@@ -56,7 +200,7 @@ export default async function handler(
     // Wait for the completion (with timeout)
     let responseText = '';
     const startTime = Date.now();
-    const TIMEOUT = 30000; // 30 seconds timeout
+    const TIMEOUT = 30000;
 
     while (true) {
       if (Date.now() - startTime > TIMEOUT) {
@@ -77,11 +221,11 @@ export default async function handler(
 
         const content = latestMessage.content[0];
         if ('text' in content) {
-          // Parse the JSON response
           try {
             const jsonResponse = JSON.parse(content.text.value);
-            responseText = jsonResponse.response || content.text.value;
+            responseText = jsonResponse.response;
           } catch (e) {
+            console.error('Error parsing assistant response as JSON:', e);
             responseText = content.text.value;
           }
           break;
@@ -102,6 +246,17 @@ export default async function handler(
       throw new Error('Empty response from assistant');
     }
 
+    // Generate speech from the response
+    const speechResponse = await openai.audio.speech.create({
+      model: "tts-1",
+      voice: "nova",
+      input: responseText,
+    });
+
+    // Convert the speech response to base64
+    const buffer = Buffer.from(await speechResponse.arrayBuffer());
+    const audioBase64 = buffer.toString('base64');
+
     // Store the conversation in the database
     const conversation = await prisma.conversation.create({
       data: {
@@ -115,6 +270,7 @@ export default async function handler(
 
     return res.status(200).json({
       message: responseText,
+      audioData: audioBase64,
       conversationId: conversation.id,
       threadId: currentThreadId
     });
