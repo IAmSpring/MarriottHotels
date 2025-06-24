@@ -17,9 +17,11 @@ const AIChatBot: React.FC = () => {
     }
   ]);
   const [inputText, setInputText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [threadId, setThreadId] = useState<string | null>(null);
 
-  const handleSend = () => {
-    if (!inputText.trim()) return;
+  const handleSend = async () => {
+    if (!inputText.trim() || isLoading) return;
 
     // Add user message
     const newMessage: Message = {
@@ -29,16 +31,60 @@ const AIChatBot: React.FC = () => {
     };
     setMessages(prev => [...prev, newMessage]);
     setInputText('');
+    setIsLoading(true);
 
-    // Simulate AI response (replace with actual AI integration)
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: inputText,
+          userId: 'anonymous', // Replace with actual user ID when auth is implemented
+          threadId: threadId
+        }),
+      });
+
+      const data = await response.json();
+      
+      // Store threadId for conversation continuity
+      if (data.threadId) {
+        setThreadId(data.threadId);
+      }
+
+      // Try to parse the message as JSON if it's a string
+      let messageText = data.message;
+      try {
+        if (typeof data.message === 'string') {
+          const jsonMatch = data.message.match(/```json\s*({[\s\S]*?})\s*```/);
+          if (jsonMatch) {
+            const jsonData = JSON.parse(jsonMatch[1]);
+            messageText = jsonData.response;
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing JSON response:', error);
+        // Keep the original message if JSON parsing fails
+      }
+
       const aiResponse: Message = {
-        text: "Thanks for your message! I'm a demo AI assistant. In the real implementation, I would provide helpful responses about Marriott's services.",
+        text: messageText,
         isUser: false,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, aiResponse]);
-    }, 1000);
+    } catch (error) {
+      console.error('Chat error:', error);
+      const errorMessage: Message = {
+        text: "I'm sorry, I'm having trouble connecting right now. Please try again later.",
+        isUser: false,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -104,6 +150,17 @@ const AIChatBot: React.FC = () => {
               </div>
             </div>
           ))}
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="max-w-[80%] rounded-lg p-3 bg-gray-100">
+                <div className="flex space-x-2">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Input */}
@@ -116,10 +173,11 @@ const AIChatBot: React.FC = () => {
               placeholder="Type your message..."
               className="flex-1 resize-none border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#8B1538] focus:border-transparent"
               rows={1}
+              disabled={isLoading}
             />
             <button
               onClick={handleSend}
-              disabled={!inputText.trim()}
+              disabled={!inputText.trim() || isLoading}
               className="p-2 bg-[#8B1538] text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#6B1028] transition-colors"
             >
               <Send className="w-5 h-5" />

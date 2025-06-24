@@ -165,10 +165,12 @@ export const appRouter = t.router({
       const user = await prisma.user.findUnique({
         where: { id: ctx.user!.id },
         include: {
-          profile: true,
           bookings: {
             orderBy: { createdAt: 'desc' }
-          }
+          },
+          orders: true,
+          reviews: true,
+          conversations: true
         }
       });
       return user;
@@ -177,9 +179,12 @@ export const appRouter = t.router({
   // Hotel procedures
   hotels: t.procedure
     .query(() => {
-      console.log('Fetching hotels...');
-      console.log('Hotels data:', mockHotels);
-      return mockHotels;
+      try {
+        return mockHotels;
+      } catch (error) {
+        console.error('Error fetching hotels:', error);
+        throw new Error('Failed to fetch hotels');
+      }
     }),
 
   // Booking procedures
@@ -239,8 +244,10 @@ export const appRouter = t.router({
     .query(async () => {
       return prisma.user.findMany({
         include: {
-          profile: true,
-          bookings: true
+          bookings: true,
+          orders: true,
+          reviews: true,
+          conversations: true
         }
       });
     }),

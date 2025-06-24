@@ -5,7 +5,13 @@ import { trpc } from '../utils/trpc';
 import type { Hotel } from '../types/hotel';
 
 const FeaturedHotels: React.FC = () => {
-  const { data: hotels, isLoading, error } = trpc.hotels.useQuery();
+  const { data: hotels, isLoading, error } = trpc.hotels.useQuery(undefined, {
+    retry: 3,
+    retryDelay: 1000,
+    onError: (error) => {
+      console.error('Error fetching hotels:', error);
+    }
+  });
 
   if (isLoading) {
     return (
@@ -18,7 +24,23 @@ const FeaturedHotels: React.FC = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-red-500">Error loading hotels: {error.message}</p>
+        <div className="text-center">
+          <p className="text-red-500 mb-4">Error loading hotels: {error.message}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-[#8B1538] text-white px-4 py-2 rounded-lg hover:bg-[#6B1028] transition"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hotels || hotels.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <p className="text-gray-500">No hotels available at the moment.</p>
       </div>
     );
   }
@@ -30,7 +52,7 @@ const FeaturedHotels: React.FC = () => {
         <p className="text-gray-600 text-center mb-12">Discover our most popular destinations and exceptional properties</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {hotels?.slice(0, 6).map((hotel: Hotel) => (
+          {hotels.slice(0, 6).map((hotel: Hotel) => (
             <Link 
               key={hotel.id} 
               to={`/hotels/${hotel.id}`}
@@ -41,6 +63,10 @@ const FeaturedHotels: React.FC = () => {
                   src={hotel.images[0]}
                   alt={hotel.name}
                   className="w-full h-full object-cover rounded-t-lg"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/images/hotel.gif'; // Fallback image
+                  }}
                 />
                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center">
                   <Star className="w-4 h-4 text-yellow-400 fill-current" />

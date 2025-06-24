@@ -13,24 +13,28 @@ const HotelDetail = () => {
   const [checkIn, setCheckIn] = useState<Date | null>(null);
   const [checkOut, setCheckOut] = useState<Date | null>(null);
   const [guests, setGuests] = useState(1);
-  const [selectedRoom, setSelectedRoom] = useState('');
+  const [selectedRoomType, setSelectedRoomType] = useState('');
 
   if (!hotel) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
-  const rooms = [
-    { type: 'Standard', price: hotel.basePrice },
-    { type: 'Deluxe', price: hotel.basePrice * 1.5 },
-    { type: 'Suite', price: hotel.basePrice * 2 },
-  ];
-
   const calculateTotalPrice = () => {
-    if (!checkIn || !checkOut || !selectedRoom) return 0;
+    if (!checkIn || !checkOut || !selectedRoomType) return 0;
+    
+    const selectedRoom = hotel.rooms.find(r => r.type === selectedRoomType);
+    if (!selectedRoom) return 0;
+    
     const days = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
-    const roomPrice = rooms.find(r => r.type === selectedRoom)?.price || 0;
-    return days * roomPrice;
+    if (days <= 0) return 0;
+    
+    return days * selectedRoom.price;
   };
+
+  // Get maximum guests from room types
+  const maxGuests = Math.max(...hotel.rooms.map(room => 
+    parseInt(room.occupancy.split(' ')[0]) || 2
+  ));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -69,19 +73,24 @@ const HotelDetail = () => {
             </div>
 
             <h3 className="text-2xl font-semibold mb-4">Room Types</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {rooms.map((room) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {hotel.rooms.map((room) => (
                 <div 
                   key={room.type}
                   className={`p-6 rounded-lg border-2 cursor-pointer transition-all
-                    ${selectedRoom === room.type 
+                    ${selectedRoomType === room.type 
                       ? 'border-blue-500 bg-blue-50' 
                       : 'border-gray-200 hover:border-blue-300'}`}
-                  onClick={() => setSelectedRoom(room.type)}
+                  onClick={() => setSelectedRoomType(room.type)}
                 >
                   <h4 className="text-xl font-semibold mb-2">{room.type}</h4>
-                  <p className="text-gray-600">Starting from</p>
-                  <p className="text-2xl font-bold text-blue-600">${room.price}/night</p>
+                  <p className="text-gray-600 mb-2">{room.description}</p>
+                  <div className="text-sm text-gray-500 space-y-1">
+                    <p>Beds: {room.beds}</p>
+                    <p>Max Occupancy: {room.occupancy}</p>
+                    <p>Size: {room.size}</p>
+                  </div>
+                  <p className="mt-4 text-2xl font-bold text-blue-600">${room.price}/night</p>
                 </div>
               ))}
             </div>
@@ -93,6 +102,22 @@ const HotelDetail = () => {
               <h3 className="text-2xl font-semibold mb-6">Book Your Stay</h3>
               
               <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
+                  <select
+                    value={selectedRoomType}
+                    onChange={(e) => setSelectedRoomType(e.target.value)}
+                    className="w-full p-2 border rounded-md"
+                  >
+                    <option value="">Select a room type</option>
+                    {hotel.rooms.map(room => (
+                      <option key={room.type} value={room.type}>
+                        {room.type} - ${room.price}/night
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Check-in Date</label>
                   <DatePicker
@@ -122,19 +147,19 @@ const HotelDetail = () => {
                     onChange={(e) => setGuests(Number(e.target.value))}
                     className="w-full p-2 border rounded-md"
                   >
-                    {[1, 2, 3, 4].map(num => (
+                    {Array.from({ length: maxGuests }, (_, i) => i + 1).map(num => (
                       <option key={num} value={num}>{num} {num === 1 ? 'Guest' : 'Guests'}</option>
                     ))}
                   </select>
                 </div>
 
-                {selectedRoom && checkIn && checkOut && (
+                {selectedRoomType && checkIn && checkOut && (
                   <div className="mt-6 p-4 bg-gray-50 rounded-md">
                     <h4 className="font-semibold mb-2">Booking Summary</h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span>Room Type:</span>
-                        <span>{selectedRoom}</span>
+                        <span>{selectedRoomType}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Check-in:</span>
@@ -160,7 +185,7 @@ const HotelDetail = () => {
 
                 <button
                   className="w-full bg-blue-600 text-white py-3 rounded-md font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400"
-                  disabled={!selectedRoom || !checkIn || !checkOut}
+                  disabled={!selectedRoomType || !checkIn || !checkOut}
                 >
                   Book Now
                 </button>
