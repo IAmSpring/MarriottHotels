@@ -15,6 +15,11 @@ interface AudioState {
   isLoading: boolean;
 }
 
+interface AIResponse {
+  response?: string;
+  [key: string]: any;
+}
+
 const AIChatBot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -118,27 +123,38 @@ const AIChatBot: React.FC = () => {
       }
 
       // Parse the message from the response
-      let messageText = '';
+      let messageText: string = '';
       try {
+        // Handle string response
         if (typeof data.message === 'string') {
-          const parsedData = JSON.parse(data.message);
-          messageText = parsedData.response || parsedData;
-        } else if (data.message && typeof data.message === 'object') {
-          messageText = data.message.response || JSON.stringify(data.message);
+          // Try to parse as JSON first
+          try {
+            const parsedJson = JSON.parse(data.message) as AIResponse;
+            messageText = parsedJson.response || JSON.stringify(parsedJson);
+          } catch {
+            // If not valid JSON, use the raw message
+            messageText = data.message;
+          }
+        } 
+        // Handle object response
+        else if (data.message && typeof data.message === 'object') {
+          const messageObj = data.message as AIResponse;
+          messageText = messageObj.response || JSON.stringify(messageObj);
         }
+
+        // If messageText is still a stringified JSON, try to parse it
+        if (typeof messageText === 'string' && (messageText.startsWith('{') || messageText.startsWith('['))) {
+          try {
+            const parsed = JSON.parse(messageText) as AIResponse;
+            messageText = parsed.response || JSON.stringify(parsed);
+          } catch {
+            // Keep original if not valid JSON
+          }
+        }
+
       } catch (e) {
         console.error('Error parsing message:', e);
-        messageText = data.message || "I'm sorry, I couldn't process that response.";
-      }
-
-      // Clean up the message text if it's still a JSON string
-      if (typeof messageText === 'string' && messageText.includes('"response":')) {
-        try {
-          const parsed = JSON.parse(messageText);
-          messageText = parsed.response || messageText;
-        } catch (e) {
-          // Keep the original messageText if parsing fails
-        }
+        messageText = "I'm sorry, I couldn't process that response properly.";
       }
 
       const aiResponse: Message = {
