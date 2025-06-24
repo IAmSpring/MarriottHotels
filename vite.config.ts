@@ -20,7 +20,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['@headlessui/react', '@heroicons/react', 'lucide-react'],
+          'ui-vendor': ['@headlessui/react', 'lucide-react'],
           'date-vendor': ['react-datepicker', 'date-fns'],
           'stripe-vendor': ['@stripe/stripe-js'],
           'trpc-vendor': ['@trpc/client', '@trpc/react-query', '@trpc/server'],
