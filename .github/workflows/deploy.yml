@@ -23,7 +23,6 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
         env:
           VITE_API_URL: "https://iamspring.github.io/MarriottHotels/api"
           VITE_AUTH_DOMAIN: "iamspring.github.io"
@@ -32,6 +31,7 @@ jobs:
           AI_ASSISTANT_ID: ${{ secrets.AI_ASSISTANT_ID }}
           AI_ADMIN_ID: ${{ secrets.AI_ADMIN_ID }}
           ENABLE_AI_CHAT: "true"
+        run: npm run build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
