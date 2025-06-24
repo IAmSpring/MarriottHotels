@@ -117,13 +117,28 @@ const AIChatBot: React.FC = () => {
         setThreadId(data.threadId);
       }
 
-      // Parse the message from the JSON response
-      let messageText = data.message;
+      // Parse the message from the response
+      let messageText = '';
       try {
-        const parsedMessage = JSON.parse(data.message);
-        messageText = parsedMessage.response;
+        if (typeof data.message === 'string') {
+          const parsedData = JSON.parse(data.message);
+          messageText = parsedData.response || parsedData;
+        } else if (data.message && typeof data.message === 'object') {
+          messageText = data.message.response || JSON.stringify(data.message);
+        }
       } catch (e) {
-        console.warn('Failed to parse message as JSON, using raw message');
+        console.error('Error parsing message:', e);
+        messageText = data.message || "I'm sorry, I couldn't process that response.";
+      }
+
+      // Clean up the message text if it's still a JSON string
+      if (typeof messageText === 'string' && messageText.includes('"response":')) {
+        try {
+          const parsed = JSON.parse(messageText);
+          messageText = parsed.response || messageText;
+        } catch (e) {
+          // Keep the original messageText if parsing fails
+        }
       }
 
       const aiResponse: Message = {
@@ -235,7 +250,11 @@ const AIChatBot: React.FC = () => {
                     ? 'prose-invert' 
                     : 'prose-neutral'
                 } prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-headings:my-1`}>
-                  <ReactMarkdown>{message.text}</ReactMarkdown>
+                  {message.isUser ? (
+                    <p>{message.text}</p>
+                  ) : (
+                    <ReactMarkdown>{typeof message.text === 'string' ? message.text : JSON.stringify(message.text)}</ReactMarkdown>
+                  )}
                 </div>
                 <div className="flex items-center justify-between mt-1">
                   <p className="text-xs opacity-70">
