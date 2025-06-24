@@ -97,4 +97,27 @@ export interface BookingDetails {
   checkOut: string;
   guests: number;
   totalPrice: number;
-} 
+}
+
+export interface TourSection {
+  id: string;
+  name: string;
+  description: string;
+  narration: string;
+  element: string; // CSS selector for the section
+}
+
+export interface TourState {
+  isPlaying: boolean;
+  currentSectionIndex: number;
+  sections: TourSection[];
+  audio: HTMLAudioElement | null;
+}
+
+export type TourAction = 
+  | { type: 'PLAY' }
+  | { type: 'PAUSE' }
+  | { type: 'NEXT_SECTION' }
+  | { type: 'PREVIOUS_SECTION' }
+  | { type: 'JUMP_TO_SECTION'; payload: number }
+  | { type: 'SET_AUDIO'; payload: HTMLAudioElement | null }; 

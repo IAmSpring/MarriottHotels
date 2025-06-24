@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "homepage": "https://iamspring.github.io/MarriottHotels",
   "scripts": {
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "vite",
@@ -11,7 +12,9 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -66,6 +69,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.17",
     "eslint": "^8.56.0",
+    "gh-pages": "^6.3.0",
     "nodemon": "^3.1.10",
     "postcss": "^8.4.33",
     "prisma": "^5.9.0",
