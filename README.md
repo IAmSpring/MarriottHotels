@@ -116,6 +116,9 @@ A beautiful, production-ready booking website inspired by Marriott.com with mode
 
 ## 🚀 Getting Started
 
+### Documentation
+[https://github.com/IAmSpring/MarriottHotels/tree/main/docs](https://github.com/IAmSpring/MarriottHotels/tree/main/docs)
+
 ### Prerequisites
 - Node.js 16+ 
 - npm or yarn
