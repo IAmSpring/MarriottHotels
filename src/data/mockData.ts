@@ -11,6 +11,9 @@ export interface Hotel {
   featured?: boolean;
   reviews: number;
   rooms: Room[];
+  totalRooms: number;
+  occupiedRooms: number;
+  avgDailyRate: number;
 }
 
 export interface Restaurant {
@@ -79,6 +82,72 @@ export interface Room {
   size: string;
 }
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'ADMIN' | 'MANAGER' | 'STAFF';
+  lastLogin: Date;
+  status: 'ACTIVE' | 'INACTIVE';
+}
+
+export interface Booking {
+  id: string;
+  guestName: string;
+  hotelName: string;
+  checkIn: Date;
+  checkOut: Date;
+  status: 'CONFIRMED' | 'PENDING' | 'CANCELLED';
+  totalAmount: number;
+  roomType: string;
+}
+
+export interface Revenue {
+  date: Date;
+  amount: number;
+  source: 'DIRECT' | 'OTA' | 'CORPORATE';
+  hotelId: string;
+}
+
+export interface Complaint {
+  id: string;
+  guestName: string;
+  hotelName: string;
+  date: Date;
+  status: 'NEW' | 'IN_PROGRESS' | 'RESOLVED';
+  category: string;
+  description: string;
+}
+
+export interface MaintenanceRequest {
+  id: string;
+  hotelName: string;
+  roomNumber: string;
+  issue: string;
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+  dateReported: Date;
+}
+
+export interface StaffSchedule {
+  id: string;
+  employeeName: string;
+  department: string;
+  shift: 'MORNING' | 'AFTERNOON' | 'NIGHT';
+  date: Date;
+  hotelName: string;
+}
+
+export interface Inventory {
+  id: string;
+  itemName: string;
+  category: string;
+  quantity: number;
+  reorderPoint: number;
+  hotelName: string;
+  lastUpdated: Date;
+}
+
 export const mockHotels: Hotel[] = [
   {
     id: 'sandbourne-santa-monica',
@@ -121,7 +190,10 @@ export const mockHotels: Hotel[] = [
         occupancy: '4 Adults',
         size: '1,200 sq ft'
       }
-    ]
+    ],
+    totalRooms: 300,
+    occupiedRooms: 250,
+    avgDailyRate: 350
   },
   {
     id: 'trailborn-highlands',
@@ -156,7 +228,10 @@ export const mockHotels: Hotel[] = [
         occupancy: '2 Adults',
         size: '650 sq ft'
       }
-    ]
+    ],
+    totalRooms: 400,
+    occupiedRooms: 320,
+    avgDailyRate: 450
   },
   {
     id: 'park-lane-hong-kong',
@@ -199,7 +274,10 @@ export const mockHotels: Hotel[] = [
         occupancy: '2 Adults',
         size: '900 sq ft'
       }
-    ]
+    ],
+    totalRooms: 300,
+    occupiedRooms: 250,
+    avgDailyRate: 350
   },
   {
     id: '1',
@@ -233,7 +311,10 @@ export const mockHotels: Hotel[] = [
         occupancy: '2 Adults',
         size: '650 sq ft'
       }
-    ]
+    ],
+    totalRooms: 300,
+    occupiedRooms: 250,
+    avgDailyRate: 350
   },
   {
     id: 'obr-001',
@@ -267,7 +348,10 @@ export const mockHotels: Hotel[] = [
         occupancy: '3 Adults',
         size: '750 sq ft'
       }
-    ]
+    ],
+    totalRooms: 400,
+    occupiedRooms: 320,
+    avgDailyRate: 450
   },
   {
     id: 'cch-003',
@@ -301,7 +385,10 @@ export const mockHotels: Hotel[] = [
         occupancy: '2 Adults',
         size: '600 sq ft'
       }
-    ]
+    ],
+    totalRooms: 300,
+    occupiedRooms: 250,
+    avgDailyRate: 350
   },
   {
     id: 'dos-004',
@@ -335,7 +422,10 @@ export const mockHotels: Hotel[] = [
         occupancy: '2 Adults',
         size: '700 sq ft'
       }
-    ]
+    ],
+    totalRooms: 400,
+    occupiedRooms: 320,
+    avgDailyRate: 450
   },
   {
     id: 'cis-005',
@@ -369,7 +459,10 @@ export const mockHotels: Hotel[] = [
         occupancy: '6 Adults',
         size: '600 sq ft'
       }
-    ]
+    ],
+    totalRooms: 300,
+    occupiedRooms: 250,
+    avgDailyRate: 350
   },
   {
     id: 'hdb-006',
@@ -403,7 +496,10 @@ export const mockHotels: Hotel[] = [
         occupancy: '2 Adults',
         size: '500 sq ft'
       }
-    ]
+    ],
+    totalRooms: 300,
+    occupiedRooms: 250,
+    avgDailyRate: 350
   },
   {
     id: 'lsr-007',
@@ -437,7 +533,10 @@ export const mockHotels: Hotel[] = [
         occupancy: '2 Adults',
         size: '650 sq ft'
       }
-    ]
+    ],
+    totalRooms: 400,
+    occupiedRooms: 320,
+    avgDailyRate: 450
   },
   {
     id: 'bci-008',
@@ -471,7 +570,10 @@ export const mockHotels: Hotel[] = [
         occupancy: '2 Adults',
         size: '325 sq ft'
       }
-    ]
+    ],
+    totalRooms: 300,
+    occupiedRooms: 250,
+    avgDailyRate: 350
   },
   {
     id: 'lms-009',
@@ -505,7 +607,10 @@ export const mockHotels: Hotel[] = [
         occupancy: '4 Adults',
         size: '1,500 sq ft'
       }
-    ]
+    ],
+    totalRooms: 400,
+    occupiedRooms: 320,
+    avgDailyRate: 450
   }
 ];
 
@@ -748,4 +853,151 @@ export const getHotelsByType = (type: Hotel['type']) => mockHotels.filter(hotel 
 export const getExperiencesByType = (type: string) => mockExperiences.filter(exp => exp.type === type);
 
 // Helper function to get destinations by country
-export const getDestinationsByCountry = (country: string) => mockDestinations.filter(dest => dest.country === country); 
+export const getDestinationsByCountry = (country: string) => mockDestinations.filter(dest => dest.country === country);
+
+// Generate mock data
+export const mockUsers: User[] = [
+  {
+    id: '1',
+    name: 'John Smith',
+    email: 'john.smith@marriott.com',
+    role: 'ADMIN',
+    lastLogin: new Date('2024-02-20T10:30:00'),
+    status: 'ACTIVE',
+  },
+  {
+    id: '2',
+    name: 'Sarah Johnson',
+    email: 'sarah.j@marriott.com',
+    role: 'MANAGER',
+    lastLogin: new Date('2024-02-19T15:45:00'),
+    status: 'ACTIVE',
+  },
+  // Add more mock users...
+];
+
+export const mockBookings: Booking[] = [
+  {
+    id: 'B1',
+    guestName: 'Michael Brown',
+    hotelName: 'Marriott Downtown',
+    checkIn: new Date('2024-03-01'),
+    checkOut: new Date('2024-03-05'),
+    status: 'CONFIRMED',
+    totalAmount: 1200,
+    roomType: 'Deluxe Suite',
+  },
+  {
+    id: 'B2',
+    guestName: 'Emma Wilson',
+    hotelName: 'Marriott Resort',
+    checkIn: new Date('2024-03-10'),
+    checkOut: new Date('2024-03-15'),
+    status: 'PENDING',
+    totalAmount: 2500,
+    roomType: 'Ocean View Suite',
+  },
+  // Add more mock bookings...
+];
+
+export const mockRevenue: Revenue[] = [
+  {
+    date: new Date('2024-02-01'),
+    amount: 150000,
+    source: 'DIRECT',
+    hotelId: 'H1',
+  },
+  {
+    date: new Date('2024-02-02'),
+    amount: 125000,
+    source: 'OTA',
+    hotelId: 'H1',
+  },
+  // Add more mock revenue data...
+];
+
+export const mockComplaints: Complaint[] = [
+  {
+    id: 'C1',
+    guestName: 'David Lee',
+    hotelName: 'Marriott Downtown',
+    date: new Date('2024-02-18'),
+    status: 'NEW',
+    category: 'Room Service',
+    description: 'Delayed room service delivery',
+  },
+  {
+    id: 'C2',
+    guestName: 'Lisa Chen',
+    hotelName: 'Marriott Resort',
+    date: new Date('2024-02-17'),
+    status: 'IN_PROGRESS',
+    category: 'Cleanliness',
+    description: 'Room not properly cleaned',
+  },
+  // Add more mock complaints...
+];
+
+export const mockMaintenanceRequests: MaintenanceRequest[] = [
+  {
+    id: 'M1',
+    hotelName: 'Marriott Downtown',
+    roomNumber: '405',
+    issue: 'AC not working',
+    priority: 'HIGH',
+    status: 'PENDING',
+    dateReported: new Date('2024-02-19'),
+  },
+  {
+    id: 'M2',
+    hotelName: 'Marriott Resort',
+    roomNumber: '712',
+    issue: 'Leaking faucet',
+    priority: 'MEDIUM',
+    status: 'IN_PROGRESS',
+    dateReported: new Date('2024-02-18'),
+  },
+  // Add more mock maintenance requests...
+];
+
+export const mockStaffSchedules: StaffSchedule[] = [
+  {
+    id: 'S1',
+    employeeName: 'James Wilson',
+    department: 'Housekeeping',
+    shift: 'MORNING',
+    date: new Date('2024-02-20'),
+    hotelName: 'Marriott Downtown',
+  },
+  {
+    id: 'S2',
+    employeeName: 'Maria Garcia',
+    department: 'Front Desk',
+    shift: 'AFTERNOON',
+    date: new Date('2024-02-20'),
+    hotelName: 'Marriott Downtown',
+  },
+  // Add more mock schedules...
+];
+
+export const mockInventory: Inventory[] = [
+  {
+    id: 'I1',
+    itemName: 'Bath Towels',
+    category: 'Linens',
+    quantity: 500,
+    reorderPoint: 100,
+    hotelName: 'Marriott Downtown',
+    lastUpdated: new Date('2024-02-15'),
+  },
+  {
+    id: 'I2',
+    itemName: 'Shampoo Bottles',
+    category: 'Toiletries',
+    quantity: 1000,
+    reorderPoint: 200,
+    hotelName: 'Marriott Downtown',
+    lastUpdated: new Date('2024-02-16'),
+  },
+  // Add more mock inventory...
+]; 

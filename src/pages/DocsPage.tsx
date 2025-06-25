@@ -11,9 +11,17 @@ const DocsPage: React.FC = () => {
   useEffect(() => {
     const fetchDoc = async () => {
       try {
-        // Ensure path starts with a forward slash
-        const docPath = path ? `/${path}` : '/README.md';
-        const response = await fetch(`/docs${docPath}`);
+        // Ensure path starts with a forward slash and ends with .md if not provided
+        let docPath = path || 'README.md';
+        if (!docPath.endsWith('.md')) {
+          docPath = `${docPath}.md`;
+        }
+        if (!docPath.startsWith('/')) {
+          docPath = `/${docPath}`;
+        }
+
+        // Use the correct base path for the docs
+        const response = await fetch(`/MarriottHotels/docs${docPath}`);
         
         if (!response.ok) {
           throw new Error(`Failed to load documentation (${response.status})`);

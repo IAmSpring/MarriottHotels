@@ -41,6 +41,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
+      '@docs': resolve(__dirname, './docs')
     },
   },
   optimizeDeps: {
@@ -60,6 +61,17 @@ export default defineConfig({
     'process.env': {}
   },
   publicDir: 'public',
-  // Add static file serving for docs
-  assetsInclude: ['**/*.md']
+  assetsInclude: ['**/*.md'],
+  // Configure static file serving for docs
+  build: {
+    ...defineConfig().build,
+    outDir: 'dist',
+    rollupOptions: {
+      ...defineConfig().build?.rollupOptions,
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        docs: resolve(__dirname, 'docs/index.html')
+      }
+    }
+  }
 });
