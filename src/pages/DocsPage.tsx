@@ -22,53 +22,45 @@ const docSections: DocSection[] = [
     path: "/docs",
   },
   {
-    title: "Architecture",
-    path: "/docs/architecture",
-    subsections: [
-      { title: "System Overview", path: "/docs/architecture/system-overview" },
-      { title: "Component Structure", path: "/docs/architecture/component-structure" },
-      { title: "Data Flow", path: "/docs/architecture/data-flow" },
-      { title: "Security", path: "/docs/architecture/security" }
-    ]
-  },
-  {
-    title: "AI Integration",
+    title: "AI",
     path: "/docs/ai",
     subsections: [
       { title: "Assistant Architecture", path: "/docs/ai/assistant-architecture" },
-      { title: "OpenAI Integration", path: "/docs/ai/openai-integration" },
-      { title: "Voice Processing", path: "/docs/ai/voice-processing" },
       { title: "Conversation Management", path: "/docs/ai/conversation-management" },
-      { title: "Models and Prompts", path: "/docs/ai/models-and-prompts" }
+      { title: "Models and Prompts", path: "/docs/ai/models-and-prompts" },
+      { title: "OpenAI Integration", path: "/docs/ai/openai-integration" },
+      { title: "Voice Processing", path: "/docs/ai/voice-processing" }
     ]
   },
   {
-    title: "Frontend",
-    path: "/docs/frontend",
+    title: "Architecture",
+    path: "/docs/architecture",
     subsections: [
-      { title: "Component Architecture", path: "/docs/frontend/component-architecture" },
-      { title: "State Management", path: "/docs/frontend/state-management" },
-      { title: "Design System", path: "/docs/frontend/design-system" }
+      { title: "Component Structure", path: "/docs/architecture/component-structure" },
+      { title: "Data Flow", path: "/docs/architecture/data-flow" },
+      { title: "Performance", path: "/docs/architecture/performance" },
+      { title: "Security", path: "/docs/architecture/security" },
+      { title: "System Overview", path: "/docs/architecture/system-overview" }
     ]
   },
   {
     title: "Backend",
     path: "/docs/backend",
     subsections: [
-      { title: "Server Architecture", path: "/docs/backend/server-architecture" },
       { title: "API Design", path: "/docs/backend/api-design" },
+      { title: "Authentication", path: "/docs/backend/authentication" },
       { title: "Database Schema", path: "/docs/backend/database-schema" },
-      { title: "Authentication", path: "/docs/backend/authentication" }
+      { title: "Server Architecture", path: "/docs/backend/server-architecture" }
     ]
   },
   {
-    title: "Features",
-    path: "/docs/features",
+    title: "Deployment",
+    path: "/docs/deployment",
     subsections: [
-      { title: "Chatbot Implementation", path: "/docs/features/chatbot-implementation" },
-      { title: "Voice Integration", path: "/docs/features/voice-integration" },
-      { title: "Natural Language Processing", path: "/docs/features/natural-language-processing" },
-      { title: "Recommendation System", path: "/docs/features/recommendation-system" }
+      { title: "Monitoring", path: "/docs/deployment/monitoring" },
+      { title: "Production Pipeline", path: "/docs/deployment/production-pipeline" },
+      { title: "Scaling", path: "/docs/deployment/scaling" },
+      { title: "Security", path: "/docs/deployment/security" }
     ]
   },
   {
@@ -82,13 +74,42 @@ const docSections: DocSection[] = [
     ]
   },
   {
+    title: "Features",
+    path: "/docs/features",
+    subsections: [
+      { title: "Chatbot Implementation", path: "/docs/features/chatbot-implementation" },
+      { title: "Natural Language Processing", path: "/docs/features/natural-language-processing" },
+      { title: "Recommendation System", path: "/docs/features/recommendation-system" },
+      { title: "Voice Integration", path: "/docs/features/voice-integration" }
+    ]
+  },
+  {
+    title: "Frontend",
+    path: "/docs/frontend",
+    subsections: [
+      { title: "Component Architecture", path: "/docs/frontend/component-architecture" },
+      { title: "Design System", path: "/docs/frontend/design-system" },
+      { title: "State Management", path: "/docs/frontend/state-management" }
+    ]
+  },
+  {
+    title: "Infrastructure",
+    path: "/docs/infrastructure",
+    subsections: [
+      { title: "Cloud Infrastructure", path: "/docs/infrastructure/cloud-infrastructure" },
+      { title: "Infrastructure as Code", path: "/docs/infrastructure/infrastructure-as-code" },
+      { title: "Infrastructure Setup", path: "/docs/infrastructure/infrastructure-setup" },
+      { title: "Network Architecture", path: "/docs/infrastructure/network-architecture" }
+    ]
+  },
+  {
     title: "Testing",
     path: "/docs/testing",
     subsections: [
-      { title: "Testing Strategy", path: "/docs/testing/testing-strategy" },
       { title: "AI Component Testing", path: "/docs/testing/ai-component-testing" },
       { title: "Integration Testing", path: "/docs/testing/integration-testing" },
-      { title: "Performance Testing", path: "/docs/testing/performance-testing" }
+      { title: "Performance Testing", path: "/docs/testing/performance-testing" },
+      { title: "Testing Strategy", path: "/docs/testing/testing-strategy" }
     ]
   }
 ];
@@ -260,9 +281,9 @@ const DocsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-200 p-6 fixed h-full overflow-y-auto">
+      <div className="w-64 bg-white border-r border-gray-200 p-6 fixed h-screen overflow-y-auto pb-24">
         <h3 className="text-xl font-bold text-gray-900 mb-6">Documentation</h3>
-        <nav className="space-y-1">
+        <nav className="space-y-1 mb-20">
           {docSections.map(renderNavSection)}
         </nav>
       </div>

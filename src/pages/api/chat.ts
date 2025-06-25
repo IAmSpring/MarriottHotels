@@ -1,24 +1,20 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
-import OpenAI from 'openai';
+import { getOpenAIClient, getOpenAIConfig } from '../../lib/openai';
 import { Readable } from 'stream';
 
 const prisma = new PrismaClient();
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const config = getOpenAIConfig();
+const openai = getOpenAIClient(config.apiKey);
 
 // Ensure both ASSISTANT_IDs are available and valid
-const CONCIERGE_ASSISTANT_ID = process.env.AI_ASSISTANT_ID;
-const ADMIN_ASSISTANT_ID = process.env.AI_ADMIN_ID;
-
-if (!CONCIERGE_ASSISTANT_ID || !ADMIN_ASSISTANT_ID) {
+if (!config.assistantId || !config.adminId) {
   throw new Error('Both AI_ASSISTANT_ID and AI_ADMIN_ID are required');
 }
 
 // Type assertion since we've verified the IDs exist
-const CONCIERGE_ID: string = CONCIERGE_ASSISTANT_ID;
-const ADMIN_ID: string = ADMIN_ASSISTANT_ID;
+const CONCIERGE_ID: string = config.assistantId;
+const ADMIN_ID: string = config.adminId;
 
 const ADMIN_INSTRUCTIONS = `You are the Marriott Operations AI Assistant, a sophisticated system designed to support Marriott's business operations and management. Your responses should always be in JSON format with a 'response' field containing your message.
 

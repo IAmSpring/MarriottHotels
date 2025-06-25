@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Components } from 'react-markdown/lib/ast-to-react';
+import type { Components } from 'react-markdown';
 
 interface DocSection {
   title: string;
@@ -65,6 +65,14 @@ const docSections: DocSection[] = [
     ]
   }
 ];
+
+interface MarkdownComponentProps {
+  children?: React.ReactNode;
+  href?: string;
+  className?: string;
+  inline?: boolean;
+  [key: string]: any;
+}
 
 const DocsPage: React.FC = () => {
   const [content, setContent] = useState<string>('');
@@ -130,8 +138,33 @@ const DocsPage: React.FC = () => {
     </div>
   );
 
-  const components: Components = {
-    a: ({ href, children }) => {
+  const components: Partial<Components> = {
+    code: ({ className, children, inline }: MarkdownComponentProps) => {
+      const match = /language-(\w+)/.exec(className || '');
+      const language = match ? match[1] : '';
+      const codeContent = children?.toString() || '';
+
+      // Handle Mermaid diagrams
+      if (language === 'mermaid') {
+        return (
+          <div className="my-6 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="mermaid">
+              {codeContent}
+            </div>
+          </div>
+        );
+      }
+
+      // Regular code blocks
+      return (
+        <pre className="my-4 bg-gray-800 text-gray-100 rounded-lg p-4 overflow-x-auto">
+          <code className={`${className} text-sm font-mono`}>
+            {children}
+          </code>
+        </pre>
+      );
+    },
+    a: ({ href, children }: MarkdownComponentProps) => {
       if (href?.startsWith('./')) {
         const internalPath = href.substring(2).replace(/\.md$/, '');
         return (
@@ -154,30 +187,21 @@ const DocsPage: React.FC = () => {
         </a>
       );
     },
-    h1: ({ children }) => (
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">{children}</h1>
+    h1: ({ children }: MarkdownComponentProps) => (
+      <h1 className="text-4xl font-bold text-gray-900 mb-8">
+        {children}
+      </h1>
     ),
-    h2: ({ children }) => (
-      <h2 className="text-3xl font-semibold text-gray-800 mt-8 mb-4">{children}</h2>
+    h2: ({ children }: MarkdownComponentProps) => (
+      <h2 className="text-3xl font-semibold text-gray-800 mt-8 mb-4">
+        {children}
+      </h2>
     ),
-    h3: ({ children }) => (
-      <h3 className="text-2xl font-medium text-gray-700 mt-6 mb-3">{children}</h3>
-    ),
-    code: ({ node, className, children, ...props }) => {
-      const match = /language-(\w+)/.exec(className || '');
-      const isInline = !node?.position?.start.line;
-      return isInline ? (
-        <code className="bg-gray-100 rounded px-1 py-0.5" {...props}>
-          {children}
-        </code>
-      ) : (
-        <pre className="bg-gray-100 rounded-lg p-4 overflow-x-auto">
-          <code className={match ? `language-${match[1]}` : ''} {...props}>
-            {children}
-          </code>
-        </pre>
-      );
-    }
+    h3: ({ children }: MarkdownComponentProps) => (
+      <h3 className="text-2xl font-medium text-gray-700 mt-6 mb-3">
+        {children}
+      </h3>
+    )
   };
 
   return (

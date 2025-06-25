@@ -42,9 +42,9 @@ export const getOpenAIConfig = (): OpenAIConfig => {
   // In the browser, use import.meta.env
   if (typeof window !== 'undefined') {
     return {
-      apiKey: import.meta.env.OPENAI_API_KEY,
-      assistantId: import.meta.env.AI_ASSISTANT_ID,
-      adminId: import.meta.env.AI_ADMIN_ID
+      apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+      assistantId: import.meta.env.VITE_AI_ASSISTANT_ID,
+      adminId: import.meta.env.VITE_AI_ADMIN_ID
     };
   }
   
@@ -156,4 +156,23 @@ export const getCachedAudioResponse = async (
   
   audioCache.set(cacheKey, { audio: audioBase64, timestamp: now });
   return audioBase64;
+};
+
+// Audio transcription utility
+export const transcribeAudio = async (openai: OpenAI, audioBlob: Blob): Promise<string> => {
+  try {
+    const formData = new FormData();
+    formData.append('file', audioBlob, 'audio.webm');
+    formData.append('model', 'whisper-1');
+    
+    const response = await openai.audio.transcriptions.create({
+      file: audioBlob,
+      model: 'whisper-1',
+    });
+
+    return response.text;
+  } catch (error) {
+    console.error('Transcription error:', error);
+    throw new Error('Failed to transcribe audio');
+  }
 }; 

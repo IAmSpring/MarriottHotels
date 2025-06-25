@@ -1,24 +1,19 @@
-import OpenAI from 'openai';
+import { getOpenAIClient, getOpenAIConfig } from '../lib/openai';
 
 // Get environment variables - using the same names as our .env file
-const OPENAI_API_KEY = import.meta.env.OPENAI_API_KEY;
-const AI_ASSISTANT_ID = import.meta.env.AI_ASSISTANT_ID;
-const AI_ADMIN_ID = import.meta.env.AI_ADMIN_ID;
+const config = getOpenAIConfig();
 const ENABLE_AI_CHAT = import.meta.env.ENABLE_AI_CHAT !== 'false';
 
 if (!ENABLE_AI_CHAT) {
   console.warn('AI Chat is disabled');
 }
 
-if (!OPENAI_API_KEY || !AI_ASSISTANT_ID || !AI_ADMIN_ID) {
+if (!config.apiKey || !config.assistantId || !config.adminId) {
   console.warn('Missing required OpenAI environment variables');
 }
 
 // Initialize OpenAI with browser-safe configuration
-export const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true // Enable browser usage
-});
+export const openai = getOpenAIClient(config.apiKey);
 
 // Static data store (simulating database)
 const staticStore = {
@@ -49,7 +44,7 @@ export const staticApi = {
       });
 
       // Select appropriate assistant based on isAdmin flag
-      const assistantId = isAdmin ? AI_ADMIN_ID : AI_ASSISTANT_ID;
+      const assistantId = isAdmin ? config.adminId : config.assistantId;
       const instructions = isAdmin 
         ? "You are a Marriott business operations assistant. Provide responses in JSON format with a 'response' field."
         : "You are a helpful Marriott Hotels concierge. Provide responses in JSON format with a 'response' field.";
