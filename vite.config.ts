@@ -12,6 +12,11 @@ export default defineConfig({
         target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
+      },
+      '/admin': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
       }
     },
     fs: {
@@ -30,6 +35,10 @@ export default defineConfig({
           'trpc-vendor': ['@trpc/client', '@trpc/react-query', '@trpc/server'],
         },
       },
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        docs: resolve(__dirname, 'docs/index.html')
+      }
     },
     chunkSizeWarningLimit: 800,
     target: 'esnext',
@@ -37,6 +46,7 @@ export default defineConfig({
     cssMinify: true,
     sourcemap: false,
     reportCompressedSize: false,
+    outDir: 'dist'
   },
   resolve: {
     alias: {
@@ -61,17 +71,5 @@ export default defineConfig({
     'process.env': {}
   },
   publicDir: 'public',
-  assetsInclude: ['**/*.md'],
-  // Configure static file serving for docs
-  build: {
-    ...defineConfig().build,
-    outDir: 'dist',
-    rollupOptions: {
-      ...defineConfig().build?.rollupOptions,
-      input: {
-        main: resolve(__dirname, 'index.html'),
-        docs: resolve(__dirname, 'docs/index.html')
-      }
-    }
-  }
+  assetsInclude: ['**/*.md']
 });

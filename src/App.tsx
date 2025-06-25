@@ -22,6 +22,7 @@ import DestinationDetails from './pages/DestinationDetails';
 import AppPage from './pages/AppPage';
 import AIChatBot from './components/AIChatBot';
 import DocsPage from './pages/DocsPage';
+import AccountSettings from './pages/AccountSettings';
 
 const App: React.FC = () => {
   return (
@@ -36,6 +37,7 @@ const App: React.FC = () => {
               <Route path="/hotels/:id" element={<HotelDetails />} />
               <Route path="/deals" element={<DealsPage />} />
               <Route path="/bookings" element={<BookingsPage />} />
+              <Route path="/account-settings" element={<AccountSettings />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/dining" element={<DiningPage />} />
               <Route path="/dining/:id" element={<RestaurantDetails />} />

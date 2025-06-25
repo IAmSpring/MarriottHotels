@@ -141,7 +141,10 @@ const BookingsPage = () => {
               <p className="text-gray-600 mt-2">Welcome back, {user.name}</p>
             </div>
             <div className="mt-4 md:mt-0 flex space-x-4">
-              <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+              <button 
+                onClick={() => navigate('/account-settings')}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
                 Account Settings
               </button>
               <button 

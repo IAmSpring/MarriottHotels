@@ -1,23 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, User, Heart, MapPin } from 'lucide-react';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkLoginStatus = () => {
+      const loggedIn = localStorage.getItem('marriott_user_logged_in') === 'true';
+      setIsLoggedIn(loggedIn);
+    };
+
+    checkLoginStatus();
+    // Check on route change
+    window.addEventListener('storage', checkLoginStatus);
+    return () => window.removeEventListener('storage', checkLoginStatus);
+  }, []);
 
   const isActive = (path: string) => location.pathname === path;
 
   const handleBookingsClick = () => {
-    // Check if user is logged in (for demo purposes, always redirect to login)
-    const isLoggedIn = localStorage.getItem('marriott_user_logged_in') === 'true';
-    
     if (isLoggedIn) {
       navigate('/bookings');
     } else {
       navigate('/login');
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('marriott_user_logged_in');
+    localStorage.removeItem('marriott_user_email');
+    localStorage.removeItem('marriott_user_name');
+    setIsLoggedIn(false);
+    navigate('/');
   };
 
   return (
@@ -81,16 +99,36 @@ const Navbar = () => {
             <button className="p-2 text-gray-700 hover:text-[#8B1538] transition-colors">
               <Heart className="h-5 w-5" />
             </button>
-            <button 
-              onClick={() => navigate('/login')}
-              className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:text-[#8B1538] transition-colors"
-            >
-              <User className="h-5 w-5" />
-              <span className="text-sm font-medium">Sign In</span>
-            </button>
-            <button className="px-6 py-2 bg-[#8B1538] text-white font-semibold rounded-lg hover:bg-[#6B1028] transition-colors">
-              Join Bonvoy
-            </button>
+            {isLoggedIn ? (
+              <div className="flex items-center space-x-4">
+                <button 
+                  onClick={() => navigate('/account-settings')}
+                  className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:text-[#8B1538] transition-colors"
+                >
+                  <User className="h-5 w-5" />
+                  <span className="text-sm font-medium">Account</span>
+                </button>
+                <button 
+                  onClick={handleLogout}
+                  className="px-4 py-2 text-white bg-[#8B1538] rounded-lg hover:bg-[#6B1028] transition-colors"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <>
+                <button 
+                  onClick={() => navigate('/login')}
+                  className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:text-[#8B1538] transition-colors"
+                >
+                  <User className="h-5 w-5" />
+                  <span className="text-sm font-medium">Sign In</span>
+                </button>
+                <button className="px-6 py-2 bg-[#8B1538] text-white font-semibold rounded-lg hover:bg-[#6B1028] transition-colors">
+                  Join Bonvoy
+                </button>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -155,18 +193,43 @@ const Navbar = () => {
                 My Bookings
               </button>
               <div className="border-t border-gray-200 pt-4 mt-4">
-                <button 
-                  onClick={() => {
-                    navigate('/login');
-                    setIsMenuOpen(false);
-                  }}
-                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#8B1538] hover:bg-gray-50 transition-colors"
-                >
-                  Sign In
-                </button>
-                <button className="block w-full mt-2 px-3 py-2 bg-[#8B1538] text-white font-semibold rounded-lg hover:bg-[#6B1028] transition-colors">
-                  Join Bonvoy
-                </button>
+                {isLoggedIn ? (
+                  <>
+                    <button 
+                      onClick={() => {
+                        navigate('/account-settings');
+                        setIsMenuOpen(false);
+                      }}
+                      className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#8B1538] hover:bg-gray-50 transition-colors"
+                    >
+                      Account Settings
+                    </button>
+                    <button 
+                      onClick={() => {
+                        handleLogout();
+                        setIsMenuOpen(false);
+                      }}
+                      className="block w-full mt-2 px-3 py-2 bg-[#8B1538] text-white font-semibold rounded-lg hover:bg-[#6B1028] transition-colors"
+                    >
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button 
+                      onClick={() => {
+                        navigate('/login');
+                        setIsMenuOpen(false);
+                      }}
+                      className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#8B1538] hover:bg-gray-50 transition-colors"
+                    >
+                      Sign In
+                    </button>
+                    <button className="block w-full mt-2 px-3 py-2 bg-[#8B1538] text-white font-semibold rounded-lg hover:bg-[#6B1028] transition-colors">
+                      Join Bonvoy
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
