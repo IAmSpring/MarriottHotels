@@ -28,6 +28,12 @@ const DEFAULT_OPTIONS = [
   "Help me plan a romantic getaway"
 ];
 
+const RECOMMENDED_PROMPTS = [
+  "Help me plan a luxury vacation in Aspen",
+  "What are the best Marriott hotels for a business trip?",
+  "Tell me about Marriott Bonvoy rewards program"
+];
+
 const stripMarkdown = (text: string): string => {
   return text
     .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
@@ -292,6 +298,11 @@ const AIChatBot: React.FC = () => {
     }
   };
 
+  const handlePromptClick = (prompt: string) => {
+    setInputText(prompt);
+    handleSend(prompt);
+  };
+
   return (
     <div className={`fixed bottom-4 right-4 z-50 ${isOpen ? 'w-96' : 'w-auto'}`}>
       {/* Chat Button */}
@@ -353,6 +364,22 @@ const AIChatBot: React.FC = () => {
                 onStop={stopPlayback}
               />
             ))}
+            
+            {/* Show recommended prompts after the first AI message */}
+            {messages.length === 1 && (
+              <div className="space-y-2 mt-4">
+                <p className="text-sm text-gray-500">Try asking about:</p>
+                {RECOMMENDED_PROMPTS.map((prompt, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handlePromptClick(prompt)}
+                    className="block w-full text-left p-2 text-sm text-[#8B1538] hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            )}
             
             {isLoading && (
               <div className="flex justify-center items-center py-4">
