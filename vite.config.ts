@@ -31,10 +31,7 @@ export default defineConfig({
           'trpc-vendor': ['@trpc/client', '@trpc/react-query', '@trpc/server'],
         },
       },
-      input: {
-        main: path.resolve(__dirname, 'index.html'),
-        docs: path.resolve(__dirname, 'docs/index.html')
-      }
+      input: path.resolve(__dirname, 'index.html')
     },
     chunkSizeWarningLimit: 800,
     target: 'esnext',
