@@ -20,6 +20,19 @@ async function main() {
     prisma.user.deleteMany(),
   ]);
 
+  // Create admin user
+  const admin = await prisma.user.create({
+    data: {
+      name: 'Admin User',
+      email: 'admin@test.com',
+      password: await bcrypt.hash('admin123', 10),
+      role: 'ADMIN',
+      bonvoyNumber: 'ADMIN001',
+      bonvoyPoints: 0,
+      bonvoyStatus: 'NONE'
+    }
+  });
+
   // Create sample users
   const users = await Promise.all([
     prisma.user.create({

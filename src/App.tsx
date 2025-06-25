@@ -21,6 +21,7 @@ import DestinationsPage from './pages/DestinationsPage';
 import DestinationDetails from './pages/DestinationDetails';
 import AppPage from './pages/AppPage';
 import AIChatBot from './components/AIChatBot';
+import DocsPage from './pages/DocsPage';
 
 const App: React.FC = () => {
   return (
@@ -46,6 +47,7 @@ const App: React.FC = () => {
               <Route path="/destinations" element={<DestinationsPage />} />
               <Route path="/destinations/:id" element={<DestinationDetails />} />
               <Route path="/app" element={<AppPage />} />
+              <Route path="/docs/*" element={<DocsPage />} />
             </Routes>
             <AIChatBot />
           </div>

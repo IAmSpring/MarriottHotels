@@ -222,11 +222,26 @@ export default async function handler(
         const content = latestMessage.content[0];
         if ('text' in content) {
           try {
-            const jsonResponse = JSON.parse(content.text.value);
+            // Clean up markdown code blocks if present
+            let textValue = content.text.value;
+            if (textValue.includes('```json')) {
+              textValue = textValue
+                .replace(/```json\n/g, '')
+                .replace(/```\n/g, '')
+                .replace(/```/g, '')
+                .trim();
+            }
+            const jsonResponse = JSON.parse(textValue);
             responseText = jsonResponse.response;
           } catch (e) {
             console.error('Error parsing assistant response as JSON:', e);
-            responseText = content.text.value;
+            // If JSON parsing fails, try to extract content between response quotes
+            const match = content.text.value.match(/"response"\s*:\s*"([^"]*)"/);
+            if (match) {
+              responseText = match[1];
+            } else {
+              responseText = content.text.value;
+            }
           }
           break;
         } else {
@@ -257,10 +272,31 @@ export default async function handler(
     const buffer = Buffer.from(await speechResponse.arrayBuffer());
     const audioBase64 = buffer.toString('base64');
 
+    // Validate user exists before creating conversation
+    let userIdToUse = 1; // Default to 1 if no userId provided
+    if (userId) {
+      try {
+        const parsedUserId = parseInt(userId);
+        if (!isNaN(parsedUserId)) {
+          const user = await prisma.user.findUnique({
+            where: {
+              id: parsedUserId
+            }
+          });
+          if (user) {
+            userIdToUse = user.id;
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing or finding user:', error);
+        // Continue with default userIdToUse if there's an error
+      }
+    }
+
     // Store the conversation in the database
     const conversation = await prisma.conversation.create({
       data: {
-        userId: parseInt(userId) || 1,
+        userId: userIdToUse,
         userMessage: message,
         aiResponse: responseText,
         threadId: currentThreadId,

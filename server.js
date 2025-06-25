@@ -29,10 +29,10 @@ async function main() {
 
   // Configure CORS
   app.use(cors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://studio.apollographql.com'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-trpc-source'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-trpc-source', 'apollo-require-preflight'],
     exposedHeaders: ['set-cookie']
   }));
 
@@ -111,14 +111,15 @@ async function main() {
     typeDefs, 
     resolvers,
     playground: true,
-    introspection: true
+    introspection: true,
+    cors: false // Disable Apollo's CORS handling
   });
   
   await apolloServer.start();
   apolloServer.applyMiddleware({ 
     app, 
     path: '/api/graphql',
-    cors: false
+    cors: false // Let the global CORS middleware handle it
   });
 
   // API documentation
@@ -149,8 +150,10 @@ async function main() {
 💬 Chat API: http://localhost:${port}/api/chat
 📝 GraphQL Playground: http://localhost:${port}/api/graphql
 🌐 Accepting frontend requests from http://localhost:5173
+📚 Documentation: http://localhost:5173/MarriottHotels/docs
+🗄️ Prisma Studio: http://localhost:5555
     `);
   });
 }
 
-main().catch(console.error); 
+main().catch(console.error);
