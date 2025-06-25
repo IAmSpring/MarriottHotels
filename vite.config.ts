@@ -13,6 +13,10 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       }
+    },
+    fs: {
+      // Allow serving files from one level up to the project root
+      allow: ['..']
     }
   },
   build: {
@@ -54,5 +58,8 @@ export default defineConfig({
   },
   define: {
     'process.env': {}
-  }
+  },
+  publicDir: 'public',
+  // Add static file serving for docs
+  assetsInclude: ['**/*.md']
 });

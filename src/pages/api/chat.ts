@@ -293,6 +293,19 @@ export default async function handler(
       }
     }
 
+    // Ensure default user exists
+    const defaultUser = await prisma.user.upsert({
+      where: { id: 1 },
+      update: {},
+      create: {
+        id: 1,
+        email: 'default@marriott.com',
+        password: 'defaultpass', // This is safe as it's just for the default user
+        name: 'Default User',
+        role: 'USER'
+      }
+    });
+
     // Store the conversation in the database
     const conversation = await prisma.conversation.create({
       data: {

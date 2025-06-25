@@ -2,143 +2,139 @@ import { useState, useRef, useCallback } from 'react';
 
 interface UseVoiceRecorderProps {
   onTranscriptionComplete: (text: string) => void;
-  silenceTimeout?: number;
+  silenceTimeout?: number; // in milliseconds
 }
 
 export const useVoiceRecorder = ({
   onTranscriptionComplete,
-  silenceTimeout = 4000 // 4 seconds default
+  silenceTimeout = 4000, // 4 seconds default
 }: UseVoiceRecorderProps) => {
   const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
-  const silenceTimer = useRef<NodeJS.Timeout>();
-  const audioContext = useRef<AudioContext>();
-  const analyser = useRef<AnalyserNode>();
-  const mediaStream = useRef<MediaStream>();
+  const silenceTimer = useRef<NodeJS.Timeout | null>(null);
+  const audioContext = useRef<AudioContext | null>(null);
+  const analyser = useRef<AnalyserNode | null>(null);
+  const mediaStream = useRef<MediaStream | null>(null);
 
-  const detectSilence = useCallback((stream: MediaStream) => {
-    if (!audioContext.current) {
-      audioContext.current = new AudioContext();
+  const resetRecording = useCallback(() => {
+    audioChunks.current = [];
+    if (silenceTimer.current) {
+      clearTimeout(silenceTimer.current);
+      silenceTimer.current = null;
     }
-    
-    analyser.current = audioContext.current.createAnalyser();
-    const source = audioContext.current.createMediaStreamSource(stream);
-    source.connect(analyser.current);
-    
-    analyser.current.fftSize = 2048;
+    if (mediaStream.current) {
+      mediaStream.current.getTracks().forEach(track => track.stop());
+      mediaStream.current = null;
+    }
+    if (audioContext.current) {
+      audioContext.current.close();
+      audioContext.current = null;
+    }
+    analyser.current = null;
+    mediaRecorder.current = null;
+    setIsRecording(false);
+    setIsTranscribing(false);
+  }, []);
+
+  const checkForSilence = useCallback(() => {
+    if (!analyser.current) return;
+
     const bufferLength = analyser.current.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
-    
-    const checkVolume = () => {
-      if (!isRecording || !analyser.current) return;
-      
-      analyser.current.getByteFrequencyData(dataArray);
-      const average = dataArray.reduce((a, b) => a + b) / bufferLength;
-      
-      // If volume is below threshold (silence)
-      if (average < 5) {
-        if (!silenceTimer.current) {
-          silenceTimer.current = setTimeout(() => {
-            stopRecording();
-          }, silenceTimeout);
-        }
-      } else {
-        // Reset silence timer if sound is detected
-        if (silenceTimer.current) {
-          clearTimeout(silenceTimer.current);
-          silenceTimer.current = undefined;
-        }
+    analyser.current.getByteFrequencyData(dataArray);
+
+    // Calculate average volume
+    const average = dataArray.reduce((a, b) => a + b) / bufferLength;
+
+    // If volume is below threshold (silence)
+    if (average < 5) { // Adjust threshold as needed
+      if (!silenceTimer.current) {
+        silenceTimer.current = setTimeout(() => {
+          stopRecording();
+        }, silenceTimeout);
       }
-      
-      // Continue checking if still recording
-      if (isRecording) {
-        requestAnimationFrame(checkVolume);
-      }
-    };
-    
-    checkVolume();
+    } else if (silenceTimer.current) {
+      clearTimeout(silenceTimer.current);
+      silenceTimer.current = null;
+    }
+
+    if (isRecording) {
+      requestAnimationFrame(checkForSilence);
+    }
   }, [isRecording, silenceTimeout]);
 
-  const startRecording = async () => {
+  const startRecording = useCallback(async () => {
     try {
+      resetRecording();
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStream.current = stream;
-      
+
+      // Set up audio analysis
+      audioContext.current = new AudioContext();
+      analyser.current = audioContext.current.createAnalyser();
+      const source = audioContext.current.createMediaStreamSource(stream);
+      source.connect(analyser.current);
+      analyser.current.fftSize = 2048;
+
       mediaRecorder.current = new MediaRecorder(stream);
-      audioChunks.current = [];
       
       mediaRecorder.current.ondataavailable = (event) => {
-        audioChunks.current.push(event.data);
+        if (event.data.size > 0) {
+          audioChunks.current.push(event.data);
+        }
       };
-      
-      mediaRecorder.current.start();
-      setIsRecording(true);
-      detectSilence(stream);
-    } catch (error) {
-      console.error('Error starting recording:', error);
-    }
-  };
-
-  const stopRecording = async () => {
-    if (!mediaRecorder.current || mediaRecorder.current.state === 'inactive') return;
-
-    return new Promise<void>((resolve) => {
-      if (!mediaRecorder.current) return resolve();
 
       mediaRecorder.current.onstop = async () => {
+        const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+        
         try {
-          // Clean up
-          if (silenceTimer.current) {
-            clearTimeout(silenceTimer.current);
-            silenceTimer.current = undefined;
-          }
-          
-          if (mediaStream.current) {
-            mediaStream.current.getTracks().forEach(track => track.stop());
-          }
-          
-          if (audioContext.current) {
-            await audioContext.current.close();
-            audioContext.current = undefined;
-          }
-
-          // Create audio blob and transcribe
-          const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
-          
-          // Create form data for OpenAI API
+          // Create form data for the API request
           const formData = new FormData();
-          formData.append('file', audioBlob, 'audio.webm');
-          formData.append('model', 'whisper-1');
+          formData.append('audio', audioBlob);
 
-          // Send to OpenAI for transcription
-          const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+          // Send to our server endpoint
+          const response = await fetch('/api/chat/transcribe', {
             method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${process.env.VITE_OPENAI_API_KEY}`
-            },
-            body: formData
+            body: formData,
           });
+
+          if (!response.ok) {
+            throw new Error(`Transcription error: ${response.status}`);
+          }
 
           const data = await response.json();
           onTranscriptionComplete(data.text);
-          
-          setIsRecording(false);
-          resolve();
         } catch (error) {
-          console.error('Error processing recording:', error);
-          setIsRecording(false);
-          resolve();
+          console.error('Transcription error:', error);
+          onTranscriptionComplete(''); // Call with empty string on error
+        } finally {
+          resetRecording();
         }
       };
 
+      mediaRecorder.current.start();
+      setIsRecording(true);
+      checkForSilence();
+    } catch (error) {
+      console.error('Failed to start recording:', error);
+      resetRecording();
+    }
+  }, [checkForSilence, resetRecording, onTranscriptionComplete]);
+
+  const stopRecording = useCallback(() => {
+    if (mediaRecorder.current && mediaRecorder.current.state !== 'inactive') {
+      setIsTranscribing(true);
       mediaRecorder.current.stop();
-    });
-  };
+    }
+  }, []);
 
   return {
     isRecording,
+    isTranscribing,
     startRecording,
-    stopRecording
+    stopRecording,
   };
-}; 
+};

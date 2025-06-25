@@ -4,21 +4,30 @@ import ReactMarkdown from 'react-markdown';
 
 const DocsPage: React.FC = () => {
   const [content, setContent] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
   const { '*': path } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDoc = async () => {
       try {
-        const response = await fetch(`/docs/${path || 'README.md'}`);
+        // Ensure path starts with a forward slash
+        const docPath = path ? `/${path}` : '/README.md';
+        const response = await fetch(`/docs${docPath}`);
+        
         if (!response.ok) {
-          throw new Error('Failed to load documentation');
+          throw new Error(`Failed to load documentation (${response.status})`);
         }
+        
         const text = await response.text();
         setContent(text);
+        setError(null);
       } catch (error) {
         console.error('Error loading documentation:', error);
-        navigate('/docs');
+        setError(error instanceof Error ? error.message : 'Failed to load documentation');
+        if (!path) {
+          navigate('/');
+        }
       }
     };
 
@@ -26,9 +35,24 @@ const DocsPage: React.FC = () => {
   }, [path, navigate]);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="prose prose-lg prose-indigo max-w-none">
-        <ReactMarkdown>{content}</ReactMarkdown>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {error ? (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
+            <h2 className="text-red-800 text-lg font-semibold mb-2">Error</h2>
+            <p className="text-red-600">{error}</p>
+            <button 
+              onClick={() => navigate('/docs')}
+              className="mt-4 text-red-700 hover:text-red-800 font-medium"
+            >
+              Return to Documentation Home
+            </button>
+          </div>
+        ) : (
+          <div className="prose prose-lg prose-indigo max-w-none bg-white rounded-lg shadow-sm p-8">
+            <ReactMarkdown>{content}</ReactMarkdown>
+          </div>
+        )}
       </div>
     </div>
   );

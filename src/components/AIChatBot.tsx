@@ -1,13 +1,13 @@
 import React, { useState, useRef } from 'react';
-import { MessageCircle, X, Send, Bot, Expand, Minimize, Volume2, Pause, Play, Square, Mic } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, Expand, Minimize, Volume2, Pause, Play, Square, Mic, VolumeX, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useVoiceRecorder } from '../hooks/useVoiceRecorder';
+import MessageBubble from './MessageBubble';
 
 interface Message {
   text: string;
   isUser: boolean;
   timestamp: Date;
-  audioData?: string;
 }
 
 interface AudioState {
@@ -17,9 +17,15 @@ interface AudioState {
 }
 
 interface AIResponse {
-  response?: string;
-  [key: string]: any;
+  response: string;
+  threadId?: string;
 }
+
+const DEFAULT_OPTIONS = [
+  "What are the best hotels in Miami?",
+  "Tell me about Marriott Bonvoy rewards",
+  "Help me plan a romantic getaway"
+];
 
 const AIChatBot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,12 +45,15 @@ const AIChatBot: React.FC = () => {
     isPlaying: false,
     isLoading: false
   });
+  const [isTTSEnabled, setIsTTSEnabled] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const { isRecording, startRecording, stopRecording } = useVoiceRecorder({
+  const { isRecording, isTranscribing, startRecording, stopRecording } = useVoiceRecorder({
     onTranscriptionComplete: (text) => {
-      setInputText(text);
-      handleSend();
+      if (text && text.trim()) {
+        setInputText(text);
+        handleSend(text);
+      }
     },
   });
 
@@ -98,12 +107,88 @@ const AIChatBot: React.FC = () => {
     }
   };
 
-  const handleSend = async () => {
-    if (!inputText.trim() || isLoading) return;
+  const handlePlayback = (messageId: number, text: string) => {
+    if (audioState.messageId === messageId && audioState.isPlaying) {
+      // Pause current playback
+      window.speechSynthesis.pause();
+      setAudioState(prev => ({ ...prev, isPlaying: false }));
+    } else if (audioState.messageId === messageId && !audioState.isPlaying) {
+      // Resume current playback
+      window.speechSynthesis.resume();
+      setAudioState(prev => ({ ...prev, isPlaying: true }));
+    } else {
+      // Start new playback
+      window.speechSynthesis.cancel(); // Stop any ongoing speech
+      const utterance = new SpeechSynthesisUtterance(text);
+      
+      utterance.onstart = () => {
+        setAudioState({
+          messageId,
+          isPlaying: true,
+          isLoading: false
+        });
+      };
+      
+      utterance.onend = () => {
+        setAudioState({
+          messageId: null,
+          isPlaying: false,
+          isLoading: false
+        });
+      };
+      
+      utterance.onpause = () => {
+        setAudioState(prev => ({ ...prev, isPlaying: false }));
+      };
+      
+      utterance.onresume = () => {
+        setAudioState(prev => ({ ...prev, isPlaying: true }));
+      };
+      
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  const stopPlayback = () => {
+    window.speechSynthesis.cancel();
+    setAudioState({
+      messageId: null,
+      isPlaying: false,
+      isLoading: false
+    });
+  };
+
+  const speakText = async (text: string) => {
+    try {
+      if ('speechSynthesis' in window) {
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+        window.speechSynthesis.speak(utterance);
+      } else {
+        console.warn('Text-to-speech not supported in this browser');
+      }
+    } catch (error) {
+      console.error('TTS Error:', error);
+    }
+  };
+
+  const handleOptionClick = (option: string) => {
+    setInputText(option);
+    handleSend(option);
+  };
+
+  const handleSend = async (text?: string) => {
+    const trimmedInput = (text || inputText)?.trim();
+    if (!trimmedInput || isLoading) return;
 
     // Add user message
     const newMessage: Message = {
-      text: inputText,
+      text: trimmedInput,
       isUser: true,
       timestamp: new Date()
     };
@@ -118,81 +203,70 @@ const AIChatBot: React.FC = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: inputText,
+          message: trimmedInput,
           userId: 'anonymous',
           threadId: threadId
         }),
       });
 
-      const data = await response.json();
-      
-      if (data.threadId) {
-        setThreadId(data.threadId);
+      if (!response.ok) {
+        throw new Error('Failed to get response');
       }
 
-      // Parse the message and audio from the response
+      const data = await response.json();
+      
+      // Parse the response properly
       let messageText = '';
-      let audioContent = data.audioData;
       try {
-        // Handle string response
-        if (typeof data.message === 'string') {
-          // Try to parse as JSON first
+        // If data is already a parsed object
+        if (typeof data === 'object' && data.response) {
+          messageText = data.response;
+        }
+        // If data.message is a string containing JSON
+        else if (typeof data.message === 'string') {
           try {
-            const parsedJson = JSON.parse(data.message) as AIResponse;
-            messageText = parsedJson.response || JSON.stringify(parsedJson);
-            // Check if audio is in the parsed JSON
-            if (parsedJson.audioData) {
-              audioContent = parsedJson.audioData;
-            }
+            const parsed = JSON.parse(data.message);
+            messageText = parsed.response || data.message;
           } catch {
-            // If not valid JSON, use the raw message
             messageText = data.message;
           }
-        } 
-        // Handle object response
-        else if (data.message && typeof data.message === 'object') {
-          const messageObj = data.message as AIResponse;
-          messageText = messageObj.response || JSON.stringify(messageObj);
-          // Check if audio is in the message object
-          if (messageObj.audioData) {
-            audioContent = messageObj.audioData;
-          }
         }
-
-        // If messageText is still a stringified JSON, try to parse it
-        if (typeof messageText === 'string' && (messageText.startsWith('{') || messageText.startsWith('['))) {
-          try {
-            const parsed = JSON.parse(messageText) as AIResponse;
-            messageText = parsed.response || JSON.stringify(parsed);
-            // One final check for audio in the parsed JSON
-            if (parsed.audioData) {
-              audioContent = parsed.audioData;
-            }
-          } catch {
-            // Keep original if not valid JSON
-          }
+        // If data.message is an object
+        else if (typeof data.message === 'object' && data.message.response) {
+          messageText = data.message.response;
         }
-
-      } catch (e) {
-        console.error('Error parsing message:', e);
+        // Fallback
+        else {
+          messageText = "I'm sorry, I couldn't process that response properly.";
+        }
+      } catch (error) {
+        console.error('Error parsing message:', error);
         messageText = "I'm sorry, I couldn't process that response properly.";
       }
 
-      const aiResponse: Message = {
+      // Add AI response
+      const aiMessage: Message = {
         text: messageText,
-        isUser: false,
-        timestamp: new Date(),
-        audioData: audioContent
-      };
-      setMessages(prev => [...prev, aiResponse]);
-    } catch (error) {
-      console.error('Chat error:', error);
-      const errorMessage: Message = {
-        text: "I'm sorry, I'm having trouble connecting right now. Please try again later.",
         isUser: false,
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev, aiMessage]);
+
+      // If TTS is enabled, speak the response
+      if (isTTSEnabled) {
+        speakText(messageText);
+      }
+
+      if (data.threadId) {
+        setThreadId(data.threadId);
+      }
+    } catch (error) {
+      console.error('Chat error:', error);
+      setMessages(prev => [...prev, {
+        text: "I apologize, but I'm having trouble connecting right now. Please try again later.",
+        isUser: false,
+        timestamp: new Date()
+      }]);
     } finally {
       setIsLoading(false);
     }
@@ -206,7 +280,7 @@ const AIChatBot: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className={`fixed bottom-4 right-4 z-50 ${isOpen ? 'w-96' : 'w-auto'}`}>
       {/* Chat Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -268,115 +342,109 @@ const AIChatBot: React.FC = () => {
           </div>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[80%] rounded-lg p-3 ${
-                  message.isUser
-                    ? 'bg-[#8B1538] text-white'
-                    : 'bg-gray-100 text-gray-800'
+        <div className={`${isOpen ? 'block' : 'hidden'} bg-white rounded-t-xl shadow-xl`}>
+          <div className="h-96 overflow-y-auto p-4">
+            {messages.map((message, index) => (
+              <MessageBubble
+                key={index}
+                text={message.text}
+                isUser={message.isUser}
+                timestamp={message.timestamp}
+                messageId={index}
+                audioState={audioState}
+                onPlayPause={handlePlayback}
+                onStop={stopPlayback}
+              />
+            ))}
+            
+            {/* Quick Options - Show only after first AI message */}
+            {messages.length === 1 && (
+              <div className="flex flex-col gap-2 mt-4">
+                {DEFAULT_OPTIONS.map((option, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleOptionClick(option)}
+                    className="text-left px-4 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 transition-colors"
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            {isLoading && (
+              <div className="flex justify-center items-center py-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#8B1538]"></div>
+              </div>
+            )}
+          </div>
+
+          {/* Input Section */}
+          <div className="p-4 border-t bg-white">
+            <div className="flex items-center space-x-2">
+              <textarea
+                value={inputText || ''}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Type your message..."
+                className="flex-1 resize-none border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#8B1538] focus:border-transparent bg-white"
+                rows={1}
+                disabled={isLoading || isRecording || isTranscribing}
+              />
+              <button
+                onClick={async (e) => {
+                  e.preventDefault();
+                  try {
+                    if (isRecording) {
+                      await stopRecording();
+                    } else {
+                      await startRecording();
+                    }
+                  } catch (error) {
+                    console.error('Recording error:', error);
+                  }
+                }}
+                disabled={isLoading}
+                className={`p-2 rounded-full transition-colors ${
+                  isRecording 
+                    ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
+                    : isTranscribing
+                    ? 'bg-gray-200'
+                    : 'bg-gray-200 hover:bg-gray-300'
                 }`}
               >
-                <div className={`text-sm prose prose-sm max-w-none ${
-                  message.isUser 
-                    ? 'prose-invert' 
-                    : 'prose-neutral'
-                } prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-headings:my-1`}>
-                  {message.isUser ? (
-                    <p>{message.text}</p>
-                  ) : (
-                    <ReactMarkdown>{typeof message.text === 'string' ? message.text : JSON.stringify(message.text)}</ReactMarkdown>
-                  )}
-                </div>
-                <div className="flex items-center justify-between mt-1">
-                  <p className="text-xs opacity-70">
-                    {message.timestamp.toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </p>
-                  {!message.isUser && message.audioData && (
-                    <button
-                      onClick={() => handleAudioPlayback(index, message.audioData)}
-                      className="ml-2 p-1 hover:bg-gray-200 rounded-full transition-colors"
-                      disabled={audioState.isLoading}
-                    >
-                      {audioState.isLoading && audioState.messageId === index ? (
-                        <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
-                      ) : audioState.isPlaying && audioState.messageId === index ? (
-                        <div className="flex space-x-1">
-                          <Pause className="w-4 h-4" />
-                          <Square 
-                            className="w-4 h-4 cursor-pointer" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              stopAudio();
-                            }}
-                          />
-                        </div>
-                      ) : (
-                        <Volume2 className="w-4 h-4" />
-                      )}
-                    </button>
-                  )}
-                </div>
-              </div>
+                {isTranscribing ? (
+                  <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
+                ) : (
+                  <Mic className={`w-5 h-5 ${isRecording ? 'text-white' : 'text-gray-600'}`} />
+                )}
+              </button>
+              <button
+                onClick={() => setIsTTSEnabled(!isTTSEnabled)}
+                className={`p-2 rounded-full transition-colors ${
+                  isTTSEnabled 
+                    ? 'bg-blue-500 hover:bg-blue-600' 
+                    : 'bg-gray-200 hover:bg-gray-300'
+                }`}
+                title={isTTSEnabled ? 'Disable auto-read responses' : 'Enable auto-read responses'}
+              >
+                {isTTSEnabled ? (
+                  <Volume2 className="w-5 h-5 text-white" />
+                ) : (
+                  <VolumeX className="w-5 h-5 text-gray-600" />
+                )}
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSend();
+                }}
+                disabled={!(inputText?.trim()) || isLoading || isRecording || isTranscribing}
+                className="p-2 bg-[#8B1538] text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#6B1028] transition-colors"
+              >
+                <Send className="w-5 h-5" />
+              </button>
             </div>
-          ))}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="max-w-[80%] rounded-lg p-3 bg-gray-100">
-                <div className="flex space-x-2">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Input */}
-        <div className="p-4 border-t bg-white">
-          <div className="flex items-center space-x-2">
-            <textarea
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your message..."
-              className="flex-1 resize-none border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#8B1538] focus:border-transparent bg-white"
-              rows={1}
-              disabled={isLoading || isRecording}
-            />
-            <button
-              onClick={() => {
-                if (isRecording) {
-                  stopRecording();
-                } else {
-                  startRecording();
-                }
-              }}
-              disabled={isLoading}
-              className={`p-2 rounded-full transition-colors ${
-                isRecording 
-                  ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
-                  : 'bg-gray-200 hover:bg-gray-300'
-              }`}
-            >
-              <Mic className={`w-5 h-5 ${isRecording ? 'text-white' : 'text-gray-600'}`} />
-            </button>
-            <button
-              onClick={handleSend}
-              disabled={!inputText.trim() || isLoading || isRecording}
-              className="p-2 bg-[#8B1538] text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#6B1028] transition-colors"
-            >
-              <Send className="w-5 h-5" />
-            </button>
           </div>
         </div>
       </div>

@@ -91,6 +91,41 @@ async function main() {
     }
   });
 
+  // Add transcription endpoint
+  app.post('/api/chat/transcribe', async (req, res) => {
+    try {
+      if (!req.files || !req.files.audio) {
+        return res.status(400).json({ error: 'Audio file is required' });
+      }
+
+      const audioFile = req.files.audio;
+      
+      // Create form data for OpenAI
+      const formData = new FormData();
+      formData.append('file', audioFile.data, 'recording.webm');
+      formData.append('model', 'whisper-1');
+
+      // Send to OpenAI Whisper API
+      const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      res.json({ text: data.text });
+    } catch (error) {
+      console.error('Transcription error:', error);
+      res.status(500).json({ error: 'Failed to transcribe audio' });
+    }
+  });
+
   // API endpoints
   app.use('/api/trpc', createExpressMiddleware({
     router: appRouter,
