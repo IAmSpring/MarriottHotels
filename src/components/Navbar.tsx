@@ -1,49 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, User, Heart, MapPin } from 'lucide-react';
-
-const useAuth = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState('');
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const loggedIn = localStorage.getItem('marriott_user_logged_in') === 'true';
-      const name = localStorage.getItem('marriott_user_name') || '';
-      setIsLoggedIn(loggedIn);
-      setUserName(name);
-    };
-
-    // Initial check
-    checkAuth();
-
-    // Listen for storage events (from other tabs)
-    window.addEventListener('storage', checkAuth);
-    
-    // Listen for auth changes in the current window
-    const handleAuthChange = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      if (customEvent.detail) {
-        setIsLoggedIn(customEvent.detail.isLoggedIn);
-        setUserName(customEvent.detail.userName || '');
-      } else {
-        checkAuth();
-      }
-    };
-    window.addEventListener('authChange', handleAuthChange);
-
-    return () => {
-      window.removeEventListener('storage', checkAuth);
-      window.removeEventListener('authChange', handleAuthChange);
-    };
-  }, []);
-
-  return { isLoggedIn, userName, setIsLoggedIn, setUserName };
-};
+import { Menu, X, User, Heart, MapPin, Settings } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isLoggedIn, userName, setIsLoggedIn, setUserName } = useAuth();
+  const { isLoggedIn, userName, isAdmin, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -58,11 +20,7 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('marriott_user_logged_in');
-    localStorage.removeItem('marriott_user_email');
-    localStorage.removeItem('marriott_user_name');
-    setIsLoggedIn(false);
-    setUserName('');
+    logout();
     navigate('/');
   };
 
@@ -120,6 +78,18 @@ const Navbar = () => {
             >
               My Bookings
             </button>
+            {isLoggedIn && isAdmin() && (
+              <Link
+                to="/admin"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive('/admin') 
+                    ? 'text-[#8B1538] bg-red-50' 
+                    : 'text-gray-700 hover:text-[#8B1538] hover:bg-gray-50'
+                }`}
+              >
+                Admin Dashboard
+              </Link>
+            )}
           </div>
 
           {/* Desktop User Actions */}
@@ -133,7 +103,11 @@ const Navbar = () => {
                   onClick={() => navigate('/account-settings')}
                   className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:text-[#8B1538] transition-colors"
                 >
-                  <User className="h-5 w-5" />
+                  {isAdmin() ? (
+                    <Settings className="h-5 w-5" />
+                  ) : (
+                    <User className="h-5 w-5" />
+                  )}
                   <span className="text-sm font-medium">{userName}</span>
                 </button>
                 <button 
@@ -220,45 +194,19 @@ const Navbar = () => {
               >
                 My Bookings
               </button>
-              <div className="border-t border-gray-200 pt-4 mt-4">
-                {isLoggedIn ? (
-                  <>
-                    <button 
-                      onClick={() => {
-                        navigate('/account-settings');
-                        setIsMenuOpen(false);
-                      }}
-                      className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#8B1538] hover:bg-gray-50 transition-colors"
-                    >
-                      Account Settings
-                    </button>
-                    <button 
-                      onClick={() => {
-                        handleLogout();
-                        setIsMenuOpen(false);
-                      }}
-                      className="block w-full mt-2 px-3 py-2 bg-[#8B1538] text-white font-semibold rounded-lg hover:bg-[#6B1028] transition-colors"
-                    >
-                      Sign Out
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button 
-                      onClick={() => {
-                        navigate('/login');
-                        setIsMenuOpen(false);
-                      }}
-                      className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#8B1538] hover:bg-gray-50 transition-colors"
-                    >
-                      Sign In
-                    </button>
-                    <button className="block w-full mt-2 px-3 py-2 bg-[#8B1538] text-white font-semibold rounded-lg hover:bg-[#6B1028] transition-colors">
-                      Join Bonvoy
-                    </button>
-                  </>
-                )}
-              </div>
+              {isLoggedIn && isAdmin() && (
+                <Link
+                  to="/admin"
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                    isActive('/admin') 
+                      ? 'text-[#8B1538] bg-red-50' 
+                      : 'text-gray-700 hover:text-[#8B1538] hover:bg-gray-50'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Admin Dashboard
+                </Link>
+              )}
             </div>
           </div>
         )}

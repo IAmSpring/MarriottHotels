@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { trpc } from './utils/trpc';
 import { trpcClient, queryClient } from './utils/trpc';
@@ -24,6 +24,21 @@ import AppPage from './pages/AppPage';
 import AIChatBot from './components/AIChatBot';
 import DocsPage from './pages/DocsPage';
 import AccountSettings from './pages/AccountSettings';
+import TourController from './components/TourController';
+import AdminApp from './pages/admin';
+
+// Wrapper component to handle conditional rendering of TourController
+const TourControllerWrapper = () => {
+  const location = useLocation();
+  console.log('Current path:', location.pathname);
+  const isHomePage = location.pathname === '/' || location.pathname === '';
+  console.log('Is home page:', isHomePage);
+  return isHomePage ? (
+    <div style={{ position: 'fixed', bottom: '2rem', left: '2rem', zIndex: 9999, pointerEvents: 'auto' }}>
+      <TourController />
+    </div>
+  ) : null;
+};
 
 const App: React.FC = () => {
   return (
@@ -52,7 +67,9 @@ const App: React.FC = () => {
                 <Route path="/destinations/:id" element={<DestinationDetails />} />
                 <Route path="/app" element={<AppPage />} />
                 <Route path="/docs/*" element={<DocsPage />} />
+                <Route path="/admin/*" element={<AdminApp />} />
               </Routes>
+              <TourControllerWrapper />
               <AIChatBot />
             </div>
           </Router>

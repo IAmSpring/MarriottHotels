@@ -27,4 +27,15 @@
 
 .animate-gif {
   animation: playGif 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Ensure fixed elements are visible */
+.fixed {
+  position: fixed !important;
+  z-index: 9999 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: translateZ(0) !important;
+  will-change: transform !important;
 } 

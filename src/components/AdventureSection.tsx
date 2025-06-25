@@ -19,7 +19,7 @@ const AdventureSection = () => {
   ];
 
   return (
-    <section className="py-16">
+    <section id="adventure-section" className="py-16">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold mb-2">Your Next Adventure is Calling</h2>
         <p className="text-gray-600 mb-8">

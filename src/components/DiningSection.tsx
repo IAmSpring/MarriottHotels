@@ -19,7 +19,7 @@ const DiningSection = () => {
   ];
 
   return (
-    <section className="py-16 bg-black text-white">
+    <div id="dining-section" className="py-16 bg-white">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
@@ -69,7 +69,7 @@ const DiningSection = () => {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

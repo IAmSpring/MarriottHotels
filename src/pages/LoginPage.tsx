@@ -16,19 +16,27 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Simple demo login - in real app, this would validate credentials
     if (isLogin) {
+      // Check for admin login
+      if (formData.email === 'admin@test.com' && formData.password === 'admin123') {
+        login(formData.email, 'Admin User', 'ADMIN');
+        window.dispatchEvent(new CustomEvent('authChange', { 
+          detail: { isLoggedIn: true, userName: 'Admin User', userRole: 'ADMIN' } 
+        }));
+        navigate('/admin');
+        return;
+      }
+
+      // Regular user login
       localStorage.setItem('marriott_user_logged_in', 'true');
       localStorage.setItem('marriott_user_email', formData.email);
       localStorage.setItem('marriott_user_name', 'John Doe');
-      // Use auth context login
-      login(formData.email, 'John Doe');
-      // Emit custom event for immediate UI update
+      login(formData.email, 'John Doe', 'USER');
       window.dispatchEvent(new CustomEvent('authChange', { 
-        detail: { isLoggedIn: true, userName: 'John Doe' } 
+        detail: { isLoggedIn: true, userName: 'John Doe', userRole: 'USER' } 
       }));
       navigate('/bookings');
     } else {
@@ -37,11 +45,9 @@ const LoginPage = () => {
       localStorage.setItem('marriott_user_logged_in', 'true');
       localStorage.setItem('marriott_user_email', formData.email);
       localStorage.setItem('marriott_user_name', fullName);
-      // Use auth context login
-      login(formData.email, fullName);
-      // Emit custom event for immediate UI update
+      login(formData.email, fullName, 'USER');
       window.dispatchEvent(new CustomEvent('authChange', { 
-        detail: { isLoggedIn: true, userName: fullName } 
+        detail: { isLoggedIn: true, userName: fullName, userRole: 'USER' } 
       }));
       navigate('/bookings');
     }

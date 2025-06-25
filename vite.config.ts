@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
+import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -11,18 +11,14 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,
-        secure: false,
       },
-      '/admin': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-        secure: false,
-      }
     },
     fs: {
       // Allow serving files from one level up to the project root
-      allow: ['..']
-    }
+      allow: ['..', './public']
+    },
+    port: 5173,
+    host: true,
   },
   build: {
     rollupOptions: {
@@ -36,8 +32,8 @@ export default defineConfig({
         },
       },
       input: {
-        main: resolve(__dirname, 'index.html'),
-        docs: resolve(__dirname, 'docs/index.html')
+        main: path.resolve(__dirname, 'index.html'),
+        docs: path.resolve(__dirname, 'docs/index.html')
       }
     },
     chunkSizeWarningLimit: 800,
@@ -50,8 +46,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
-      '@docs': resolve(__dirname, './docs')
+      '@': path.resolve(__dirname, './src'),
+      '@docs': path.resolve(__dirname, './docs')
     },
   },
   optimizeDeps: {
@@ -68,7 +64,11 @@ export default defineConfig({
     ],
   },
   define: {
-    'process.env': {}
+    'process.env': {},
+    'import.meta.env.OPENAI_API_KEY': JSON.stringify(process.env.OPENAI_API_KEY || ''),
+    'import.meta.env.AI_ASSISTANT_ID': JSON.stringify(process.env.AI_ASSISTANT_ID || ''),
+    'import.meta.env.AI_ADMIN_ID': JSON.stringify(process.env.AI_ADMIN_ID || ''),
+    'import.meta.env.ENABLE_AI_CHAT': JSON.stringify(process.env.ENABLE_AI_CHAT || 'true'),
   },
   publicDir: 'public',
   assetsInclude: ['**/*.md']

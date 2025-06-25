@@ -79,13 +79,20 @@ const DocsPage: React.FC = () => {
         setIsLoading(true);
         // If no path is provided, load the README
         const docPath = !path ? 'README.md' : `${path}.md`;
-        const response = await fetch(`/docs/${docPath}`);
+        
+        // Log the path being fetched
+        console.log('Fetching doc path:', docPath);
+        
+        // Use the correct base URL for the docs
+        const response = await fetch(`/MarriottHotels/docs/${docPath}`);
         
         if (!response.ok) {
+          console.error('Failed to load doc:', response.status, response.statusText);
           throw new Error('Documentation not found');
         }
         
         const text = await response.text();
+        console.log('Loaded doc content:', text.substring(0, 100) + '...');
         setContent(text);
         setError(null);
       } catch (err) {
@@ -189,6 +196,7 @@ const DocsPage: React.FC = () => {
           {error ? (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
               {error}
+              <pre className="mt-2 text-sm">{`Failed to load: ${path || 'README.md'}`}</pre>
             </div>
           ) : isLoading ? (
             <div className="flex justify-center items-center py-8">
@@ -207,4 +215,4 @@ const DocsPage: React.FC = () => {
   );
 };
 
-export default DocsPage;
+export default DocsPage; 

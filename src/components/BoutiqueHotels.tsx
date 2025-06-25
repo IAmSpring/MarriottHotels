@@ -42,7 +42,7 @@ const BoutiqueHotels = () => {
   ];
 
   return (
-    <section className="py-16 bg-white">
+    <section id="boutique-section" className="py-16 bg-white">
       <div className="container mx-auto px-4 max-w-7xl">
         <h2 className="text-3xl font-bold mb-2">A Fresh Bouquet of Boutique Hotels</h2>
         <p className="text-gray-600 mb-8">New places to stay, handpicked for you.</p>

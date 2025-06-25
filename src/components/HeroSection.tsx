@@ -14,7 +14,7 @@ const HeroSection: React.FC = () => {
   const [guests, setGuests] = useState(2);
 
   return (
-    <div className="relative h-screen">
+    <div id="hero-section" className="relative h-screen">
       {/* Background Image */}
       <div className="absolute inset-0 overflow-hidden">
         <img

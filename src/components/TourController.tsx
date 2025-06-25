@@ -2,11 +2,7 @@ import React, { useEffect, useReducer, useRef } from 'react';
 import { Play, Pause, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TourState, TourAction, TourSection } from '../types';
 import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true
-});
+import { useLocation } from 'react-router-dom';
 
 const tourSections: TourSection[] = [
   {
@@ -106,33 +102,43 @@ function tourReducer(state: TourState, action: TourAction): TourState {
 }
 
 const TourController: React.FC = () => {
+  console.log('TourController: Rendering');
   const [state, dispatch] = useReducer(tourReducer, initialState);
   const inactivityTimerRef = useRef<NodeJS.Timeout>();
   const isFirstRender = useRef(true);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  const generateAndPlayAudio = async (text: string) => {
-    try {
-      const response = await openai.audio.speech.create({
-        model: "tts-1",
-        voice: "nova",
-        input: text
-      });
-
-      const audioBlob = await response.arrayBuffer();
-      const audioUrl = URL.createObjectURL(new Blob([audioBlob], { type: 'audio/mpeg' }));
-      const audio = new Audio(audioUrl);
-
-      audio.addEventListener('ended', () => {
-        if (state.isPlaying) {
-          dispatch({ type: 'NEXT_SECTION' });
-        }
-      });
-
-      dispatch({ type: 'SET_AUDIO', payload: audio });
-      audio.play();
-    } catch (error) {
-      console.error('Error generating audio:', error);
+  const generateAndPlayAudio = (text: string) => {
+    // Stop any existing speech
+    if (utteranceRef.current) {
+      window.speechSynthesis.cancel();
     }
+
+    // Create new utterance
+    const utterance = new SpeechSynthesisUtterance(text);
+    utteranceRef.current = utterance;
+
+    // Configure voice
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice = voices.find(voice => voice.name.includes('Samantha') || voice.name.includes('Female'));
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
+
+    // Configure properties
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    // Handle end of speech
+    utterance.onend = () => {
+      if (state.isPlaying) {
+        dispatch({ type: 'NEXT_SECTION' });
+      }
+    };
+
+    // Play the speech
+    window.speechSynthesis.speak(utterance);
   };
 
   const scrollToSection = (index: number) => {
@@ -144,49 +150,71 @@ const TourController: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log('TourController: Mounted');
+    // Load voices
+    const loadVoices = () => {
+      window.speechSynthesis.getVoices();
+    };
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+
     // Start auto-play after 5 seconds of inactivity on first load
     if (isFirstRender.current) {
+      console.log('TourController: Setting up auto-play timer');
       inactivityTimerRef.current = setTimeout(() => {
+        console.log('TourController: Auto-play timer triggered');
         dispatch({ type: 'PLAY' });
       }, 5000);
       isFirstRender.current = false;
     }
 
     return () => {
+      console.log('TourController: Unmounting');
       if (inactivityTimerRef.current) {
         clearTimeout(inactivityTimerRef.current);
       }
+      window.speechSynthesis.cancel();
     };
   }, []);
 
   useEffect(() => {
     if (state.isPlaying) {
       const currentSection = state.sections[state.currentSectionIndex];
-      if (state.audio) {
-        state.audio.pause();
-        state.audio.currentTime = 0;
-      }
       generateAndPlayAudio(currentSection.narration);
       scrollToSection(state.currentSectionIndex);
-    } else if (state.audio) {
-      state.audio.pause();
+    } else {
+      window.speechSynthesis.cancel();
     }
   }, [state.isPlaying, state.currentSectionIndex]);
 
   const handlePlayPause = () => {
+    if (state.isPlaying) {
+      window.speechSynthesis.cancel();
+    }
     dispatch({ type: state.isPlaying ? 'PAUSE' : 'PLAY' });
   };
 
   const handlePrevious = () => {
+    window.speechSynthesis.cancel();
     dispatch({ type: 'PREVIOUS_SECTION' });
   };
 
   const handleNext = () => {
+    window.speechSynthesis.cancel();
     dispatch({ type: 'NEXT_SECTION' });
   };
 
   return (
-    <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 bg-white rounded-full shadow-lg px-6 py-3 flex items-center space-x-4">
+    <div 
+      className="fixed bottom-8 left-8 z-[9999] bg-white rounded-full shadow-lg px-6 py-3 flex items-center space-x-4 border-2 border-[#8B1538]" 
+      style={{ 
+        pointerEvents: 'auto',
+        transform: 'translateZ(0)',
+        willChange: 'transform',
+        visibility: 'visible',
+        opacity: 1
+      }}
+    >
       <button
         onClick={handlePrevious}
         disabled={state.currentSectionIndex === 0}

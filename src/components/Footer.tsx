@@ -1,5 +1,6 @@
 import React from 'react';
 import { Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -20,14 +21,14 @@ const Footer = () => {
             </div>
           </div>
           
-          {/* About */}
+          {/* Documentation */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">About Marriott</h4>
+            <h4 className="text-lg font-semibold mb-4">Documentation</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white transition-colors">Our Story</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Leadership</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Press Center</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Investor Relations</a></li>
+              <li><Link to="/docs" className="hover:text-white transition-colors">Overview</Link></li>
+              <li><Link to="/docs/architecture/system-overview" className="hover:text-white transition-colors">System Architecture</Link></li>
+              <li><Link to="/docs/ai/assistant-architecture" className="hover:text-white transition-colors">AI Features</Link></li>
+              <li><Link to="/docs/features/chatbot-implementation" className="hover:text-white transition-colors">Chatbot</Link></li>
             </ul>
           </div>
           
@@ -56,7 +57,9 @@ const Footer = () => {
         
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-          <p>&copy; 2025 Marriott International, Inc. All rights reserved.</p>
+          <Link to="/docs" className="hover:text-white transition-colors">
+            &copy; 2025 Marriott International, Inc. All rights reserved.
+          </Link>
         </div>
       </div>
     </footer>
