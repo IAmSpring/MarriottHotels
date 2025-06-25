@@ -5,6 +5,7 @@ import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import fs from 'fs/promises';
 import path from 'path';
+import type { Components } from 'react-markdown';
 
 interface DocsPageProps {
   content: string;
@@ -29,8 +30,40 @@ export const getServerSideProps: GetServerSideProps<DocsPageProps> = async (cont
   }
 };
 
+interface CodeProps {
+  inline?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+}
+
 const DocsPage: React.FC<DocsPageProps> = ({ content }) => {
   const router = useRouter();
+
+  const components: Partial<Components> = {
+    code: ({ inline, className, children }: CodeProps) => (
+      inline ? (
+        <code className="bg-gray-100 rounded px-1 py-0.5">{children}</code>
+      ) : (
+        <pre className="bg-gray-100 rounded-lg p-4 overflow-x-auto">
+          <code>{children}</code>
+        </pre>
+      )
+    ),
+    a: ({ href, children }) => (
+      <a href={href} target="_blank" rel="noopener noreferrer" className="text-[#8B1538] hover:underline">
+        {children}
+      </a>
+    ),
+    h1: ({ children }) => (
+      <h1 className="text-4xl font-bold text-gray-900 mb-8">{children}</h1>
+    ),
+    h2: ({ children }) => (
+      <h2 className="text-3xl font-semibold text-gray-800 mt-8 mb-4">{children}</h2>
+    ),
+    h3: ({ children }) => (
+      <h3 className="text-2xl font-medium text-gray-700 mt-6 mb-3">{children}</h3>
+    ),
+  };
 
   // Custom link renderer to handle internal doc links
   const LinkRenderer = (props: any) => {
@@ -105,27 +138,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ content }) => {
         <div className="max-w-4xl mx-auto py-8 px-4">
           <article className="prose prose-lg max-w-none">
             <ReactMarkdown
-              components={{
-                a: LinkRenderer,
-                h1: ({ children }) => (
-                  <h1 className="text-4xl font-bold text-gray-900 mb-8">{children}</h1>
-                ),
-                h2: ({ children }) => (
-                  <h2 className="text-3xl font-semibold text-gray-800 mt-8 mb-4">{children}</h2>
-                ),
-                h3: ({ children }) => (
-                  <h3 className="text-2xl font-medium text-gray-700 mt-6 mb-3">{children}</h3>
-                ),
-                code: ({ inline, children }) => (
-                  inline ? (
-                    <code className="bg-gray-100 rounded px-1 py-0.5">{children}</code>
-                  ) : (
-                    <pre className="bg-gray-100 rounded-lg p-4 overflow-x-auto">
-                      <code>{children}</code>
-                    </pre>
-                  )
-                ),
-              }}
+              components={components}
             >
               {content}
             </ReactMarkdown>

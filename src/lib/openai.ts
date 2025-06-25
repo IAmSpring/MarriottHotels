@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import type { Thread } from 'openai/resources/beta/threads/threads';
 import { logger } from '../utils/logger';
 
 // Singleton pattern for OpenAI client
@@ -80,7 +81,7 @@ export const getOpenAIClient = (apiKey?: string): OpenAI => {
 const threadCache = new Map<string, { thread: any, timestamp: number }>();
 const THREAD_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-export const getThread = async (openai: OpenAI, threadId: string) => {
+export const getThread = async (openai: OpenAI, threadId: string): Promise<OpenAI.Beta.Threads.Thread> => {
   const now = Date.now();
   const cached = threadCache.get(threadId);
   
@@ -89,6 +90,10 @@ export const getThread = async (openai: OpenAI, threadId: string) => {
   }
 
   const thread = await openai.beta.threads.retrieve(threadId);
+  if (!thread) {
+    throw new Error(`Thread not found: ${threadId}`);
+  }
+  
   threadCache.set(threadId, { thread, timestamp: now });
   return thread;
 };
@@ -99,16 +104,18 @@ export const parseAssistantResponse = (content: any): string => {
   
   try {
     if (typeof content === 'string') {
-      const jsonResponse = JSON.parse(content);
-      return jsonResponse.response || content;
+      const parsed = JSON.parse(content);
+      return parsed.response || '';
     }
-    if ('text' in content && content.text.value) {
-      const jsonResponse = JSON.parse(content.text.value);
-      return jsonResponse.response || content.text.value;
+    
+    if (typeof content === 'object') {
+      return content.response || '';
     }
-  } catch (e) {
-    return typeof content === 'string' ? content : 
-           'text' in content ? content.text.value : '';
+    
+    return String(content);
+  } catch (error) {
+    console.error('Error parsing assistant response:', error);
+    return '';
   }
 };
 

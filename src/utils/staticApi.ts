@@ -45,6 +45,10 @@ export const staticApi = {
 
       // Select appropriate assistant based on isAdmin flag
       const assistantId = isAdmin ? config.adminId : config.assistantId;
+      if (!assistantId) {
+        throw new Error('Assistant ID is not configured');
+      }
+
       const instructions = isAdmin 
         ? "You are a Marriott business operations assistant. Provide responses in JSON format with a 'response' field."
         : "You are a helpful Marriott Hotels concierge. Provide responses in JSON format with a 'response' field.";
