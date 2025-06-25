@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { MessageCircle, X, Send, Bot, Expand, Minimize, Volume2, Pause, Play, Square } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, Expand, Minimize, Volume2, Pause, Play, Square, Mic } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { useVoiceRecorder } from '../hooks/useVoiceRecorder';
 
 interface Message {
   text: string;
@@ -39,6 +40,13 @@ const AIChatBot: React.FC = () => {
     isLoading: false
   });
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const { isRecording, startRecording, stopRecording } = useVoiceRecorder({
+    onTranscriptionComplete: (text) => {
+      setInputText(text);
+      handleSend();
+    },
+  });
 
   const handleAudioPlayback = async (messageId: number, audioData: string | undefined) => {
     if (!audioData) return;
@@ -343,11 +351,28 @@ const AIChatBot: React.FC = () => {
               placeholder="Type your message..."
               className="flex-1 resize-none border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#8B1538] focus:border-transparent bg-white"
               rows={1}
-              disabled={isLoading}
+              disabled={isLoading || isRecording}
             />
             <button
+              onClick={() => {
+                if (isRecording) {
+                  stopRecording();
+                } else {
+                  startRecording();
+                }
+              }}
+              disabled={isLoading}
+              className={`p-2 rounded-full transition-colors ${
+                isRecording 
+                  ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
+                  : 'bg-gray-200 hover:bg-gray-300'
+              }`}
+            >
+              <Mic className={`w-5 h-5 ${isRecording ? 'text-white' : 'text-gray-600'}`} />
+            </button>
+            <button
               onClick={handleSend}
-              disabled={!inputText.trim() || isLoading}
+              disabled={!inputText.trim() || isLoading || isRecording}
               className="p-2 bg-[#8B1538] text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#6B1028] transition-colors"
             >
               <Send className="w-5 h-5" />
