@@ -1,12 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
+import React, { useState, useEffect, useRef } from 'react';
+import ReactMarkdown, { Components } from 'react-markdown';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Components } from 'react-markdown/lib/ast-to-react';
 
 interface DocSection {
   title: string;
   path: string;
   subsections?: DocSection[];
+}
+
+declare global {
+  interface Window {
+    mermaid: {
+      contentLoaded: () => void;
+    };
+  }
 }
 
 const docSections: DocSection[] = [
@@ -63,6 +70,26 @@ const docSections: DocSection[] = [
       { title: "Natural Language Processing", path: "/docs/features/natural-language-processing" },
       { title: "Recommendation System", path: "/docs/features/recommendation-system" }
     ]
+  },
+  {
+    title: "DevOps",
+    path: "/docs/devops",
+    subsections: [
+      { title: "CI/CD Pipeline", path: "/docs/devops/ci-cd-pipeline" },
+      { title: "Environment Management", path: "/docs/devops/environment-management" },
+      { title: "GitHub Actions", path: "/docs/devops/github-actions" },
+      { title: "Monitoring & Logging", path: "/docs/devops/monitoring-logging" }
+    ]
+  },
+  {
+    title: "Testing",
+    path: "/docs/testing",
+    subsections: [
+      { title: "Testing Strategy", path: "/docs/testing/testing-strategy" },
+      { title: "AI Component Testing", path: "/docs/testing/ai-component-testing" },
+      { title: "Integration Testing", path: "/docs/testing/integration-testing" },
+      { title: "Performance Testing", path: "/docs/testing/performance-testing" }
+    ]
   }
 ];
 
@@ -72,32 +99,73 @@ const DocsPage: React.FC = () => {
   const { "*": path } = useParams<{ "*": string }>();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Effect to re-render Mermaid diagrams when content changes
+  useEffect(() => {
+    if (window.mermaid && !isLoading && content) {
+      setTimeout(() => {
+        window.mermaid.contentLoaded();
+      }, 100);
+    }
+  }, [content, isLoading]);
+
+  // Scroll to top when path changes
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTo(0, 0);
+    }
+  }, [path]);
 
   useEffect(() => {
     const fetchDoc = async () => {
       try {
         setIsLoading(true);
-        // If no path is provided, load the README
-        const docPath = !path ? 'README.md' : `${path}.md`;
-        const response = await fetch(`/docs/${docPath}`);
+        setError(null);
+
+        // If no path is provided or path is empty/root, load the README
+        const docPath = !path || path === '' ? 'README.md' : `${path}.md`;
+        
+        // Log the path being fetched for debugging
+        console.log('Fetching doc path:', docPath);
+        
+        // Construct the correct path for the markdown file
+        const response = await fetch(`/MarriottHotels/docs/${docPath}`);
         
         if (!response.ok) {
-          throw new Error('Documentation not found');
+          console.error('Failed to load doc:', response.status, response.statusText);
+          if (docPath !== 'README.md') {
+            // If the requested doc fails but it's not README, try loading README
+            const readmeResponse = await fetch('/MarriottHotels/docs/README.md');
+            if (readmeResponse.ok) {
+              const text = await readmeResponse.text();
+              setContent(text);
+              // Navigate to root docs path
+              navigate('/docs');
+              return;
+            }
+          }
+          throw new Error(`Documentation not found: ${docPath}`);
         }
         
         const text = await response.text();
+        console.log('Loaded doc content length:', text.length);
         setContent(text);
-        setError(null);
+
+        // Scroll to top after content is loaded
+        if (contentRef.current) {
+          contentRef.current.scrollTo(0, 0);
+        }
       } catch (err) {
         console.error('Documentation fetch error:', err);
-        setError('Failed to load documentation');
+        setError('Failed to load documentation. Please try again later.');
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchDoc();
-  }, [path]);
+  }, [path, navigate]);
 
   const renderNavSection = (section: DocSection) => (
     <div key={section.path} className="mb-4">
@@ -123,7 +191,32 @@ const DocsPage: React.FC = () => {
     </div>
   );
 
-  const components: Components = {
+  const components: Partial<Components> = {
+    code: ({ className, children }) => {
+      const match = /language-(\w+)/.exec(className || '');
+      const language = match ? match[1] : '';
+      const codeContent = children?.toString() || '';
+
+      // Handle Mermaid diagrams
+      if (language === 'mermaid') {
+        return (
+          <div className="my-6 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="mermaid">
+              {codeContent}
+            </div>
+          </div>
+        );
+      }
+
+      // Regular code blocks
+      return (
+        <pre className="my-4 bg-gray-800 text-gray-100 rounded-lg p-4 overflow-x-auto">
+          <code className={`${className} text-sm font-mono`}>
+            {children}
+          </code>
+        </pre>
+      );
+    },
     a: ({ href, children }) => {
       if (href?.startsWith('./')) {
         const internalPath = href.substring(2).replace(/\.md$/, '');
@@ -148,29 +241,20 @@ const DocsPage: React.FC = () => {
       );
     },
     h1: ({ children }) => (
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">{children}</h1>
+      <h1 className="text-4xl font-bold text-gray-900 mb-8">
+        {children}
+      </h1>
     ),
     h2: ({ children }) => (
-      <h2 className="text-3xl font-semibold text-gray-800 mt-8 mb-4">{children}</h2>
+      <h2 className="text-3xl font-semibold text-gray-800 mt-8 mb-4">
+        {children}
+      </h2>
     ),
     h3: ({ children }) => (
-      <h3 className="text-2xl font-medium text-gray-700 mt-6 mb-3">{children}</h3>
-    ),
-    code: ({ node, className, children, ...props }) => {
-      const match = /language-(\w+)/.exec(className || '');
-      const isInline = !node?.position?.start.line;
-      return isInline ? (
-        <code className="bg-gray-100 rounded px-1 py-0.5" {...props}>
-          {children}
-        </code>
-      ) : (
-        <pre className="bg-gray-100 rounded-lg p-4 overflow-x-auto">
-          <code className={match ? `language-${match[1]}` : ''} {...props}>
-            {children}
-          </code>
-        </pre>
-      );
-    }
+      <h3 className="text-2xl font-medium text-gray-700 mt-6 mb-3">
+        {children}
+      </h3>
+    )
   };
 
   return (
@@ -185,7 +269,10 @@ const DocsPage: React.FC = () => {
 
       {/* Main Content */}
       <div className="ml-64 flex-1">
-        <div className="max-w-4xl mx-auto py-12 px-8">
+        <div 
+          ref={contentRef}
+          className="max-w-4xl mx-auto py-12 px-8 h-full overflow-y-auto"
+        >
           {error ? (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
               {error}
