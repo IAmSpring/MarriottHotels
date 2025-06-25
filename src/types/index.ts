@@ -112,6 +112,7 @@ export interface TourState {
   currentSectionIndex: number;
   sections: TourSection[];
   audio: HTMLAudioElement | null;
+  isLoading: boolean;
 }
 
 export type TourAction = 
@@ -120,4 +121,5 @@ export type TourAction =
   | { type: 'NEXT_SECTION' }
   | { type: 'PREVIOUS_SECTION' }
   | { type: 'JUMP_TO_SECTION'; payload: number }
-  | { type: 'SET_AUDIO'; payload: HTMLAudioElement | null }; 
+  | { type: 'SET_AUDIO'; payload: HTMLAudioElement | null }
+  | { type: 'SET_LOADING'; payload: boolean }; 

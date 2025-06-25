@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Play, Pause, Square } from 'lucide-react';
+import { Play, Pause, Square, Loader2 } from 'lucide-react';
 
 interface MarkdownMessageProps {
   text: string;
@@ -42,38 +42,68 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({
     onPlayPause(messageId, cleanText);
   };
 
+  const isCurrentMessage = audioState.messageId === messageId;
+  const showControls = isCurrentMessage && !audioState.isLoading;
+  const showLoader = isCurrentMessage && audioState.isLoading;
+
   return (
     <div className={`mb-4 ${isUser ? 'text-right' : 'text-left'}`}>
       <div
-        className={`inline-block rounded-lg px-4 py-2 ${
+        className={`inline-block rounded-lg px-4 py-2 max-w-[85%] ${
           isUser
-            ? 'bg-[#8B1538] text-white'
-            : 'bg-gray-100 text-white'
+            ? 'bg-[#8B1538] text-white prose-invert'
+            : 'bg-gray-100 text-gray-900'
         }`}
       >
-        <div className="flex items-start justify-between">
-          <div className="mr-3 prose prose-sm max-w-none prose-invert">
-            <ReactMarkdown>{text}</ReactMarkdown>
+        <div className="flex flex-col">
+          <div className={`prose prose-sm max-w-none ${isUser ? 'prose-invert' : ''}`}>
+            <ReactMarkdown
+              components={{
+                p: ({ children }) => <p className="m-0">{children}</p>,
+                ul: ({ children }) => <ul className="m-0 pl-4">{children}</ul>,
+                ol: ({ children }) => <ol className="m-0 pl-4">{children}</ol>,
+                li: ({ children }) => <li className="m-0">{children}</li>,
+                strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+                em: ({ children }) => <em className="italic">{children}</em>,
+                a: ({ href, children }) => (
+                  <a href={href} className={`${isUser ? 'text-white' : 'text-[#8B1538]'} underline`} target="_blank" rel="noopener noreferrer">
+                    {children}
+                  </a>
+                ),
+              }}
+            >
+              {text}
+            </ReactMarkdown>
           </div>
           {!isUser && (
-            <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
-              <button
-                onClick={handlePlayClick}
-                className="p-1 rounded-full hover:bg-gray-200 transition-colors"
-              >
-                {audioState.messageId === messageId && audioState.isPlaying ? (
-                  <Pause className="w-4 h-4 text-white" />
-                ) : (
-                  <Play className="w-4 h-4 text-white" />
-                )}
-              </button>
-              {audioState.messageId === messageId && (
-                <button
-                  onClick={onStop}
-                  className="p-1 rounded-full hover:bg-gray-200 transition-colors"
-                >
-                  <Square className="w-4 h-4 text-white" />
-                </button>
+            <div className="flex justify-end mt-2 space-x-2">
+              {showLoader ? (
+                <div className="w-8 h-8 flex items-center justify-center">
+                  <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
+                </div>
+              ) : (
+                <div className="flex items-center space-x-1">
+                  <button
+                    onClick={handlePlayClick}
+                    className="p-1.5 rounded-full hover:bg-gray-200 transition-colors"
+                    title={isCurrentMessage && audioState.isPlaying ? "Pause" : "Play"}
+                  >
+                    {isCurrentMessage && audioState.isPlaying ? (
+                      <Pause className="w-5 h-5 text-gray-700" />
+                    ) : (
+                      <Play className="w-5 h-5 text-gray-700" />
+                    )}
+                  </button>
+                  {showControls && audioState.isPlaying && (
+                    <button
+                      onClick={onStop}
+                      className="p-1.5 rounded-full hover:bg-gray-200 transition-colors"
+                      title="Stop"
+                    >
+                      <Square className="w-5 h-5 text-gray-700" />
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           )}

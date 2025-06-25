@@ -3,6 +3,7 @@ import { MessageCircle, X, Send, Bot, Expand, Minimize, Volume2, Pause, Play, Sq
 import ReactMarkdown from 'react-markdown';
 import { useVoiceRecorder } from '../hooks/useVoiceRecorder';
 import MessageBubble from './MessageBubble';
+import MarkdownMessage from './MarkdownMessage';
 
 interface Message {
   text: string;
@@ -294,141 +295,129 @@ const AIChatBot: React.FC = () => {
   return (
     <div className={`fixed bottom-4 right-4 z-50 ${isOpen ? 'w-96' : 'w-auto'}`}>
       {/* Chat Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`${
-          isOpen ? 'hidden' : 'flex'
-        } items-center justify-center w-14 h-14 rounded-full bg-[#8B1538] text-white shadow-lg hover:bg-[#6B1028] transition-colors`}
-      >
-        <MessageCircle className="w-6 h-6" />
-      </button>
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="flex items-center justify-center w-14 h-14 rounded-full bg-[#8B1538] text-white shadow-lg hover:bg-[#6B1028] transition-colors"
+        >
+          <MessageCircle className="w-6 h-6" />
+        </button>
+      )}
 
       {/* Chat Window */}
-      <div
-        className={`${
-          isOpen ? 'flex' : 'hidden'
-        } ${
-          isExpanded 
-            ? 'fixed top-[10vh] left-[10vw] w-[80vw] h-[80vh] transform-none'
-            : 'w-full sm:w-96 h-[600px] max-h-[80vh]'
-        } flex-col bg-white rounded-lg shadow-xl transition-all duration-300 z-50 overflow-hidden`}
-      >
-        {/* Header */}
-        <div className="flex-shrink-0 flex items-center justify-between p-4 border-b bg-[#8B1538] text-white rounded-t-lg">
-          <div className="flex items-center space-x-2">
-            <Bot className="w-6 h-6" />
-            <span className="font-semibold">Marriott AI Assistant</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="p-1 hover:bg-[#6B1028] rounded-full transition-colors"
-            >
-              {isExpanded ? (
-                <Minimize className="w-5 h-5" />
-              ) : (
-                <Expand className="w-5 h-5" />
-              )}
-            </button>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="p-1 hover:bg-[#6B1028] rounded-full transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Messages Container */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message, index) => (
-            <MessageBubble
-              key={index}
-              text={message.text}
-              isUser={message.isUser}
-              timestamp={message.timestamp}
-              messageId={index}
-              audioState={audioState}
-              onPlayPause={handlePlayback}
-              onStop={stopPlayback}
-            />
-          ))}
-          
-          {isLoading && (
-            <div className="flex justify-center items-center py-4">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#8B1538]"></div>
+      {isOpen && (
+        <div
+          className={`${
+            isExpanded 
+              ? 'fixed top-[10vh] left-[10vw] w-[80vw] h-[80vh] transform-none'
+              : 'w-full h-[600px] max-h-[80vh]'
+          } flex flex-col bg-white rounded-lg shadow-xl transition-all duration-300 z-50 overflow-hidden`}
+        >
+          {/* Header */}
+          <div className="flex-shrink-0 flex items-center justify-between p-4 border-b bg-[#8B1538] text-white rounded-t-lg">
+            <div className="flex items-center space-x-2">
+              <Bot className="w-6 h-6" />
+              <span className="font-semibold">Marriott AI Assistant</span>
             </div>
-          )}
-        </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="p-1 hover:bg-[#6B1028] rounded-full transition-colors"
+              >
+                {isExpanded ? (
+                  <Minimize className="w-5 h-5" />
+                ) : (
+                  <Expand className="w-5 h-5" />
+                )}
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-1 hover:bg-[#6B1028] rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
 
-        {/* Input Section */}
-        <div className="flex-shrink-0 p-4 border-t bg-white">
-          <div className="flex items-center space-x-2">
-            <textarea
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your message..."
-              className="flex-1 resize-none border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#8B1538] focus:border-transparent bg-white"
-              rows={1}
-              disabled={isLoading || isRecording || isTranscribing}
-            />
-            <button
-              onClick={async (e) => {
-                e.preventDefault();
-                try {
+          {/* Messages Container */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages.map((message, index) => (
+              <MarkdownMessage
+                key={index}
+                text={message.text}
+                isUser={message.isUser}
+                timestamp={message.timestamp}
+                messageId={index}
+                audioState={audioState}
+                onPlayPause={handlePlayback}
+                onStop={stopPlayback}
+              />
+            ))}
+            
+            {isLoading && (
+              <div className="flex justify-center items-center py-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#8B1538]"></div>
+              </div>
+            )}
+          </div>
+
+          {/* Input Section */}
+          <div className="flex-shrink-0 p-4 border-t bg-white">
+            <div className="flex items-center space-x-2">
+              <input
+                type="text"
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Type your message..."
+                className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B1538] focus:border-transparent"
+                disabled={isLoading || isRecording || isTranscribing}
+              />
+              <button
+                onClick={() => setIsTTSEnabled(!isTTSEnabled)}
+                className={`p-2 rounded-full transition-colors ${
+                  isTTSEnabled 
+                    ? 'bg-[#8B1538] text-white' 
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-600'
+                }`}
+                title={isTTSEnabled ? 'Disable auto-read responses' : 'Enable auto-read responses'}
+              >
+                {isTTSEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+              </button>
+              <button
+                onClick={async () => {
                   if (isRecording) {
                     await stopRecording();
                   } else {
                     await startRecording();
                   }
-                } catch (error) {
-                  console.error('Recording error:', error);
-                }
-              }}
-              disabled={isLoading}
-              className={`p-2 rounded-full transition-colors ${
-                isRecording 
-                  ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
-                  : isTranscribing
-                  ? 'bg-gray-200'
-                  : 'bg-gray-200 hover:bg-gray-300'
-              }`}
-            >
-              {isTranscribing ? (
-                <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
-              ) : (
-                <Mic className={`w-5 h-5 ${isRecording ? 'text-white' : 'text-gray-600'}`} />
-              )}
-            </button>
-            <button
-              onClick={() => setIsTTSEnabled(!isTTSEnabled)}
-              className={`p-2 rounded-full transition-colors ${
-                isTTSEnabled 
-                  ? 'bg-blue-500 hover:bg-blue-600' 
-                  : 'bg-gray-200 hover:bg-gray-300'
-              }`}
-              title={isTTSEnabled ? 'Disable auto-read responses' : 'Enable auto-read responses'}
-            >
-              {isTTSEnabled ? (
-                <Volume2 className="w-5 h-5 text-white" />
-              ) : (
-                <VolumeX className="w-5 h-5 text-gray-600" />
-              )}
-            </button>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                handleSend();
-              }}
-              disabled={!(inputText?.trim()) || isLoading || isRecording || isTranscribing}
-              className="p-2 bg-[#8B1538] text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#6B1028] transition-colors"
-            >
-              <Send className="w-5 h-5" />
-            </button>
+                }}
+                disabled={isLoading}
+                className={`p-2 rounded-full transition-colors ${
+                  isRecording 
+                    ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
+                    : isTranscribing
+                    ? 'bg-gray-200'
+                    : 'bg-gray-200 hover:bg-gray-300'
+                }`}
+              >
+                {isTranscribing ? (
+                  <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
+                ) : (
+                  <Mic className={`w-5 h-5 ${isRecording ? 'text-white' : 'text-gray-600'}`} />
+                )}
+              </button>
+              <button
+                onClick={() => handleSend()}
+                disabled={!inputText?.trim() || isLoading || isRecording || isTranscribing}
+                className="p-2 bg-[#8B1538] text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#6B1028] transition-colors"
+              >
+                <Send className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

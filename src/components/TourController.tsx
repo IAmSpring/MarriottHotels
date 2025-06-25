@@ -1,8 +1,8 @@
-import React, { useEffect, useReducer, useRef } from 'react';
+import React, { useEffect, useReducer, useRef, useState, useCallback } from 'react';
 import { Play, Pause, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TourState, TourAction, TourSection } from '../types';
-import OpenAI from 'openai';
 import { useLocation } from 'react-router-dom';
+import { audioManager } from '../utils/audioManager';
 
 const tourSections: TourSection[] = [
   {
@@ -67,7 +67,8 @@ const initialState: TourState = {
   isPlaying: false,
   currentSectionIndex: 0,
   sections: tourSections,
-  audio: null
+  audio: null,
+  isLoading: false
 };
 
 function tourReducer(state: TourState, action: TourAction): TourState {
@@ -77,69 +78,93 @@ function tourReducer(state: TourState, action: TourAction): TourState {
     case 'PAUSE':
       return { ...state, isPlaying: false };
     case 'NEXT_SECTION':
+      const nextIndex = Math.min(state.currentSectionIndex + 1, state.sections.length - 1);
       return {
         ...state,
-        currentSectionIndex: Math.min(state.currentSectionIndex + 1, state.sections.length - 1)
+        currentSectionIndex: nextIndex,
+        isPlaying: nextIndex !== state.currentSectionIndex ? state.isPlaying : false
       };
     case 'PREVIOUS_SECTION':
+      const prevIndex = Math.max(state.currentSectionIndex - 1, 0);
       return {
         ...state,
-        currentSectionIndex: Math.max(state.currentSectionIndex - 1, 0)
+        currentSectionIndex: prevIndex,
+        isPlaying: prevIndex !== state.currentSectionIndex ? state.isPlaying : false
       };
     case 'JUMP_TO_SECTION':
       return {
         ...state,
-        currentSectionIndex: action.payload
+        currentSectionIndex: action.payload,
+        isPlaying: action.payload !== state.currentSectionIndex ? state.isPlaying : false
       };
     case 'SET_AUDIO':
       return {
         ...state,
         audio: action.payload
       };
+    case 'SET_LOADING':
+      return {
+        ...state,
+        isLoading: action.payload
+      };
     default:
       return state;
   }
 }
 
-const TourController: React.FC = () => {
-  console.log('TourController: Rendering');
-  const [state, dispatch] = useReducer(tourReducer, initialState);
-  const inactivityTimerRef = useRef<NodeJS.Timeout>();
-  const isFirstRender = useRef(true);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+// Audio cache for TTS
+const audioCache = new Map<string, { audio: HTMLAudioElement; data: string }>();
 
-  const generateAndPlayAudio = (text: string) => {
-    // Stop any existing speech
-    if (utteranceRef.current) {
-      window.speechSynthesis.cancel();
+const loadAndPlayAudio = async (audioData: string, cacheKey: string): Promise<HTMLAudioElement> => {
+  return new Promise((resolve, reject) => {
+    // Check cache first
+    const cached = audioCache.get(cacheKey);
+    if (cached) {
+      console.log('Using cached audio for:', cacheKey);
+      // Create a new audio instance from cached data to allow multiple playbacks
+      const audio = new Audio(`data:audio/mp3;base64,${cached.data}`);
+      audio.addEventListener('canplaythrough', () => resolve(audio), { once: true });
+      audio.addEventListener('error', (e) => reject(e), { once: true });
+      audio.load();
+      return;
     }
 
-    // Create new utterance
-    const utterance = new SpeechSynthesisUtterance(text);
-    utteranceRef.current = utterance;
-
-    // Configure voice
-    const voices = window.speechSynthesis.getVoices();
-    const preferredVoice = voices.find(voice => voice.name.includes('Samantha') || voice.name.includes('Female'));
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-    }
-
-    // Configure properties
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-
-    // Handle end of speech
-    utterance.onend = () => {
-      if (state.isPlaying) {
-        dispatch({ type: 'NEXT_SECTION' });
-      }
+    console.log('Loading new audio for:', cacheKey);
+    const audio = new Audio(`data:audio/mp3;base64,${audioData}`);
+    
+    const onCanPlay = () => {
+      audio.removeEventListener('canplaythrough', onCanPlay);
+      audio.removeEventListener('error', onError);
+      // Store in cache
+      audioCache.set(cacheKey, { audio, data: audioData });
+      resolve(audio);
     };
 
-    // Play the speech
-    window.speechSynthesis.speak(utterance);
-  };
+    const onError = (e: ErrorEvent) => {
+      console.error('Audio loading error:', e);
+      audio.removeEventListener('canplaythrough', onCanPlay);
+      audio.removeEventListener('error', onError);
+      reject(new Error('Failed to load audio: ' + e.message));
+    };
+
+    audio.addEventListener('canplaythrough', onCanPlay);
+    audio.addEventListener('error', onError);
+    audio.load();
+  });
+};
+
+const TourController: React.FC = () => {
+  const [state, dispatch] = useReducer(tourReducer, initialState);
+  const location = useLocation();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isFirstRender = useRef(true);
+  const [isRightMouseDown, setIsRightMouseDown] = useState(false);
+
+  // Add effect to handle section changes
+  useEffect(() => {
+    scrollToSection(state.currentSectionIndex);
+  }, [state.currentSectionIndex]);
 
   const scrollToSection = (index: number) => {
     const section = state.sections[index];
@@ -149,89 +174,235 @@ const TourController: React.FC = () => {
     }
   };
 
+  // Handle right-click events
   useEffect(() => {
-    console.log('TourController: Mounted');
-    // Load voices
-    const loadVoices = () => {
-      window.speechSynthesis.getVoices();
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault(); // Prevent default context menu
     };
-    loadVoices();
-    window.speechSynthesis.onvoiceschanged = loadVoices;
 
-    // Start auto-play after 5 seconds of inactivity on first load
+    const handleMouseDown = (e: MouseEvent) => {
+      if (e.button === 2) { // Right mouse button
+        setIsRightMouseDown(true);
+        if (e.clientY < window.innerHeight / 2) {
+          handlePrevious();
+        } else {
+          handleNext();
+        }
+      }
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      if (e.button === 2) {
+        setIsRightMouseDown(false);
+      }
+    };
+
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, []);
+
+  // Handle audio interruption from other sources
+  useEffect(() => {
+    const handleOtherAudioPlaying = (source: string) => {
+      if (source !== 'tour' && state.isPlaying) {
+        dispatch({ type: 'PAUSE' });
+      }
+    };
+
+    audioManager.addPlayCallback(handleOtherAudioPlaying);
+    return () => {
+      audioManager.removePlayCallback(handleOtherAudioPlaying);
+    };
+  }, [state.isPlaying]);
+
+  // Cleanup effect
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioManager.setAudio(null);
+      }
+    };
+  }, []);
+
+  const setupAudioListeners = (audio: HTMLAudioElement) => {
+    audio.addEventListener('ended', () => {
+      if (state.currentSectionIndex < state.sections.length - 1 && state.isPlaying) {
+        dispatch({ type: 'NEXT_SECTION' });
+      } else {
+        dispatch({ type: 'PAUSE' });
+      }
+      audioManager.setAudio(null);
+    });
+
+    audio.addEventListener('error', (error) => {
+      console.error('Audio playback error:', error);
+      dispatch({ type: 'PAUSE' });
+      audioManager.setAudio(null);
+    });
+
+    audio.addEventListener('pause', () => {
+      if (!audio.ended) {
+        audioManager.setAudio(null);
+      }
+    });
+  };
+
+  const generateAndPlayAudio = async (text: string) => {
+    const cacheKey = `tour-${state.currentSectionIndex}-${text.substring(0, 50)}`;
+
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+      audioManager.setAudio(null);
+    }
+
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+
+      // Check cache first
+      const cached = audioCache.get(cacheKey);
+      if (cached) {
+        const audio = await loadAndPlayAudio(cached.data, cacheKey);
+        setupAudioListeners(audio);
+        audioRef.current = audio;
+        audioManager.setAudio(audio, 'tour');
+        await audio.play();
+        return;
+      }
+
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error('Failed to generate speech: ' + (error.details || error.error));
+      }
+
+      const { audioData } = await response.json();
+      
+      if (!audioData) {
+        throw new Error('No audio data received');
+      }
+
+      const audio = await loadAndPlayAudio(audioData, cacheKey);
+      setupAudioListeners(audio);
+      audioRef.current = audio;
+      audioManager.setAudio(audio, 'tour');
+      await audio.play();
+    } catch (error) {
+      console.error('TTS Error:', error);
+      dispatch({ type: 'PAUSE' });
+      audioManager.setAudio(null);
+      // Remove failed audio from cache
+      audioCache.delete(cacheKey);
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  };
+
+  // Setup effect
+  useEffect(() => {
     if (isFirstRender.current) {
-      console.log('TourController: Setting up auto-play timer');
       inactivityTimerRef.current = setTimeout(() => {
-        console.log('TourController: Auto-play timer triggered');
         dispatch({ type: 'PLAY' });
       }, 5000);
       isFirstRender.current = false;
     }
 
     return () => {
-      console.log('TourController: Unmounting');
       if (inactivityTimerRef.current) {
         clearTimeout(inactivityTimerRef.current);
       }
-      window.speechSynthesis.cancel();
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
     };
   }, []);
 
+  // Location change effect
+  useEffect(() => {
+    dispatch({ type: 'PAUSE' });
+    dispatch({ type: 'JUMP_TO_SECTION', payload: 0 });
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+  }, [location]);
+
+  // Playback effect - remove scrollToSection from here since it's handled by the new effect
   useEffect(() => {
     if (state.isPlaying) {
       const currentSection = state.sections[state.currentSectionIndex];
       generateAndPlayAudio(currentSection.narration);
-      scrollToSection(state.currentSectionIndex);
-    } else {
-      window.speechSynthesis.cancel();
+    } else if (audioRef.current) {
+      audioRef.current.pause();
     }
   }, [state.isPlaying, state.currentSectionIndex]);
 
   const handlePlayPause = () => {
-    if (state.isPlaying) {
-      window.speechSynthesis.cancel();
+    if (state.isPlaying && audioRef.current) {
+      audioRef.current.pause();
     }
     dispatch({ type: state.isPlaying ? 'PAUSE' : 'PLAY' });
   };
 
   const handlePrevious = () => {
-    window.speechSynthesis.cancel();
-    dispatch({ type: 'PREVIOUS_SECTION' });
+    if (state.currentSectionIndex > 0) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      dispatch({ type: 'PREVIOUS_SECTION' });
+    }
   };
 
   const handleNext = () => {
-    window.speechSynthesis.cancel();
-    dispatch({ type: 'NEXT_SECTION' });
+    if (state.currentSectionIndex < state.sections.length - 1) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      dispatch({ type: 'NEXT_SECTION' });
+    }
   };
 
   return (
-    <div 
-      className="fixed bottom-8 left-8 z-[9999] bg-white rounded-full shadow-lg px-6 py-3 flex items-center space-x-4 border-2 border-[#8B1538]" 
-      style={{ 
-        pointerEvents: 'auto',
-        transform: 'translateZ(0)',
-        willChange: 'transform',
-        visibility: 'visible',
-        opacity: 1
-      }}
-    >
+    <div className="fixed bottom-4 left-4 bg-white rounded-full shadow-lg px-4 py-2 flex items-center space-x-4 z-50">
       <button
         onClick={handlePrevious}
         disabled={state.currentSectionIndex === 0}
-        className={`p-2 rounded-full ${
+        className={`p-2 rounded-full transition-colors ${
           state.currentSectionIndex === 0
             ? 'text-gray-400 cursor-not-allowed'
-            : 'text-gray-700 hover:bg-gray-100'
+            : 'hover:bg-gray-100 text-gray-700'
         }`}
+        title="Previous section"
       >
         <ChevronLeft className="w-6 h-6" />
       </button>
 
       <button
         onClick={handlePlayPause}
-        className="p-2 rounded-full bg-[#8B1538] text-white hover:bg-[#6B1028]"
+        disabled={state.isLoading}
+        className={`p-2 rounded-full transition-colors hover:bg-gray-100 ${
+          state.isPlaying ? 'text-[#8B1538]' : 'text-gray-700'
+        }`}
+        title={state.isPlaying ? "Pause tour" : "Play tour"}
       >
-        {state.isPlaying ? (
+        {state.isLoading ? (
+          <div className="w-6 h-6 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-t-[#8B1538] border-r-[#8B1538] border-b-[#8B1538] border-l-transparent"></div>
+          </div>
+        ) : state.isPlaying ? (
           <Pause className="w-6 h-6" />
         ) : (
           <Play className="w-6 h-6" />
@@ -241,18 +412,15 @@ const TourController: React.FC = () => {
       <button
         onClick={handleNext}
         disabled={state.currentSectionIndex === state.sections.length - 1}
-        className={`p-2 rounded-full ${
+        className={`p-2 rounded-full transition-colors ${
           state.currentSectionIndex === state.sections.length - 1
             ? 'text-gray-400 cursor-not-allowed'
-            : 'text-gray-700 hover:bg-gray-100'
+            : 'hover:bg-gray-100 text-gray-700'
         }`}
+        title="Next section"
       >
         <ChevronRight className="w-6 h-6" />
       </button>
-
-      <div className="text-sm text-gray-600">
-        {state.sections[state.currentSectionIndex].name}
-      </div>
     </div>
   );
 };

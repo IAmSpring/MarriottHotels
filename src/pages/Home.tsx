@@ -8,7 +8,6 @@ import BoutiqueHotels from '../components/BoutiqueHotels';
 import DiningSection from '../components/DiningSection';
 import AdventureSection from '../components/AdventureSection';
 import Footer from '../components/Footer';
-import TourController from '../components/TourController';
 
 const Home: React.FC = () => {
   return (
@@ -26,9 +25,8 @@ const Home: React.FC = () => {
           <Footer />
         </main>
       </div>
-      <TourController />
     </>
   );
 };
 
-export default Home; 
+export default Home;
