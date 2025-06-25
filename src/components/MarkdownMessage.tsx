@@ -1,7 +1,8 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Play, Pause, Square } from 'lucide-react';
 
-interface MessageBubbleProps {
+interface MarkdownMessageProps {
   text: string;
   isUser: boolean;
   timestamp: Date;
@@ -15,7 +16,19 @@ interface MessageBubbleProps {
   onStop: () => void;
 }
 
-const MessageBubble: React.FC<MessageBubbleProps> = ({
+// Helper function to strip markdown for TTS
+const stripMarkdown = (text: string): string => {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
+    .replace(/\*(.*?)\*/g, '$1')     // Remove italic
+    .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove links but keep text
+    .replace(/#{1,6}\s/g, '')       // Remove headers
+    .replace(/`{1,3}.*?`{1,3}/g, '') // Remove code blocks
+    .replace(/\n/g, ' ')            // Replace newlines with spaces
+    .trim();
+};
+
+const MarkdownMessage: React.FC<MarkdownMessageProps> = ({
   text,
   isUser,
   timestamp,
@@ -24,6 +37,11 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   onPlayPause,
   onStop,
 }) => {
+  const handlePlayClick = () => {
+    const cleanText = stripMarkdown(text);
+    onPlayPause(messageId, cleanText);
+  };
+
   return (
     <div className={`mb-4 ${isUser ? 'text-right' : 'text-left'}`}>
       <div
@@ -34,11 +52,13 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
         }`}
       >
         <div className="flex items-start justify-between">
-          <div className="mr-3">{text}</div>
+          <div className="mr-3 prose prose-sm max-w-none prose-invert">
+            <ReactMarkdown>{text}</ReactMarkdown>
+          </div>
           {!isUser && (
-            <div className="flex items-center space-x-1 ml-2">
+            <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
               <button
-                onClick={() => onPlayPause(messageId, text)}
+                onClick={handlePlayClick}
                 className="p-1 rounded-full hover:bg-gray-200 transition-colors"
               >
                 {audioState.messageId === messageId && audioState.isPlaying ? (
@@ -66,4 +86,4 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   );
 };
 
-export default MessageBubble;
+export default MarkdownMessage;

@@ -27,6 +27,17 @@ const DEFAULT_OPTIONS = [
   "Help me plan a romantic getaway"
 ];
 
+const stripMarkdown = (text: string): string => {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
+    .replace(/\*(.*?)\*/g, '$1')     // Remove italic
+    .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove links but keep text
+    .replace(/#{1,6}\s/g, '')       // Remove headers
+    .replace(/`{1,3}.*?`{1,3}/g, '') // Remove code blocks
+    .replace(/\n/g, ' ')            // Replace newlines with spaces
+    .trim();
+};
+
 const AIChatBot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -107,71 +118,110 @@ const AIChatBot: React.FC = () => {
     }
   };
 
-  const handlePlayback = (messageId: number, text: string) => {
+  const handlePlayback = async (messageId: number, text: string) => {
+    const cleanText = stripMarkdown(text);
+    
+    // If currently playing this message, pause it
     if (audioState.messageId === messageId && audioState.isPlaying) {
-      // Pause current playback
-      window.speechSynthesis.pause();
-      setAudioState(prev => ({ ...prev, isPlaying: false }));
-    } else if (audioState.messageId === messageId && !audioState.isPlaying) {
-      // Resume current playback
-      window.speechSynthesis.resume();
-      setAudioState(prev => ({ ...prev, isPlaying: true }));
-    } else {
-      // Start new playback
-      window.speechSynthesis.cancel(); // Stop any ongoing speech
-      const utterance = new SpeechSynthesisUtterance(text);
-      
-      utterance.onstart = () => {
-        setAudioState({
-          messageId,
-          isPlaying: true,
-          isLoading: false
-        });
-      };
-      
-      utterance.onend = () => {
-        setAudioState({
-          messageId: null,
-          isPlaying: false,
-          isLoading: false
-        });
-      };
-      
-      utterance.onpause = () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
         setAudioState(prev => ({ ...prev, isPlaying: false }));
-      };
-      
-      utterance.onresume = () => {
+      }
+      return;
+    }
+    
+    // If we have this audio paused, resume it
+    if (audioState.messageId === messageId && !audioState.isPlaying && audioRef.current) {
+      try {
+        await audioRef.current.play();
         setAudioState(prev => ({ ...prev, isPlaying: true }));
-      };
+      } catch (error) {
+        console.error('Error resuming audio:', error);
+        setAudioState({ messageId: null, isPlaying: false, isLoading: false });
+      }
+      return;
+    }
+
+    // Stop any currently playing audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+
+    // Start new playback
+    try {
+      // Set loading state immediately
+      setAudioState({ messageId, isPlaying: false, isLoading: true });
       
-      window.speechSynthesis.speak(utterance);
+      // Request TTS audio from our API
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: cleanText }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate speech');
+      }
+
+      const data = await response.json();
+      
+      // Create and setup new audio element
+      const audio = new Audio(`data:audio/mp3;base64,${data.audioData}`);
+      audioRef.current = audio;
+
+      // Set up event listeners
+      audio.addEventListener('play', () => {
+        setAudioState(prev => ({ ...prev, isPlaying: true, isLoading: false }));
+      });
+
+      audio.addEventListener('pause', () => {
+        setAudioState(prev => ({ ...prev, isPlaying: false }));
+      });
+
+      audio.addEventListener('ended', () => {
+        setAudioState({ messageId: null, isPlaying: false, isLoading: false });
+      });
+
+      // Start playing
+      await audio.play();
+    } catch (error) {
+      console.error('TTS Error:', error);
+      setAudioState({ messageId: null, isPlaying: false, isLoading: false });
     }
   };
 
   const stopPlayback = () => {
-    window.speechSynthesis.cancel();
-    setAudioState({
-      messageId: null,
-      isPlaying: false,
-      isLoading: false
-    });
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setAudioState({
+        messageId: null,
+        isPlaying: false,
+        isLoading: false
+      });
+    }
   };
 
   const speakText = async (text: string) => {
     try {
-      if ('speechSynthesis' in window) {
-        // Cancel any ongoing speech
-        window.speechSynthesis.cancel();
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text }),
+      });
 
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 1.0;
-        utterance.pitch = 1.0;
-        utterance.volume = 1.0;
-        window.speechSynthesis.speak(utterance);
-      } else {
-        console.warn('Text-to-speech not supported in this browser');
+      if (!response.ok) {
+        throw new Error('Failed to generate speech');
       }
+
+      const data = await response.json();
+      const audio = new Audio(`data:audio/mp3;base64,${data.audioData}`);
+      await audio.play();
     } catch (error) {
       console.error('TTS Error:', error);
     }
@@ -299,25 +349,10 @@ const AIChatBot: React.FC = () => {
           isExpanded 
             ? 'fixed top-[10vh] left-[10vw] w-[80vw] h-[80vh] transform-none'
             : 'w-full sm:w-96 h-[600px] max-h-[80vh]'
-        } flex-col bg-white rounded-lg shadow-xl transition-all duration-300 z-50`}
-        style={{
-          ...(isExpanded && {
-            transform: 'translate(0, 0)',
-            right: 'auto',
-            bottom: 'auto'
-          })
-        }}
+        } flex-col bg-white rounded-lg shadow-xl transition-all duration-300 z-50 overflow-hidden`}
       >
-        {/* Overlay when expanded */}
-        {isExpanded && (
-          <div 
-            className="fixed inset-0 bg-black opacity-50 -z-10"
-            onClick={() => setIsExpanded(false)}
-          />
-        )}
-
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b bg-[#8B1538] text-white rounded-t-lg">
+        <div className="flex-shrink-0 flex items-center justify-between p-4 border-b bg-[#8B1538] text-white rounded-t-lg">
           <div className="flex items-center space-x-2">
             <Bot className="w-6 h-6" />
             <span className="font-semibold">Marriott AI Assistant</span>
@@ -342,19 +377,63 @@ const AIChatBot: React.FC = () => {
           </div>
         </div>
 
-        <div className={`${isOpen ? 'block' : 'hidden'} bg-white rounded-t-xl shadow-xl`}>
-          <div className="h-96 overflow-y-auto p-4">
+        {/* Messages and Input Container */}
+        <div className="flex-1 flex flex-col min-h-0">
+          {/* Messages Section */}
+          <div className="flex-1 overflow-y-auto p-4">
             {messages.map((message, index) => (
-              <MessageBubble
+              <div
                 key={index}
-                text={message.text}
-                isUser={message.isUser}
-                timestamp={message.timestamp}
-                messageId={index}
-                audioState={audioState}
-                onPlayPause={handlePlayback}
-                onStop={stopPlayback}
-              />
+                className={`mb-4 ${message.isUser ? 'text-right' : 'text-left'}`}
+              >
+                <div
+                  className={`inline-block rounded-lg px-4 py-2 ${
+                    message.isUser
+                      ? 'bg-[#8B1538] text-white'
+                      : 'bg-gray-200 text-gray-900'
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="mr-3 prose prose-sm max-w-none">
+                      <ReactMarkdown>{message.text}</ReactMarkdown>
+                    </div>
+                    {!message.isUser && (
+                      <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
+                        <div className="relative">
+                          {audioState.messageId === index && audioState.isLoading ? (
+                            <div className="p-1">
+                              <Loader2 className="w-4 h-4 text-gray-700 animate-spin" />
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handlePlayback(index, message.text)}
+                              className="p-1 rounded-full hover:bg-gray-300 transition-colors"
+                              disabled={audioState.isLoading}
+                            >
+                              {audioState.messageId === index && audioState.isPlaying ? (
+                                <Pause className="w-4 h-4 text-gray-700" />
+                              ) : (
+                                <Play className="w-4 h-4 text-gray-700" />
+                              )}
+                            </button>
+                          )}
+                        </div>
+                        {audioState.messageId === index && (audioState.isPlaying || audioState.isLoading) && (
+                          <button
+                            onClick={stopPlayback}
+                            className="p-1 rounded-full hover:bg-gray-300 transition-colors"
+                          >
+                            <Square className="w-4 h-4 text-gray-700" />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {message.timestamp.toLocaleTimeString()}
+                </div>
+              </div>
             ))}
             
             {/* Quick Options - Show only after first AI message */}
@@ -380,7 +459,7 @@ const AIChatBot: React.FC = () => {
           </div>
 
           {/* Input Section */}
-          <div className="p-4 border-t bg-white">
+          <div className="flex-shrink-0 p-4 border-t bg-white">
             <div className="flex items-center space-x-2">
               <textarea
                 value={inputText || ''}

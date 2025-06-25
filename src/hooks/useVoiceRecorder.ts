@@ -93,10 +93,10 @@ export const useVoiceRecorder = ({
         try {
           // Create form data for the API request
           const formData = new FormData();
-          formData.append('audio', audioBlob);
+          formData.append('audio', audioBlob, 'recording.webm');
 
-          // Send to our server endpoint
-          const response = await fetch('/api/chat/transcribe', {
+          // Send to our server endpoint (fixed path)
+          const response = await fetch('/api/transcribe', {
             method: 'POST',
             body: formData,
           });
