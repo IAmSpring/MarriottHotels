@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, MapPin, Mail, Lock } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,6 +14,7 @@ const LoginPage = () => {
     confirmPassword: ''
   });
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,12 +24,25 @@ const LoginPage = () => {
       localStorage.setItem('marriott_user_logged_in', 'true');
       localStorage.setItem('marriott_user_email', formData.email);
       localStorage.setItem('marriott_user_name', 'John Doe');
+      // Use auth context login
+      login(formData.email, 'John Doe');
+      // Emit custom event for immediate UI update
+      window.dispatchEvent(new CustomEvent('authChange', { 
+        detail: { isLoggedIn: true, userName: 'John Doe' } 
+      }));
       navigate('/bookings');
     } else {
       // Sign up logic
+      const fullName = `${formData.firstName} ${formData.lastName}`;
       localStorage.setItem('marriott_user_logged_in', 'true');
       localStorage.setItem('marriott_user_email', formData.email);
-      localStorage.setItem('marriott_user_name', `${formData.firstName} ${formData.lastName}`);
+      localStorage.setItem('marriott_user_name', fullName);
+      // Use auth context login
+      login(formData.email, fullName);
+      // Emit custom event for immediate UI update
+      window.dispatchEvent(new CustomEvent('authChange', { 
+        detail: { isLoggedIn: true, userName: fullName } 
+      }));
       navigate('/bookings');
     }
   };

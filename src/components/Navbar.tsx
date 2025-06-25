@@ -2,23 +2,50 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, User, Heart, MapPin } from 'lucide-react';
 
-const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+const useAuth = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [userName, setUserName] = useState('');
 
   useEffect(() => {
-    const checkLoginStatus = () => {
+    const checkAuth = () => {
       const loggedIn = localStorage.getItem('marriott_user_logged_in') === 'true';
+      const name = localStorage.getItem('marriott_user_name') || '';
       setIsLoggedIn(loggedIn);
+      setUserName(name);
     };
 
-    checkLoginStatus();
-    // Check on route change
-    window.addEventListener('storage', checkLoginStatus);
-    return () => window.removeEventListener('storage', checkLoginStatus);
+    // Initial check
+    checkAuth();
+
+    // Listen for storage events (from other tabs)
+    window.addEventListener('storage', checkAuth);
+    
+    // Listen for auth changes in the current window
+    const handleAuthChange = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail) {
+        setIsLoggedIn(customEvent.detail.isLoggedIn);
+        setUserName(customEvent.detail.userName || '');
+      } else {
+        checkAuth();
+      }
+    };
+    window.addEventListener('authChange', handleAuthChange);
+
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+      window.removeEventListener('authChange', handleAuthChange);
+    };
   }, []);
+
+  return { isLoggedIn, userName, setIsLoggedIn, setUserName };
+};
+
+const Navbar = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isLoggedIn, userName, setIsLoggedIn, setUserName } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -35,6 +62,7 @@ const Navbar = () => {
     localStorage.removeItem('marriott_user_email');
     localStorage.removeItem('marriott_user_name');
     setIsLoggedIn(false);
+    setUserName('');
     navigate('/');
   };
 
@@ -106,7 +134,7 @@ const Navbar = () => {
                   className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:text-[#8B1538] transition-colors"
                 >
                   <User className="h-5 w-5" />
-                  <span className="text-sm font-medium">Account</span>
+                  <span className="text-sm font-medium">{userName}</span>
                 </button>
                 <button 
                   onClick={handleLogout}

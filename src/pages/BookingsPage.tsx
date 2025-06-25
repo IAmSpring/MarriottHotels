@@ -88,13 +88,6 @@ const BookingsPage = () => {
     setBookings(mockBookings);
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('marriott_user_logged_in');
-    localStorage.removeItem('marriott_user_email');
-    localStorage.removeItem('marriott_user_name');
-    navigate('/');
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed': return 'bg-green-100 text-green-800';
@@ -139,20 +132,6 @@ const BookingsPage = () => {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
               <p className="text-gray-600 mt-2">Welcome back, {user.name}</p>
-            </div>
-            <div className="mt-4 md:mt-0 flex space-x-4">
-              <button 
-                onClick={() => navigate('/account-settings')}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                Account Settings
-              </button>
-              <button 
-                onClick={handleLogout}
-                className="px-4 py-2 bg-[#8B1538] text-white rounded-lg hover:bg-[#6B1028] transition-colors"
-              >
-                Sign Out
-              </button>
             </div>
           </div>
         </div>
