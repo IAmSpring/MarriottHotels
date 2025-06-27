@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Bot,
   Play,
@@ -9,20 +10,30 @@ import {
   MessageSquare,
   Clock,
   Activity,
+  CheckCircle,
 } from 'lucide-react';
-import { AIAssistant } from '../../../types/ai';
 
-// Mock data for AI assistants
-const mockAssistants: AIAssistant[] = [
+interface Assistant {
+  id: string;
+  name: string;
+  model: string;
+  status: 'active' | 'inactive' | 'paused';
+  totalCalls: number;
+  avgResponseTime: string;
+  successRate: string;
+  lastActive: string;
+}
+
+const mockAssistants: Assistant[] = [
   {
     id: 'asst_1',
     name: 'Concierge Assistant',
     model: 'gpt-4-turbo',
     status: 'active',
     totalCalls: 8500,
-    avgResponseTime: 0.8,
+    avgResponseTime: '0.8s',
+    successRate: '98.5%',
     lastActive: '2 minutes ago',
-    successRate: 98.5,
   },
   {
     id: 'asst_2',
@@ -30,79 +41,74 @@ const mockAssistants: AIAssistant[] = [
     model: 'gpt-4',
     status: 'active',
     totalCalls: 12000,
-    avgResponseTime: 0.9,
+    avgResponseTime: '0.9s',
+    successRate: '97.8%',
     lastActive: '5 minutes ago',
-    successRate: 97.8,
   },
   {
     id: 'asst_3',
     name: 'Customer Support',
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4-turbo',
     status: 'paused',
-    totalCalls: 15000,
-    avgResponseTime: 0.7,
+    totalCalls: 5200,
+    avgResponseTime: '1.1s',
+    successRate: '96.5%',
     lastActive: '1 hour ago',
-    successRate: 96.5,
   },
 ];
 
 interface AssistantCardProps {
-  assistant: AIAssistant;
+  assistant: Assistant;
 }
 
-const AssistantCard: React.FC<AssistantCardProps> = ({ assistant }) => {
-  const isActive = assistant.status === 'active';
+const AssistantCard: React.FC<{ assistant: Assistant }> = ({ assistant }) => {
+  const navigate = useNavigate();
   
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex justify-between items-start mb-4">
+      <div className="flex items-start justify-between mb-4">
         <div className="flex items-center">
-          <Bot className="w-6 h-6 mr-2 text-[#8B1538]" />
+          <div className="w-10 h-10 rounded-full bg-[#8B1538] text-white flex items-center justify-center mr-3">
+            <Bot className="w-6 h-6" />
+          </div>
           <div>
-            <h3 className="text-lg font-medium">{assistant.name}</h3>
-            <p className="text-sm text-gray-500">{assistant.model}</p>
+            <h3 className="font-semibold text-lg">{assistant.name}</h3>
+            <p className="text-sm text-gray-600">{assistant.model}</p>
           </div>
         </div>
-        <div className={`px-2 py-1 rounded-full text-sm ${
-          isActive ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+        <span className={`px-3 py-1 rounded-full text-sm ${
+          assistant.status === 'active' ? 'bg-green-100 text-green-800' :
+          assistant.status === 'paused' ? 'bg-yellow-100 text-yellow-800' :
+          'bg-gray-100 text-gray-800'
         }`}>
           {assistant.status}
-        </div>
+        </span>
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div>
-          <p className="text-sm text-gray-500">Total Calls</p>
-          <p className="text-lg font-semibold">{assistant.totalCalls.toLocaleString()}</p>
+          <p className="text-sm text-gray-600 mb-1">Total Calls</p>
+          <p className="font-semibold">{assistant.totalCalls.toLocaleString()}</p>
         </div>
         <div>
-          <p className="text-sm text-gray-500">Avg Response Time</p>
-          <p className="text-lg font-semibold">{assistant.avgResponseTime}s</p>
+          <p className="text-sm text-gray-600 mb-1">Avg Response Time</p>
+          <p className="font-semibold">{assistant.avgResponseTime}</p>
         </div>
         <div>
-          <p className="text-sm text-gray-500">Success Rate</p>
-          <p className="text-lg font-semibold">{assistant.successRate}%</p>
+          <p className="text-sm text-gray-600 mb-1">Success Rate</p>
+          <p className="font-semibold">{assistant.successRate}</p>
         </div>
         <div>
-          <p className="text-sm text-gray-500">Last Active</p>
-          <p className="text-lg font-semibold">{assistant.lastActive}</p>
+          <p className="text-sm text-gray-600 mb-1">Last Active</p>
+          <p className="font-semibold">{assistant.lastActive}</p>
         </div>
       </div>
 
-      <div className="flex justify-between">
-        <div className="flex space-x-2">
-          <button className="p-2 text-gray-600 hover:text-[#8B1538] hover:bg-gray-100 rounded">
-            {isActive ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-          </button>
-          <button className="p-2 text-gray-600 hover:text-[#8B1538] hover:bg-gray-100 rounded">
-            <RefreshCw className="w-5 h-5" />
-          </button>
-          <button className="p-2 text-gray-600 hover:text-[#8B1538] hover:bg-gray-100 rounded">
-            <Settings className="w-5 h-5" />
-          </button>
-        </div>
-        <button className="flex items-center px-3 py-2 bg-[#8B1538] text-white rounded hover:bg-[#6d102c]">
-          <MessageSquare className="w-4 h-4 mr-2" />
+      <div className="flex space-x-3">
+        <button
+          onClick={() => navigate(`/admin/ai/assistants/${assistant.id}/conversations`)}
+          className="flex-1 px-4 py-2 bg-[#8B1538] text-white rounded-lg hover:bg-[#6d102c] transition-colors"
+        >
           View Conversations
         </button>
       </div>
@@ -149,12 +155,24 @@ const AssistantStats: React.FC = () => {
   );
 };
 
-const AIAssistantsPage: React.FC = () => {
+const AssistantsPage: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold">AI Assistants Management</h1>
-        <p className="text-gray-600">Monitor and manage OpenAI assistants</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold">AI Assistants</h1>
+            <p className="text-gray-600">Monitor and manage your AI assistants</p>
+          </div>
+          <button
+            onClick={() => navigate('/admin/ai/assistants/new')}
+            className="px-4 py-2 bg-[#8B1538] text-white rounded-lg hover:bg-[#6d102c]"
+          >
+            Create New Assistant
+          </button>
+        </div>
       </div>
 
       <AssistantStats />
@@ -167,7 +185,7 @@ const AIAssistantsPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {mockAssistants.map((assistant) => (
           <AssistantCard key={assistant.id} assistant={assistant} />
         ))}
@@ -176,4 +194,4 @@ const AIAssistantsPage: React.FC = () => {
   );
 };
 
-export default AIAssistantsPage; 
+export default AssistantsPage; 
