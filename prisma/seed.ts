@@ -20,25 +20,38 @@ async function main() {
     prisma.user.deleteMany(),
   ]);
 
-  // Create admin user
-  const admin = await prisma.user.create({
-    data: {
-      name: 'Admin User',
-      email: 'admin@test.com',
-      password: await bcrypt.hash('admin123', 10),
-      role: 'ADMIN',
-      bonvoyNumber: 'ADMIN001',
-      bonvoyPoints: 0,
-      bonvoyStatus: 'NONE'
-    }
-  });
+  // Create admin users
+  const adminUsers = await Promise.all([
+    prisma.user.create({
+      data: {
+        name: 'John Smith',
+        email: 'john.smith@marriott.com',
+        password: await bcrypt.hash('admin123', 10),
+        role: 'ADMIN',
+        bonvoyNumber: 'ADMIN001',
+        bonvoyPoints: 100000,
+        bonvoyStatus: 'AMBASSADOR'
+      }
+    }),
+    prisma.user.create({
+      data: {
+        name: 'Sarah Johnson',
+        email: 'sarah.johnson@marriott.com',
+        password: await bcrypt.hash('admin123', 10),
+        role: 'MANAGER',
+        bonvoyNumber: 'ADMIN002',
+        bonvoyPoints: 75000,
+        bonvoyStatus: 'TITANIUM'
+      }
+    })
+  ]);
 
-  // Create sample users
+  // Create sample users with various statuses
   const users = await Promise.all([
     prisma.user.create({
       data: {
-        name: 'John Doe',
-        email: 'john@example.com',
+        name: 'Michael Brown',
+        email: 'michael@example.com',
         password: await bcrypt.hash('password123', 10),
         bonvoyNumber: 'BV123456',
         bonvoyPoints: 50000,
@@ -47,12 +60,32 @@ async function main() {
     }),
     prisma.user.create({
       data: {
-        name: 'Jane Smith',
-        email: 'jane@example.com',
+        name: 'Emma Wilson',
+        email: 'emma@example.com',
         password: await bcrypt.hash('password123', 10),
         bonvoyNumber: 'BV789012',
         bonvoyPoints: 100000,
         bonvoyStatus: 'PLATINUM'
+      }
+    }),
+    prisma.user.create({
+      data: {
+        name: 'David Chen',
+        email: 'david@example.com',
+        password: await bcrypt.hash('password123', 10),
+        bonvoyNumber: 'BV345678',
+        bonvoyPoints: 25000,
+        bonvoyStatus: 'SILVER'
+      }
+    }),
+    prisma.user.create({
+      data: {
+        name: 'Sophie Martin',
+        email: 'sophie@example.com',
+        password: await bcrypt.hash('password123', 10),
+        bonvoyNumber: 'BV901234',
+        bonvoyPoints: 150000,
+        bonvoyStatus: 'AMBASSADOR'
       }
     })
   ]);
@@ -61,32 +94,32 @@ async function main() {
   const hotels = await Promise.all([
     prisma.hotel.create({
       data: {
-        name: 'Marriott Aspen',
-        location: 'Aspen, Colorado',
-        address: '123 Mountain View Drive, Aspen, CO 81611',
-        description: 'Luxury mountain resort with spectacular views of the Rockies',
-        imageUrl: '/images/aspen.jpg',
+        name: 'Marriott Downtown',
+        location: 'New York City, NY',
+        address: '85 West Street, New York, NY 10006',
+        description: 'Luxury hotel in the heart of Manhattan',
+        imageUrl: '/images/new-york.jpg',
         rating: 4.8
       }
     }),
     prisma.hotel.create({
       data: {
-        name: 'Marriott Miami Beach',
-        location: 'Miami Beach, Florida',
-        address: '456 Ocean Drive, Miami Beach, FL 33139',
-        description: 'Beachfront paradise with world-class amenities',
+        name: 'Marriott Resort',
+        location: 'Miami Beach, FL',
+        address: '4525 Collins Avenue, Miami Beach, FL 33140',
+        description: 'Beachfront resort with stunning ocean views',
         imageUrl: '/images/miami-beach.jpg',
         rating: 4.7
       }
     }),
     prisma.hotel.create({
       data: {
-        name: 'Marriott New York Times Square',
-        location: 'New York City, New York',
-        address: '789 Broadway, New York, NY 10019',
-        description: 'Modern luxury in the heart of Manhattan',
-        imageUrl: '/images/new-york.jpg',
-        rating: 4.6
+        name: 'Marriott Mountain Lodge',
+        location: 'Aspen, CO',
+        address: '315 E Dean St, Aspen, CO 81611',
+        description: 'Ski-in/ski-out luxury mountain resort',
+        imageUrl: '/images/aspen.jpg',
+        rating: 4.9
       }
     })
   ]);
@@ -98,10 +131,10 @@ async function main() {
         {
           hotelId: hotel.id,
           type: 'standard',
-          description: 'Comfortable room with city views',
+          description: 'Comfortable room with modern amenities',
           price: 299.99,
           capacity: 2,
-          amenities: JSON.stringify(['WiFi', 'TV', 'Mini Bar']),
+          amenities: JSON.stringify(['WiFi', 'TV', 'Mini Bar', 'Coffee Maker']),
           imageUrl: '/images/standard-room.jpg'
         },
         {
@@ -110,7 +143,7 @@ async function main() {
           description: 'Spacious room with premium amenities',
           price: 499.99,
           capacity: 3,
-          amenities: JSON.stringify(['WiFi', 'TV', 'Mini Bar', 'Balcony', 'Lounge Access']),
+          amenities: JSON.stringify(['WiFi', 'TV', 'Mini Bar', 'Balcony', 'Lounge Access', 'Room Service']),
           imageUrl: '/images/deluxe-room.jpg'
         },
         {
@@ -119,7 +152,7 @@ async function main() {
           description: 'Luxury suite with separate living area',
           price: 799.99,
           capacity: 4,
-          amenities: JSON.stringify(['WiFi', 'TV', 'Mini Bar', 'Balcony', 'Kitchen', 'Living Room']),
+          amenities: JSON.stringify(['WiFi', 'TV', 'Mini Bar', 'Balcony', 'Kitchen', 'Living Room', 'Butler Service']),
           imageUrl: '/images/suite-room.jpg'
         }
       ]
@@ -135,7 +168,7 @@ async function main() {
           hotelId: hotel.id,
           name: `${category.charAt(0).toUpperCase() + category.slice(1)} Center`,
           category,
-          description: `World-class ${category} facilities`,
+          description: `World-class ${category} facilities available 24/7`,
           imageUrl: `/images/${category}.jpg`
         }
       });
@@ -143,74 +176,133 @@ async function main() {
   }
 
   // Create restaurants for each hotel
-  const cuisines = ['Italian', 'Japanese', 'American', 'French'];
+  const restaurants = [
+    { name: 'La Cucina', cuisine: 'Italian', priceRange: '$$$' },
+    { name: 'Sakura', cuisine: 'Japanese', priceRange: '$$$$' },
+    { name: 'The Grill', cuisine: 'American', priceRange: '$$' },
+    { name: 'Le Bistro', cuisine: 'French', priceRange: '$$$$' }
+  ];
+
   for (const hotel of hotels) {
-    for (const cuisine of cuisines) {
+    for (const restaurant of restaurants) {
       await prisma.restaurant.create({
         data: {
           hotelId: hotel.id,
-          name: `${cuisine} Restaurant`,
-          cuisine,
-          priceRange: '$$$',
+          name: restaurant.name,
+          cuisine: restaurant.cuisine,
+          priceRange: restaurant.priceRange,
           openTime: '11:00',
           closeTime: '23:00',
-          description: `Authentic ${cuisine} cuisine in an elegant setting`,
-          imageUrl: `/images/${cuisine.toLowerCase()}-restaurant.jpg`
+          description: `Authentic ${restaurant.cuisine} cuisine in an elegant setting`,
+          imageUrl: `/images/${restaurant.cuisine.toLowerCase()}-restaurant.jpg`
         }
       });
     }
   }
 
   // Create experiences for each hotel
-  const experienceTypes = ['spa', 'golf', 'tour', 'class', 'event'];
+  const experiences = [
+    { name: 'Luxury Spa Day', type: 'spa', price: 299.99, duration: 180 },
+    { name: 'Golf Tournament', type: 'golf', price: 199.99, duration: 240 },
+    { name: 'City Tour', type: 'tour', price: 149.99, duration: 180 },
+    { name: 'Cooking Class', type: 'class', price: 179.99, duration: 120 },
+    { name: 'Wine Tasting', type: 'event', price: 129.99, duration: 90 }
+  ];
+
   for (const hotel of hotels) {
-    for (const type of experienceTypes) {
+    for (const exp of experiences) {
       await prisma.experience.create({
         data: {
           hotelId: hotel.id,
-          name: `${type.charAt(0).toUpperCase() + type.slice(1)} Experience`,
-          type,
-          description: `Unforgettable ${type} experience`,
-          price: 199.99,
-          duration: 120,
-          imageUrl: `/images/${type}.jpg`
+          name: exp.name,
+          type: exp.type,
+          description: `Unforgettable ${exp.type} experience`,
+          price: exp.price,
+          duration: exp.duration,
+          imageUrl: `/images/${exp.type}.jpg`
         }
       });
     }
   }
 
-  // Create sample bookings
+  // Create sample bookings with various statuses
   const rooms = await prisma.room.findMany();
-  for (const user of users) {
+  const bookings = [
+    {
+      userId: users[0].id,
+      hotelId: hotels[0].id,
+      roomId: rooms[0].id,
+      checkIn: new Date('2024-02-29'),
+      checkOut: new Date('2024-03-05'),
+      guests: 2,
+      totalPrice: 1499.95,
+      status: 'CONFIRMED'
+    },
+    {
+      userId: users[1].id,
+      hotelId: hotels[1].id,
+      roomId: rooms[1].id,
+      checkIn: new Date('2024-03-10'),
+      checkOut: new Date('2024-03-15'),
+      guests: 3,
+      totalPrice: 2499.95,
+      status: 'PENDING'
+    },
+    {
+      userId: users[2].id,
+      hotelId: hotels[2].id,
+      roomId: rooms[2].id,
+      checkIn: new Date('2024-03-20'),
+      checkOut: new Date('2024-03-25'),
+      guests: 4,
+      totalPrice: 3999.95,
+      status: 'CONFIRMED'
+    }
+  ];
+
+  for (const booking of bookings) {
     await prisma.booking.create({
-      data: {
-        userId: user.id,
-        hotelId: hotels[0].id,
-        roomId: rooms[0].id,
-        checkIn: new Date('2024-07-01'),
-        checkOut: new Date('2024-07-05'),
-        guests: 2,
-        totalPrice: 1199.96,
-        status: 'CONFIRMED'
-      }
+      data: booking
     });
   }
 
-  // Create sample reviews
+  // Create sample reviews with various ratings
   for (const user of users) {
     for (const hotel of hotels) {
       await prisma.review.create({
         data: {
           userId: user.id,
           hotelId: hotel.id,
-          rating: 5,
-          comment: 'Excellent stay! Would definitely recommend.'
+          rating: Math.floor(Math.random() * 2) + 4, // Random rating between 4-5
+          comment: 'Excellent stay! The service was impeccable and the facilities were top-notch.'
         }
       });
     }
   }
 
-  console.log('Database has been seeded! 🌱');
+  // Create sample conversations
+  const conversations = [
+    {
+      userId: users[0].id,
+      userMessage: "I'd like to book a room for next week",
+      aiResponse: "I'd be happy to help you book a room. Could you please let me know your preferred dates and location?",
+      threadId: "thread_abc123"
+    },
+    {
+      userId: users[1].id,
+      userMessage: "What dining options are available?",
+      aiResponse: "We have several restaurants including Italian, Japanese, American, and French cuisine. Would you like more details about any specific restaurant?",
+      threadId: "thread_def456"
+    }
+  ];
+
+  for (const conv of conversations) {
+    await prisma.conversation.create({
+      data: conv
+    });
+  }
+
+  console.log('Database has been seeded with enhanced data! 🌱');
 }
 
 main()

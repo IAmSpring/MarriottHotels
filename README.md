@@ -2,7 +2,7 @@
 
 A beautiful, production-ready booking website inspired by Marriott.com with modern web design principles and comprehensive functionality.
 
-![ScreenRecording2025-06-13](https://github.com/user-attachments/assets/3ae79e30-3d5d-4cc5-963a-21d9a506aab6)
+![Extraordinary Experiences Await You](./walkthrough.gif)
 
 ## 🌟 Features
 
@@ -238,6 +238,6 @@ Perfect for immediate deployment to platforms like Netlify, Vercel, or any stati
 
 ---
 
-![Marriott Hotels Build](https://github.com/user-attachments/assets/5391d895-ac60-4f29-902d-fe8ed4d68df9)
+![Marriott Hotels Documentation](./documentation.gif)
 
 Built with ❤️ using modern web technologies and best practices for a world-class hotel booking experience.
