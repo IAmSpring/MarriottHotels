@@ -30,9 +30,8 @@ import AdminApp from './pages/admin';
 // Wrapper component to handle conditional rendering of TourController
 const TourControllerWrapper = () => {
   const location = useLocation();
-  console.log('Current path:', location.pathname);
   const isHomePage = location.pathname === '/' || location.pathname === '';
-  console.log('Is home page:', isHomePage);
+  
   return isHomePage ? (
     <div style={{ position: 'fixed', bottom: '2rem', left: '2rem', zIndex: 9999, pointerEvents: 'auto' }}>
       <TourController />

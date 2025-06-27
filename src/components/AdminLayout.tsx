@@ -14,6 +14,9 @@ import {
   Database,
   Activity,
   Brain,
+  LineChart,
+  Search as SearchIcon,
+  GitGraph,
 } from 'lucide-react';
 
 interface NavItemProps {
@@ -24,7 +27,24 @@ interface NavItemProps {
 
 const NavItem: React.FC<NavItemProps> = ({ to, icon, label }) => {
   const location = useLocation();
-  const isActive = location.pathname === to || location.pathname.startsWith(`${to}/`);
+  
+  // More precise active state check that prevents multiple active items
+  const isActive = (() => {
+    // Exact match for admin dashboard
+    if (to === '/admin') {
+      return location.pathname === '/admin';
+    }
+    
+    // For AI section, only highlight parent when exactly on /admin/ai
+    if (to === '/admin/ai') {
+      return location.pathname === '/admin/ai';
+    }
+    
+    // For all other routes, exact match or direct children only
+    return location.pathname === to || 
+           (location.pathname.startsWith(`${to}/`) && 
+            location.pathname.split('/').length === to.split('/').length + 1);
+  })();
 
   return (
     <NavLink
@@ -70,9 +90,14 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <div className="pt-4 mt-4 border-t">
               <h2 className="px-4 mb-2 text-xs font-semibold text-gray-600 uppercase">AI Management</h2>
               <NavItem to="/admin/ai" icon={<Brain />} label="AI Dashboard" />
+              <NavItem to="/admin/ai/logs" icon={<Activity />} label="System Logs" />
               <NavItem to="/admin/ai/assistants" icon={<Bot />} label="Assistants" />
+              <NavItem to="/admin/ai/models" icon={<Brain />} label="Models" />
+              <NavItem to="/admin/ai/training" icon={<Bot />} label="Training" />
+              <NavItem to="/admin/ai/search" icon={<SearchIcon />} label="Search Analytics" />
               <NavItem to="/admin/ai/storage" icon={<Database />} label="Storage" />
-              <NavItem to="/admin/ai/performance" icon={<Activity />} label="Performance" />
+              <NavItem to="/admin/ai/infrastructure" icon={<GitGraph />} label="Infrastructure" />
+              <NavItem to="/admin/ai/performance" icon={<LineChart />} label="Performance" />
             </div>
           </nav>
         </div>
