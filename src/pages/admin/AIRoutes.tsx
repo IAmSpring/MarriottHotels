@@ -17,7 +17,10 @@ import {
 const AIRoutes = () => {
   return (
     <Routes>
+      {/* AI Dashboard */}
       <Route index element={<AIDashboardPage />} />
+      
+      {/* AI Management Routes */}
       <Route path="logs" element={<LogsPage />} />
       <Route path="performance" element={<PerformancePage />} />
       <Route path="models" element={<ModelsPage />} />
@@ -28,6 +31,8 @@ const AIRoutes = () => {
       <Route path="search" element={<SearchPage />} />
       <Route path="storage" element={<StoragePage />} />
       <Route path="infrastructure" element={<InfrastructurePage />} />
+      
+      {/* Catch-all redirect to AI dashboard */}
       <Route path="*" element={<Navigate to="/admin/ai" replace />} />
     </Routes>
   );

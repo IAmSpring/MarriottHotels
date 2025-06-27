@@ -77,6 +77,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
 
           <nav className="space-y-1">
+            {/* Main Admin Navigation */}
             <NavItem to="/admin" icon={<LayoutDashboard />} label="Dashboard" />
             <NavItem to="/admin/bookings" icon={<CalendarCheck />} label="Bookings" />
             <NavItem to="/admin/complaints" icon={<AlertTriangle />} label="Complaints" />
@@ -87,6 +88,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <NavItem to="/admin/staff" icon={<Clock />} label="Staff Schedule" />
             <NavItem to="/admin/users" icon={<Users />} label="Users" />
 
+            {/* AI Management Navigation */}
             <div className="pt-4 mt-4 border-t">
               <h2 className="px-4 mb-2 text-xs font-semibold text-gray-600 uppercase">AI Management</h2>
               <NavItem to="/admin/ai" icon={<Brain />} label="AI Dashboard" />

@@ -4,7 +4,7 @@ import AdminLayout from '../components/AdminLayout';
 import {
   AssistantsPage,
   ConversationsPage,
-  DashboardPage,
+  DashboardPage as AIDashboardPage,
   InfrastructurePage,
   LogsPage,
   ModelsPage,
@@ -14,6 +14,7 @@ import {
   StoragePage,
   TrainingPage,
 } from './admin/ai';
+import DashboardPage from './admin/DashboardPage';
 import BookingsPage from './admin/BookingsPage';
 import ComplaintsPage from './admin/ComplaintsPage';
 import HotelsPage from './admin/HotelsPage';
@@ -39,7 +40,7 @@ const AdminRouter: React.FC = () => {
         <Route path="/users" element={<UsersPage />} />
 
         {/* AI Admin Routes */}
-        <Route path="/ai" element={<DashboardPage />} />
+        <Route path="/ai" element={<AIDashboardPage />} />
         <Route path="/ai/logs" element={<LogsPage />} />
         <Route path="/ai/models" element={<ModelsPage />} />
         <Route path="/ai/training" element={<TrainingPage />} />
