@@ -1,13 +1,13 @@
-import React from 'react';
-import { mockUsers } from '../../data/mockData';
+import React, { useState } from 'react';
+import { mockHotels } from '../../data/mockData';
 
-// User Stats Component
-const UserStats = () => {
+// Hotel Stats Component
+const HotelStats = () => {
   const stats = [
-    { label: 'Total Users', value: mockUsers.length },
-    { label: 'Active Users', value: mockUsers.filter(u => u.status === 'ACTIVE').length },
-    { label: 'Admins', value: mockUsers.filter(u => u.role === 'ADMIN').length },
-    { label: 'Managers', value: mockUsers.filter(u => u.role === 'MANAGER').length },
+    { label: 'Total Hotels', value: mockHotels.length },
+    { label: 'Active Hotels', value: mockHotels.filter(h => h.status === 'ACTIVE').length },
+    { label: 'Under Maintenance', value: mockHotels.filter(h => h.status === 'MAINTENANCE').length },
+    { label: 'Average Rating', value: '4.5★' },
   ];
 
   return (
@@ -22,82 +22,76 @@ const UserStats = () => {
   );
 };
 
-// User Actions Component
-const UserActions = () => {
+// Hotel Actions Component
+const HotelActions = () => {
   return (
     <div className="flex gap-4 mb-8">
       <button className="bg-[#8B1538] text-white px-4 py-2 rounded-lg hover:bg-[#6d102c]">
-        Add New User
+        Add New Hotel
       </button>
       <button className="border border-[#8B1538] text-[#8B1538] px-4 py-2 rounded-lg hover:bg-[#8B1538] hover:text-white">
-        Export Users
+        Generate Report
       </button>
     </div>
   );
 };
 
-// User Filters Component
-const UserFilters = () => {
+// Hotel Filters Component
+const HotelFilters = () => {
   return (
     <div className="flex gap-4 mb-8">
       <input
         type="text"
-        placeholder="Search users..."
+        placeholder="Search hotels..."
         className="px-4 py-2 border rounded-lg flex-grow"
       />
       <select className="px-4 py-2 border rounded-lg">
-        <option value="">All Roles</option>
-        <option value="ADMIN">Admin</option>
-        <option value="MANAGER">Manager</option>
-        <option value="STAFF">Staff</option>
+        <option value="">All Locations</option>
+        <option value="new-york">New York</option>
+        <option value="miami">Miami</option>
+        <option value="los-angeles">Los Angeles</option>
       </select>
       <select className="px-4 py-2 border rounded-lg">
         <option value="">All Status</option>
-        <option value="ACTIVE">Active</option>
-        <option value="INACTIVE">Inactive</option>
-        <option value="SUSPENDED">Suspended</option>
+        <option value="active">Active</option>
+        <option value="maintenance">Under Maintenance</option>
+        <option value="closed">Closed</option>
       </select>
     </div>
   );
 };
 
-// User List Component
-const UserList = () => {
+// Hotel List Component
+const HotelList = () => {
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <table className="w-full">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hotel Name</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rooms</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rating</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {mockUsers.map((user) => (
-            <tr key={user.id}>
-              <td className="px-6 py-4 whitespace-nowrap">{user.name}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
+          {mockHotels.map((hotel) => (
+            <tr key={hotel.id}>
+              <td className="px-6 py-4 whitespace-nowrap">{hotel.name}</td>
+              <td className="px-6 py-4 whitespace-nowrap">{hotel.location}</td>
+              <td className="px-6 py-4 whitespace-nowrap">{hotel.rooms}</td>
+              <td className="px-6 py-4 whitespace-nowrap">{hotel.rating}★</td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span className={`px-2 py-1 text-xs rounded-full ${
-                  user.role === 'ADMIN'
-                    ? 'bg-purple-100 text-purple-800'
-                    : user.role === 'MANAGER'
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
-                  {user.role}
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`px-2 py-1 text-xs rounded-full ${
-                  user.status === 'ACTIVE'
+                  hotel.status === 'ACTIVE'
                     ? 'bg-green-100 text-green-800'
+                    : hotel.status === 'MAINTENANCE'
+                    ? 'bg-yellow-100 text-yellow-800'
                     : 'bg-red-100 text-red-800'
                 }`}>
-                  {user.status}
+                  {hotel.status}
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
@@ -112,18 +106,18 @@ const UserList = () => {
   );
 };
 
-const UsersPage = () => {
+const HotelsPage = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-semibold">Users Management</h1>
+        <h1 className="text-2xl font-semibold">Hotels Management</h1>
       </div>
-      <UserStats />
-      <UserActions />
-      <UserFilters />
-      <UserList />
+      <HotelStats />
+      <HotelActions />
+      <HotelFilters />
+      <HotelList />
     </div>
   );
 };
 
-export default UsersPage; 
+export default HotelsPage; 

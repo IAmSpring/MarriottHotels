@@ -1,16 +1,4 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import AdminLayout from '../components/AdminLayout';
-import {
-  mockBookings,
-  mockComplaints,
-  mockHotels,
-  mockInventory,
-  mockMaintenanceRequests,
-  mockRevenue,
-  mockStaffSchedules,
-  mockUsers,
-} from '../data/mockData';
 import {
   BarChart,
   Bar,
@@ -22,20 +10,16 @@ import {
   LineChart,
   Line,
 } from 'recharts';
-import UsersPage from './admin/UsersPage';
-import BookingsPage from './admin/BookingsPage';
-import HotelsPage from './admin/HotelsPage';
-import ComplaintsPage from './admin/ComplaintsPage';
-import MaintenancePage from './admin/MaintenancePage';
-import StaffSchedulePage from './admin/StaffSchedulePage';
-import InventoryPage from './admin/InventoryPage';
-import RevenuePage from './admin/RevenuePage';
 import {
-  AIStoragePage,
-  AIAssistantsPage,
-  AIPerformancePage,
-  AIDashboardPage,
-} from './admin/ai';
+  mockBookings,
+  mockComplaints,
+  mockHotels,
+  mockInventory,
+  mockMaintenanceRequests,
+  mockRevenue,
+  mockStaffSchedules,
+  mockUsers,
+} from '../../data/mockData';
 
 // Dashboard Components
 const DashboardStats = () => {
@@ -78,15 +62,6 @@ const RevenueChart = () => {
 };
 
 const BookingTable = () => {
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString();
-    } catch (error) {
-      return dateString;
-    }
-  };
-
   return (
     <div className="bg-white rounded-lg shadow mb-8">
       <div className="p-6">
@@ -107,9 +82,7 @@ const BookingTable = () => {
               <tr key={booking.id}>
                 <td className="px-6 py-4 whitespace-nowrap">{booking.guestName}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{booking.hotelName}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {formatDate(booking.checkIn)}
-                </td>
+                <td className="px-6 py-4 whitespace-nowrap">{booking.checkIn}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 py-1 text-xs rounded-full ${
                     booking.status === 'CONFIRMED'
@@ -172,8 +145,7 @@ const MaintenanceList = () => {
   );
 };
 
-// Main Dashboard Page
-const Dashboard = () => {
+const DashboardPage = () => {
   return (
     <>
       <DashboardStats />
@@ -186,28 +158,4 @@ const Dashboard = () => {
   );
 };
 
-// Admin App
-const AdminApp = () => {
-  return (
-    <AdminLayout>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/users" element={<UsersPage />} />
-        <Route path="/bookings" element={<BookingsPage />} />
-        <Route path="/hotels" element={<HotelsPage />} />
-        <Route path="/complaints" element={<ComplaintsPage />} />
-        <Route path="/maintenance" element={<MaintenancePage />} />
-        <Route path="/staff" element={<StaffSchedulePage />} />
-        <Route path="/inventory" element={<InventoryPage />} />
-        <Route path="/revenue" element={<RevenuePage />} />
-        {/* AI Admin Routes */}
-        <Route path="/ai" element={<AIDashboardPage />} />
-        <Route path="/ai/storage" element={<AIStoragePage />} />
-        <Route path="/ai/assistants" element={<AIAssistantsPage />} />
-        <Route path="/ai/performance" element={<AIPerformancePage />} />
-      </Routes>
-    </AdminLayout>
-  );
-};
-
-export default AdminApp; 
+export default DashboardPage; 

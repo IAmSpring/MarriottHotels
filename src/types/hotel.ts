@@ -17,14 +17,26 @@ export interface Hotel {
   name: string;
   location: string;
   description: string;
-  price: number;
   rating: number;
-  images: string[];
+  rooms: number;
+  status: 'ACTIVE' | 'MAINTENANCE' | 'CLOSED';
   amenities: string[];
-  type: 'standard' | 'boutique' | 'luxury';
+  images: string[];
+  price: {
+    base: number;
+    currency: string;
+  };
+  contact: {
+    phone: string;
+    email: string;
+    address: string;
+  };
+  checkInTime: string;
+  checkOutTime: string;
+  createdAt: string;
+  updatedAt: string;
   featured?: boolean;
-  reviews: number;
-  rooms: Room[];
+  type?: 'LUXURY' | 'BUSINESS' | 'RESORT' | 'BOUTIQUE';
 }
 
 export interface BookingFilters {

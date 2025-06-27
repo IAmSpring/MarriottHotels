@@ -11,6 +11,10 @@ import {
   Package,
   LogOut,
   DollarSign,
+  Brain,
+  Database,
+  Bot,
+  LineChart,
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -27,9 +31,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { path: '/admin/hotels', icon: Building2, label: 'Hotels' },
     { path: '/admin/complaints', icon: AlertCircle, label: 'Complaints' },
     { path: '/admin/maintenance', icon: Wrench, label: 'Maintenance' },
-    { path: '/admin/schedule', icon: ClipboardList, label: 'Staff Schedule' },
+    { path: '/admin/staff', icon: ClipboardList, label: 'Staff Schedule' },
     { path: '/admin/inventory', icon: Package, label: 'Inventory' },
     { path: '/admin/revenue', icon: DollarSign, label: 'Revenue' },
+    // AI Section
+    { type: 'divider', label: 'AI Management' },
+    { path: '/admin/ai', icon: Brain, label: 'AI Dashboard' },
+    { path: '/admin/ai/storage', icon: Database, label: 'Vector Storage' },
+    { path: '/admin/ai/assistants', icon: Bot, label: 'AI Assistants' },
+    { path: '/admin/ai/performance', icon: LineChart, label: 'AI Performance' },
   ];
 
   return (
@@ -40,19 +50,27 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           <h1 className="text-2xl font-bold">Marriott Admin</h1>
         </div>
         <nav className="mt-8">
-          {menuItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center px-6 py-3 text-sm font-medium ${
-                location.pathname === item.path
-                  ? 'bg-[#6B1028] text-white'
-                  : 'text-gray-300 hover:bg-[#6B1028] hover:text-white'
-              }`}
-            >
-              <item.icon className="w-5 h-5 mr-3" />
-              {item.label}
-            </Link>
+          {menuItems.map((item, index) => (
+            item.type === 'divider' ? (
+              <div key={index} className="px-6 py-3">
+                <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                  {item.label}
+                </h3>
+              </div>
+            ) : (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center px-6 py-3 text-sm font-medium ${
+                  location.pathname === item.path
+                    ? 'bg-[#6B1028] text-white'
+                    : 'text-gray-300 hover:bg-[#6B1028] hover:text-white'
+                }`}
+              >
+                <item.icon className="w-5 h-5 mr-3" />
+                {item.label}
+              </Link>
+            )
           ))}
         </nav>
       </div>

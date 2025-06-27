@@ -89,23 +89,31 @@ async function main() {
 
   // Configure CORS
   app.use(cors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://studio.apollographql.com'],
+    origin: [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'http://localhost:5173/MarriottHotels',
+      'http://localhost:5173/MarriottHotels/',
+      'https://studio.apollographql.com'
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-trpc-source', 'apollo-require-preflight'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'x-trpc-source',
+      'apollo-require-preflight',
+      'x-csrf-token'
+    ],
     exposedHeaders: ['set-cookie']
   }));
 
-  // Serve static admin UI
-  app.use(express.static(join(__dirname, 'admin-ui')));
-
-  // Admin routes
-  app.get('/admin', (req, res) => {
-    res.sendFile(join(__dirname, 'admin-ui', 'index.html'));
-  });
-
-  app.get('/admin/login', (req, res) => {
-    res.sendFile(join(__dirname, 'admin-ui', 'login.html'));
+  // Add security headers
+  app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    next();
   });
 
   // Chat API endpoint
@@ -336,25 +344,16 @@ async function main() {
     }
   });
 
-  // API endpoints
-  app.use('/api/trpc', createExpressMiddleware({
-    router: appRouter,
-    createContext,
-    onError({ error, type, path, input, ctx, req }) {
-      logger.error('tRPC error:', {
-        type,
-        path,
-        input,
-        error: error.message,
-        stack: error.stack
-      });
-    }
-  }));
-
   // Configure Apollo Server
   const apolloServer = new ApolloServer({
     typeDefs,
     resolvers,
+    context: async ({ req }) => {
+      return {
+        prisma,
+        req,
+      };
+    },
     playground: {
       settings: {
         'editor.theme': 'dark',
@@ -365,66 +364,64 @@ async function main() {
         'editor.fontFamily': "'Source Code Pro', 'Consolas', 'Inconsolata', 'Droid Sans Mono', 'Monaco', monospace"
       }
     },
-    introspection: true
+    introspection: true,
+    formatError: (error) => {
+      logger.error('GraphQL Error:', error);
+      return error;
+    }
   });
 
+  // Start the server
   await apolloServer.start();
   apolloServer.applyMiddleware({ 
     app, 
     path: '/api/graphql',
-    cors: {
-      origin: ['http://localhost:5173', 'https://studio.apollographql.com'],
-      credentials: true
-    }
+    cors: false // We're already handling CORS at the app level
   });
 
-  // API documentation
-  app.get('/', (req, res) => {
-    res.json({ 
-      status: 'ok',
-      endpoints: {
-        admin: {
-          ui: '/admin',
-          login: '/admin/login'
-        },
-        api: {
-          trpc: '/api/trpc',
-          graphql: '/api/graphql',
-          chat: '/api/chat',
-          docs: '/api/graphql' // GraphQL playground
-        }
-      }
+  // Add tRPC middleware
+  app.use('/api/trpc', createExpressMiddleware({ router: appRouter, createContext }));
+
+  // Error handling middleware
+  app.use((err, req, res, next) => {
+    logger.error('Server Error:', err);
+    res.status(err.status || 500).json({
+      error: process.env.NODE_ENV === 'production' ? 'Internal Server Error' : err.message,
+      ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
     });
   });
 
-  // Start the server
-  httpServer.listen(port, () => {
-    const frontendUrl = 'http://localhost:5173/MarriottHotels/';
-    const graphqlUrl = 'http://localhost:3000/api/graphql';
-    const prismaStudioUrl = 'http://localhost:5555';
-
-    logger.info(`
-🚀 Admin & API Server ready:
-📊 Admin UI: http://localhost:3000/admin
-🔑 Admin Login: http://localhost:3000/admin/login
-🔌 tRPC API: http://localhost:3000/api/trpc
-💬 Chat API: http://localhost:3000/api/chat
-📝 GraphQL Playground: ${graphqlUrl}
-🌐 Accepting frontend requests from ${frontendUrl}
-📚 Documentation: http://localhost:3000/MarriottHotels/docs
-🗄️ Prisma Studio: ${prismaStudioUrl}
-    `);
-
-    // Auto-launch browser windows after a short delay
-    setTimeout(() => {
-      openInBrowser(frontendUrl);
-      openInBrowser(graphqlUrl);
-      openInBrowser(prismaStudioUrl);
-    }, 2000); // Wait 2 seconds to ensure all services are ready
+  // Handle 404s
+  app.use((req, res) => {
+    res.status(404).json({ error: 'Not Found' });
   });
+
+  // Start listening
+  httpServer.listen(port, () => {
+    const serverInfo = [
+      '\n🚀 Server ready:',
+      '🔌 tRPC API: http://localhost:3000/api/trpc',
+      '💬 Chat API: http://localhost:3000/api/chat',
+      '📝 GraphQL Playground: http://localhost:3000/api/graphql',
+      '🌐 Frontend: http://localhost:5173/MarriottHotels/',
+      '📚 Documentation: http://localhost:3000/MarriottHotels/docs',
+      '🗄️ Prisma Studio: http://localhost:5555',
+      ''
+    ].join('\n');
+    
+    logger.info(serverInfo);
+  });
+
+  // Open browser tabs
+  if (process.env.NODE_ENV !== 'production') {
+    setTimeout(() => {
+      openInBrowser('http://localhost:5173/MarriottHotels/');
+      openInBrowser('http://localhost:5555');
+    }, 2000);
+  }
 }
 
-main().catch((error) => {
-  logger.error('Server startup error:', error);
+main().catch((err) => {
+  logger.error('Failed to start server:', err);
   process.exit(1);
 });

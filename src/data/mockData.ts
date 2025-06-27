@@ -1,20 +1,4 @@
-export interface Hotel {
-  id: string;
-  name: string;
-  location: string;
-  description: string;
-  price: number;
-  rating: number;
-  images: string[];
-  amenities: string[];
-  type: 'standard' | 'boutique' | 'luxury';
-  featured?: boolean;
-  reviews: number;
-  rooms: Room[];
-  totalRooms: number;
-  occupiedRooms: number;
-  avgDailyRate: number;
-}
+import { Hotel } from '../types/hotel';
 
 export interface Restaurant {
   id: string;
@@ -94,12 +78,13 @@ export interface User {
 export interface Booking {
   id: string;
   guestName: string;
+  guestEmail: string;
   hotelName: string;
-  checkIn: Date;
-  checkOut: Date;
-  status: 'CONFIRMED' | 'PENDING' | 'CANCELLED';
-  totalAmount: number;
   roomType: string;
+  checkIn: string;
+  checkOut: string;
+  status: 'CONFIRMED' | 'PENDING' | 'CANCELLED';
+  totalPrice: number;
 }
 
 export interface Revenue {
@@ -150,467 +135,76 @@ export interface Inventory {
 
 export const mockHotels: Hotel[] = [
   {
-    id: 'sandbourne-santa-monica',
-    name: 'Sandbourne Santa Monica',
-    location: 'Santa Monica, California, USA',
-    description: 'A luxurious boutique hotel steps away from Santa Monica Beach, offering a perfect blend of coastal charm and modern luxury.',
-    price: 450,
-    rating: 4.9,
-    images: [
-      'https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg',
-      'https://images.pexels.com/photos/261156/pexels-photo-261156.jpeg',
-      'https://images.pexels.com/photos/261395/pexels-photo-261395.jpeg'
-    ],
-    amenities: ['Beach Access', 'Rooftop Pool', 'Spa', 'Restaurant', 'Fitness Center', 'Valet Parking'],
-    type: 'boutique',
-    featured: true,
-    reviews: 856,
-    rooms: [
-      {
-        type: 'Ocean View Room',
-        price: 450,
-        description: 'Elegant room with stunning ocean views and private balcony',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '475 sq ft'
-      },
-      {
-        type: 'Luxury Suite',
-        price: 750,
-        description: 'Spacious suite with separate living area and ocean views',
-        beds: '1 King',
-        occupancy: '3 Adults',
-        size: '750 sq ft'
-      },
-      {
-        type: 'Penthouse Suite',
-        price: 1200,
-        description: 'Ultimate luxury with panoramic views and private terrace',
-        beds: '2 King',
-        occupancy: '4 Adults',
-        size: '1,200 sq ft'
-      }
-    ],
-    totalRooms: 300,
-    occupiedRooms: 250,
-    avgDailyRate: 350
-  },
-  {
-    id: 'trailborn-highlands',
-    name: 'Trailborn Highlands',
-    location: 'Asheville, North Carolina, USA',
-    description: 'Nestled in the Blue Ridge Mountains, this boutique retreat offers a perfect blend of rustic charm and modern comfort.',
-    price: 380,
-    rating: 4.8,
-    images: [
-      'https://images.pexels.com/photos/2662116/pexels-photo-2662116.jpeg',
-      'https://images.pexels.com/photos/2662117/pexels-photo-2662117.jpeg',
-      'https://images.pexels.com/photos/2662118/pexels-photo-2662118.jpeg'
-    ],
-    amenities: ['Mountain Views', 'Hiking Trails', 'Spa', 'Farm-to-Table Restaurant', 'Yoga Studio'],
-    type: 'boutique',
-    featured: true,
-    reviews: 634,
-    rooms: [
-      {
-        type: 'Mountain View Room',
-        price: 380,
-        description: 'Cozy room with stunning mountain views',
-        beds: '1 King or 2 Queen',
-        occupancy: '2-4 Adults',
-        size: '400 sq ft'
-      },
-      {
-        type: 'Highland Suite',
-        price: 580,
-        description: 'Luxurious suite with fireplace and private balcony',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '650 sq ft'
-      }
-    ],
-    totalRooms: 400,
-    occupiedRooms: 320,
-    avgDailyRate: 450
-  },
-  {
-    id: 'park-lane-hong-kong',
-    name: 'Park Lane Hong Kong',
-    location: 'Causeway Bay, Hong Kong',
-    description: 'A sophisticated urban retreat in the heart of Hong Kong, offering stunning views of Victoria Harbour and the city skyline.',
-    price: 520,
-    rating: 4.9,
-    images: [
-      'https://images.pexels.com/photos/2417842/pexels-photo-2417842.jpeg',
-      'https://images.pexels.com/photos/2417843/pexels-photo-2417843.jpeg',
-      'https://images.pexels.com/photos/2417844/pexels-photo-2417844.jpeg'
-    ],
-    amenities: ['Harbour Views', 'Rooftop Bar', 'Spa', 'Fine Dining', 'Executive Lounge', 'Fitness Center'],
-    type: 'boutique',
-    featured: true,
-    reviews: 923,
-    rooms: [
-      {
-        type: 'Deluxe City View',
-        price: 520,
-        description: 'Modern room with city skyline views',
-        beds: '1 King or 2 Queen',
-        occupancy: '2-3 Adults',
-        size: '450 sq ft'
-      },
-      {
-        type: 'Harbour Suite',
-        price: 820,
-        description: 'Luxury suite with Victoria Harbour views',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '700 sq ft'
-      },
-      {
-        type: 'Executive Suite',
-        price: 1100,
-        description: 'Premium suite with lounge access and harbour views',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '900 sq ft'
-      }
-    ],
-    totalRooms: 300,
-    occupiedRooms: 250,
-    avgDailyRate: 350
-  },
-  {
     id: '1',
-    name: 'Marriott Grand Plaza',
-    location: 'New York City, USA',
-    description: 'Luxury hotel in the heart of Manhattan with stunning city views.',
-    price: 299,
-    rating: 4.8,
-    images: [
-      'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg',
-      'https://images.pexels.com/photos/260922/pexels-photo-260922.jpeg',
-    ],
-    amenities: ['Pool', 'Spa', 'Restaurant', 'Gym', 'Room Service'],
-    type: 'luxury',
-    featured: true,
-    reviews: 1247,
-    rooms: [
-      {
-        type: 'City View Room',
-        price: 299,
-        description: 'Modern room with stunning city views',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '400 sq ft'
-      },
-      {
-        type: 'Executive Suite',
-        price: 499,
-        description: 'Spacious suite with separate living area',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '650 sq ft'
-      }
-    ],
-    totalRooms: 300,
-    occupiedRooms: 250,
-    avgDailyRate: 350
-  },
-  {
-    id: 'obr-001',
-    name: 'Ocean Breeze Resort',
-    location: 'Miami Beach, FL',
-    description: 'Luxury beachfront resort with stunning ocean views and world-class amenities.',
-    price: 320,
-    rating: 4.8,
-    images: [
-      'https://images.pexels.com/photos/338504/pexels-photo-338504.jpeg',
-      'https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg',
-      'https://images.pexels.com/photos/261156/pexels-photo-261156.jpeg'
-    ],
-    amenities: ['WiFi', 'Pool', 'Spa', 'Restaurant', 'Beach Access', 'Fitness Center'],
-    type: 'luxury',
-    reviews: 1247,
-    rooms: [
-      {
-        type: 'Ocean View Room',
-        price: 320,
-        description: 'Spacious room with stunning ocean views',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '450 sq ft'
-      },
-      {
-        type: 'Luxury Suite',
-        price: 550,
-        description: 'Premium suite with separate living area',
-        beds: '1 King',
-        occupancy: '3 Adults',
-        size: '750 sq ft'
-      }
-    ],
-    totalRooms: 400,
-    occupiedRooms: 320,
-    avgDailyRate: 450
-  },
-  {
-    id: 'cch-003',
-    name: 'City Central Hotel',
-    location: 'Manhattan, NY',
-    description: 'Modern urban hotel in the heart of Manhattan with easy access to attractions.',
-    price: 280,
-    rating: 4.3,
-    images: [
-      'https://images.pexels.com/photos/1134176/pexels-photo-1134176.jpeg',
-      'https://images.pexels.com/photos/260922/pexels-photo-260922.jpeg',
-      'https://images.pexels.com/photos/260931/pexels-photo-260931.jpeg'
-    ],
-    amenities: ['WiFi', 'Restaurant', 'Gym', 'Parking', 'Business Center'],
-    type: 'standard',
-    reviews: 2156,
-    rooms: [
-      {
-        type: 'City View Room',
-        price: 280,
-        description: 'Modern room with city views',
-        beds: '1 King or 2 Double',
-        occupancy: '2 Adults',
-        size: '350 sq ft'
-      },
-      {
-        type: 'Executive Suite',
-        price: 450,
-        description: 'Spacious suite with living area',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '600 sq ft'
-      }
-    ],
-    totalRooms: 300,
-    occupiedRooms: 250,
-    avgDailyRate: 350
-  },
-  {
-    id: 'dos-004',
-    name: 'Desert Oasis Spa Resort',
-    location: 'Scottsdale, AZ',
-    description: 'Tranquil desert resort featuring award-winning spa treatments and golf course.',
-    price: 380,
-    rating: 4.7,
-    images: [
-      'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg',
-      'https://images.pexels.com/photos/258245/pexels-photo-258245.jpeg',
-      'https://images.pexels.com/photos/261327/pexels-photo-261327.jpeg'
-    ],
-    amenities: ['WiFi', 'Pool', 'Spa', 'Restaurant', 'Golf Course', 'Tennis Courts'],
-    type: 'luxury',
-    reviews: 743,
-    rooms: [
-      {
-        type: 'Desert View Room',
-        price: 380,
-        description: 'Room with desert landscape views',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '475 sq ft'
-      },
-      {
-        type: 'Spa Suite',
-        price: 580,
-        description: 'Suite with private spa bath',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '700 sq ft'
-      }
-    ],
-    totalRooms: 400,
-    occupiedRooms: 320,
-    avgDailyRate: 450
-  },
-  {
-    id: 'cis-005',
-    name: 'Coastal Inn & Suites',
-    location: 'San Diego, CA',
-    description: 'Comfortable coastal accommodation with easy beach access and family-friendly amenities.',
-    price: 180,
-    rating: 4.1,
-    images: [
-      'https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg',
-      'https://images.pexels.com/photos/261156/pexels-photo-261156.jpeg',
-      'https://images.pexels.com/photos/261395/pexels-photo-261395.jpeg'
-    ],
-    amenities: ['WiFi', 'Pool', 'Parking', 'Beach Access', 'Kids Club'],
-    type: 'standard',
-    reviews: 1534,
-    rooms: [
-      {
-        type: 'Standard Room',
-        price: 180,
-        description: 'Comfortable room with basic amenities',
-        beds: '2 Queen',
-        occupancy: '4 Adults',
-        size: '400 sq ft'
-      },
-      {
-        type: 'Family Suite',
-        price: 280,
-        description: 'Suite with kitchenette',
-        beds: '2 Queen + Sofa Bed',
-        occupancy: '6 Adults',
-        size: '600 sq ft'
-      }
-    ],
-    totalRooms: 300,
-    occupiedRooms: 250,
-    avgDailyRate: 350
-  },
-  {
-    id: 'hdb-006',
-    name: 'Historic Downtown Boutique',
-    location: 'Charleston, SC',
-    description: 'Charming boutique hotel in historic district with Southern hospitality and elegance.',
-    price: 220,
+    name: 'Marriott Downtown',
+    location: 'New York',
+    description: 'Luxury hotel in the heart of Manhattan',
     rating: 4.5,
-    images: [
-      'https://images.pexels.com/photos/2034335/pexels-photo-2034335.jpeg',
-      'https://images.pexels.com/photos/2417842/pexels-photo-2417842.jpeg',
-      'https://images.pexels.com/photos/2417843/pexels-photo-2417843.jpeg'
-    ],
-    amenities: ['WiFi', 'Restaurant', 'Spa', 'Garden', 'Afternoon Tea'],
-    type: 'boutique',
-    reviews: 687,
-    rooms: [
-      {
-        type: 'Historic Room',
-        price: 220,
-        description: 'Charming room with period features',
-        beds: '1 Queen',
-        occupancy: '2 Adults',
-        size: '300 sq ft'
-      },
-      {
-        type: 'Garden Suite',
-        price: 350,
-        description: 'Suite with garden views',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '500 sq ft'
-      }
-    ],
-    totalRooms: 300,
-    occupiedRooms: 250,
-    avgDailyRate: 350
+    rooms: 405,
+    status: 'ACTIVE',
+    amenities: ['Pool', 'Spa', 'Gym', 'Restaurant'],
+    images: ['/images/hotel1.jpg', '/images/hotel2.jpg'],
+    price: {
+      base: 299,
+      currency: 'USD'
+    },
+    contact: {
+      phone: '+1-212-555-0123',
+      email: 'downtown@marriott.com',
+      address: '123 Broadway, New York, NY 10007'
+    },
+    checkInTime: '15:00',
+    checkOutTime: '11:00',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z'
   },
   {
-    id: 'lsr-007',
-    name: 'Lakeside Retreat',
-    location: 'Lake Tahoe, CA',
-    description: 'Serene lakeside hotel with breathtaking mountain and water views.',
-    price: 290,
-    rating: 4.6,
-    images: [
-      'https://images.pexels.com/photos/753626/pexels-photo-753626.jpeg',
-      'https://images.pexels.com/photos/753619/pexels-photo-753619.jpeg',
-      'https://images.pexels.com/photos/753623/pexels-photo-753623.jpeg'
-    ],
-    amenities: ['WiFi', 'Restaurant', 'Gym', 'Parking', 'Lake Access', 'Water Sports'],
-    type: 'luxury',
-    reviews: 956,
-    rooms: [
-      {
-        type: 'Lake View Room',
-        price: 290,
-        description: 'Room with lake views',
-        beds: '1 King or 2 Queen',
-        occupancy: '4 Adults',
-        size: '425 sq ft'
-      },
-      {
-        type: 'Waterfront Suite',
-        price: 490,
-        description: 'Suite with private balcony',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '650 sq ft'
-      }
-    ],
-    totalRooms: 400,
-    occupiedRooms: 320,
-    avgDailyRate: 450
+    id: '2',
+    name: 'Marriott Beach Resort',
+    location: 'Miami',
+    description: 'Beachfront resort with stunning ocean views',
+    rating: 4.8,
+    rooms: 712,
+    status: 'MAINTENANCE',
+    amenities: ['Beach Access', 'Pool', 'Spa', 'Water Sports'],
+    images: ['/images/resort1.jpg', '/images/resort2.jpg'],
+    price: {
+      base: 399,
+      currency: 'USD'
+    },
+    contact: {
+      phone: '+1-305-555-0123',
+      email: 'beach@marriott.com',
+      address: '456 Ocean Drive, Miami Beach, FL 33139'
+    },
+    checkInTime: '16:00',
+    checkOutTime: '10:00',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z'
   },
   {
-    id: 'bci-008',
-    name: 'Budget Comfort Inn',
-    location: 'Austin, TX',
-    description: 'Clean, comfortable, and affordable accommodation in the heart of Austin.',
-    price: 95,
-    rating: 3.8,
-    images: [
-      'https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg',
-      'https://images.pexels.com/photos/271619/pexels-photo-271619.jpeg',
-      'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg'
-    ],
-    amenities: ['WiFi', 'Parking', 'Continental Breakfast', 'Business Center'],
-    type: 'standard',
-    reviews: 2341,
-    rooms: [
-      {
-        type: 'Standard Room',
-        price: 95,
-        description: 'Basic comfortable room',
-        beds: '2 Double',
-        occupancy: '4 Adults',
-        size: '300 sq ft'
-      },
-      {
-        type: 'Business Room',
-        price: 120,
-        description: 'Room with work desk',
-        beds: '1 Queen',
-        occupancy: '2 Adults',
-        size: '325 sq ft'
-      }
-    ],
-    totalRooms: 300,
-    occupiedRooms: 250,
-    avgDailyRate: 350
-  },
-  {
-    id: 'lms-009',
-    name: 'Luxury Metropolitan Suite',
-    location: 'Chicago, IL',
-    description: 'Ultra-luxury suites with panoramic city views and personalized concierge service.',
-    price: 520,
-    rating: 4.9,
-    images: [
-      'https://images.pexels.com/photos/260922/pexels-photo-260922.jpeg',
-      'https://images.pexels.com/photos/260932/pexels-photo-260932.jpeg',
-      'https://images.pexels.com/photos/260931/pexels-photo-260931.jpeg'
-    ],
-    amenities: ['WiFi', 'Spa', 'Restaurant', 'Gym', 'Concierge', 'Valet Parking'],
-    type: 'luxury',
-    reviews: 423,
-    rooms: [
-      {
-        type: 'City Suite',
-        price: 520,
-        description: 'Luxury suite with city views',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '800 sq ft'
-      },
-      {
-        type: 'Penthouse Suite',
-        price: 1200,
-        description: 'Ultimate luxury experience',
-        beds: '2 King',
-        occupancy: '4 Adults',
-        size: '1,500 sq ft'
-      }
-    ],
-    totalRooms: 400,
-    occupiedRooms: 320,
-    avgDailyRate: 450
+    id: '3',
+    name: 'Marriott City Center',
+    location: 'Los Angeles',
+    description: 'Modern hotel in downtown LA',
+    rating: 4.3,
+    rooms: 550,
+    status: 'ACTIVE',
+    amenities: ['Pool', 'Business Center', 'Restaurant', 'Bar'],
+    images: ['/images/la1.jpg', '/images/la2.jpg'],
+    price: {
+      base: 279,
+      currency: 'USD'
+    },
+    contact: {
+      phone: '+1-213-555-0123',
+      email: 'la@marriott.com',
+      address: '789 Grand Ave, Los Angeles, CA 90017'
+    },
+    checkInTime: '15:00',
+    checkOutTime: '11:00',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z'
   }
 ];
 
@@ -862,122 +456,114 @@ export const mockUsers: User[] = [
     name: 'John Smith',
     email: 'john.smith@marriott.com',
     role: 'ADMIN',
-    lastLogin: new Date('2024-02-20T10:30:00'),
-    status: 'ACTIVE',
+    lastLogin: new Date('2024-03-20T08:00:00Z'),
+    status: 'ACTIVE'
   },
   {
     id: '2',
     name: 'Sarah Johnson',
-    email: 'sarah.j@marriott.com',
+    email: 'sarah.johnson@marriott.com',
     role: 'MANAGER',
-    lastLogin: new Date('2024-02-19T15:45:00'),
-    status: 'ACTIVE',
+    lastLogin: new Date('2024-03-19T15:30:00Z'),
+    status: 'ACTIVE'
   },
-  // Add more mock users...
+  {
+    id: '3',
+    name: 'Michael Chen',
+    email: 'michael.chen@marriott.com',
+    role: 'STAFF',
+    lastLogin: new Date('2024-03-20T07:45:00Z'),
+    status: 'ACTIVE'
+  }
 ];
 
-export const mockBookings: Booking[] = [
+export const mockBookings = [
   {
-    id: 'B1',
+    id: '1',
     guestName: 'Michael Brown',
     hotelName: 'Marriott Downtown',
-    checkIn: new Date('2024-03-01'),
-    checkOut: new Date('2024-03-05'),
-    status: 'CONFIRMED',
-    totalAmount: 1200,
-    roomType: 'Deluxe Suite',
+    checkIn: '2/29/2024',
+    status: 'CONFIRMED'
   },
   {
-    id: 'B2',
+    id: '2',
     guestName: 'Emma Wilson',
     hotelName: 'Marriott Resort',
-    checkIn: new Date('2024-03-10'),
-    checkOut: new Date('2024-03-15'),
-    status: 'PENDING',
-    totalAmount: 2500,
-    roomType: 'Ocean View Suite',
-  },
-  // Add more mock bookings...
+    checkIn: '3/6/2024',
+    status: 'PENDING'
+  }
 ];
 
-export const mockRevenue: Revenue[] = [
-  {
-    date: new Date('2024-02-01'),
-    amount: 150000,
-    source: 'DIRECT',
-    hotelId: 'H1',
-  },
-  {
-    date: new Date('2024-02-02'),
-    amount: 125000,
-    source: 'OTA',
-    hotelId: 'H1',
-  },
-  // Add more mock revenue data...
+export const mockRevenue = [
+  { date: 'Jan', amount: 150000 },
+  { date: 'Feb', amount: 145000 },
+  { date: 'Mar', amount: 160000 },
+  { date: 'Apr', amount: 155000 },
+  { date: 'May', amount: 140000 },
+  { date: 'Jun', amount: 135000 }
 ];
 
-export const mockComplaints: Complaint[] = [
+export const mockComplaints = [
   {
-    id: 'C1',
-    guestName: 'David Lee',
+    id: '1',
     hotelName: 'Marriott Downtown',
-    date: new Date('2024-02-18'),
-    status: 'NEW',
-    category: 'Room Service',
-    description: 'Delayed room service delivery',
+    guestName: 'John Smith',
+    issue: 'AC not working',
+    status: 'OPEN',
+    priority: 'HIGH'
   },
   {
-    id: 'C2',
-    guestName: 'Lisa Chen',
+    id: '2',
     hotelName: 'Marriott Resort',
-    date: new Date('2024-02-17'),
+    guestName: 'Sarah Johnson',
+    issue: 'Noisy neighbors',
     status: 'IN_PROGRESS',
-    category: 'Cleanliness',
-    description: 'Room not properly cleaned',
-  },
-  // Add more mock complaints...
+    priority: 'MEDIUM'
+  }
 ];
 
-export const mockMaintenanceRequests: MaintenanceRequest[] = [
+export const mockMaintenanceRequests = [
   {
-    id: 'M1',
+    id: '1',
     hotelName: 'Marriott Downtown',
     roomNumber: '405',
     issue: 'AC not working',
-    priority: 'HIGH',
-    status: 'PENDING',
-    dateReported: new Date('2024-02-19'),
+    priority: 'HIGH'
   },
   {
-    id: 'M2',
+    id: '2',
     hotelName: 'Marriott Resort',
     roomNumber: '712',
     issue: 'Leaking faucet',
-    priority: 'MEDIUM',
-    status: 'IN_PROGRESS',
-    dateReported: new Date('2024-02-18'),
-  },
-  // Add more mock maintenance requests...
+    priority: 'MEDIUM'
+  }
 ];
 
 export const mockStaffSchedules: StaffSchedule[] = [
   {
-    id: 'S1',
-    employeeName: 'James Wilson',
-    department: 'Housekeeping',
+    id: '1',
+    employeeName: 'John Smith',
+    department: 'Front Desk',
     shift: 'MORNING',
-    date: new Date('2024-02-20'),
-    hotelName: 'Marriott Downtown',
+    date: new Date('2024-03-20T08:00:00Z'),
+    hotelName: 'Marriott Downtown'
   },
   {
-    id: 'S2',
-    employeeName: 'Maria Garcia',
-    department: 'Front Desk',
+    id: '2',
+    employeeName: 'Sarah Johnson',
+    department: 'Housekeeping',
     shift: 'AFTERNOON',
-    date: new Date('2024-02-20'),
-    hotelName: 'Marriott Downtown',
+    date: new Date('2024-03-20T16:00:00Z'),
+    hotelName: 'Marriott Beach Resort'
   },
-  // Add more mock schedules...
+  {
+    id: '3',
+    employeeName: 'Michael Chen',
+    department: 'Restaurant',
+    shift: 'NIGHT',
+    date: new Date('2024-03-20T00:00:00Z'),
+    hotelName: 'Marriott City Center'
+  }
 ];
 
 export const mockInventory: Inventory[] = [

@@ -17,7 +17,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [userRole, setUserRole] = useState('');
 
   useEffect(() => {
-    // Check login status on mount
+    // For development: Set default admin user
+    localStorage.setItem('marriott_user_logged_in', 'true');
+    localStorage.setItem('marriott_user_email', 'admin@marriott.com');
+    localStorage.setItem('marriott_user_name', 'Admin User');
+    localStorage.setItem('marriott_user_role', 'ADMIN');
+    
+    // Check login status
     const loggedIn = localStorage.getItem('marriott_user_logged_in') === 'true';
     const name = localStorage.getItem('marriott_user_name') || '';
     const role = localStorage.getItem('marriott_user_role') || '';

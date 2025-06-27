@@ -60,12 +60,12 @@ const FeaturedHotels: React.FC = () => {
             >
               <div className="relative h-48">
                 <img
-                  src={hotel.images[0]}
+                  src={`/public${hotel.images[0]}`}
                   alt={hotel.name}
                   className="w-full h-full object-cover rounded-t-lg"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.src = '/images/hotel.gif'; // Fallback image
+                    target.src = '/public/images/hotel.gif'; // Fallback image with /public prefix
                   }}
                 />
                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center">
@@ -79,7 +79,7 @@ const FeaturedHotels: React.FC = () => {
                 <p className="text-gray-600 mb-4">{hotel.location}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold text-[#8B1538]">
-                    ${hotel.price}
+                    {hotel.price.currency === 'USD' ? '$' : hotel.price.currency}{hotel.price.base}
                     <span className="text-sm font-normal text-gray-500">/night</span>
                   </span>
                   <button className="bg-[#8B1538] text-white px-4 py-2 rounded-lg hover:bg-[#6B1028] transition">
