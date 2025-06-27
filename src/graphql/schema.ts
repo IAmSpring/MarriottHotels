@@ -1,5 +1,33 @@
 import { gql } from 'apollo-server-express';
 import { prisma } from '../lib/prisma';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { Hotel, Room } from '../data/hotels';
+
+interface Context {
+  hotels: Hotel[];
+  rooms: Room[];
+}
+
+interface QueryResolvers {
+  hotel: (_: unknown, { id }: { id: string }, context: Context) => Hotel | undefined;
+  hotels: (_: unknown, args: unknown, context: Context) => Hotel[];
+  room: (_: unknown, { id }: { id: string }, context: Context) => Room | undefined;
+  hotelRooms: (_: unknown, { hotelId }: { hotelId: string }, context: Context) => Room[];
+  booking: (_: unknown, { id }: { id: string }, context: Context) => any;
+  userBookings: (_: unknown, { userId }: { userId: string }, context: Context) => any[];
+}
+
+interface MutationResolvers {
+  createHotel: (_: unknown, { input }: { input: Partial<Hotel> }, context: Context) => Hotel;
+  updateHotel: (_: unknown, { id, input }: { id: string; input: Partial<Hotel> }, context: Context) => Hotel;
+  deleteHotel: (_: unknown, { id }: { id: string }, context: Context) => boolean;
+  createRoom: (_: unknown, { input }: { input: Partial<Room> }, context: Context) => Room;
+  updateRoom: (_: unknown, { id, input }: { id: string; input: Partial<Room> }, context: Context) => Room;
+  deleteRoom: (_: unknown, { id }: { id: string }, context: Context) => boolean;
+  createBooking: (_: unknown, { input }: { input: any }, context: Context) => any;
+  updateBooking: (_: unknown, { id, status }: { id: string; status: string }, context: Context) => any;
+  deleteBooking: (_: unknown, { id }: { id: string }, context: Context) => boolean;
+}
 
 export const typeDefs = gql`
   type User {
@@ -19,33 +47,32 @@ export const typeDefs = gql`
   }
 
   type Hotel {
-    id: String!
+    id: ID!
     name: String!
+    type: String!
     location: String!
-    address: String!
     description: String!
-    imageUrl: String!
+    price: Price!
     rating: Float!
-    amenities: [Amenity!]
-    rooms: [Room!]
-    restaurants: [Restaurant!]
-    experiences: [Experience!]
-    reviews: [Review!]
-    bookings: [Booking!]
+    reviews: Int!
+    image: String!
+    amenities: [String!]!
+    rooms: [Room!]!
   }
 
   type Room {
-    id: String!
-    hotelId: String!
-    hotel: Hotel!
+    id: ID!
     type: String!
-    description: String!
     price: Float!
-    capacity: Int!
-    amenities: String!
-    imageUrl: String!
-    available: Boolean!
-    bookings: [Booking!]
+    description: String!
+    beds: String!
+    occupancy: String!
+    size: String!
+  }
+
+  type Price {
+    base: Float!
+    currency: String!
   }
 
   type Amenity {
@@ -111,22 +138,15 @@ export const typeDefs = gql`
   }
 
   type Booking {
-    id: Int!
-    userId: Int!
-    user: User!
-    hotelId: String!
-    hotel: Hotel!
-    roomId: String!
-    room: Room!
+    id: ID!
+    userId: ID!
+    hotelId: ID!
+    roomId: ID!
     checkIn: String!
     checkOut: String!
     guests: Int!
     totalPrice: Float!
     status: String!
-    orderId: Int
-    order: Order
-    createdAt: String!
-    updatedAt: String!
   }
 
   type Order {
@@ -168,11 +188,11 @@ export const typeDefs = gql`
     users: [User!]!
     user(id: Int!): User
     hotels: [Hotel!]!
-    hotel(id: String!): Hotel
-    rooms(hotelId: String!): [Room!]!
-    room(id: String!): Room
-    bookings(userId: Int): [Booking!]!
-    booking(id: Int!): Booking
+    hotel(id: ID!): Hotel
+    rooms(hotelId: ID!): [Room!]!
+    room(id: ID!): Room
+    bookings(userId: ID): [Booking!]!
+    booking(id: ID!): Booking
     experiences(hotelId: String!): [Experience!]!
     experience(id: String!): Experience
     restaurants(hotelId: String!): [Restaurant!]!
@@ -180,6 +200,8 @@ export const typeDefs = gql`
     reviews(hotelId: String!): [Review!]!
     review(id: String!): Review
     conversations(userId: Int!): [Conversation!]!
+    hotelRooms(hotelId: ID!): [Room!]!
+    userBookings(userId: ID!): [Booking!]!
   }
 
   input UserInput {
@@ -189,10 +211,36 @@ export const typeDefs = gql`
     role: String
   }
 
+  input HotelInput {
+    name: String!
+    type: String!
+    location: String!
+    description: String!
+    price: PriceInput!
+    rating: Float!
+    reviews: Int!
+    image: String!
+    amenities: [String!]!
+  }
+
+  input PriceInput {
+    base: Float!
+    currency: String!
+  }
+
+  input RoomInput {
+    type: String!
+    price: Float!
+    description: String!
+    beds: String!
+    occupancy: String!
+    size: String!
+  }
+
   input BookingInput {
-    userId: Int!
-    hotelId: String!
-    roomId: String!
+    userId: ID!
+    hotelId: ID!
+    roomId: ID!
     checkIn: String!
     checkOut: String!
     guests: Int!
@@ -210,8 +258,15 @@ export const typeDefs = gql`
     createUser(input: UserInput!): User
     updateUser(id: Int!, input: UserInput!): User
     deleteUser(id: Int!): User
-    createBooking(input: BookingInput!): Booking
-    updateBookingStatus(id: Int!, status: String!): Booking
+    createHotel(input: HotelInput!): Hotel!
+    updateHotel(id: ID!, input: HotelInput!): Hotel!
+    deleteHotel(id: ID!): Boolean!
+    createRoom(input: RoomInput!): Room!
+    updateRoom(id: ID!, input: RoomInput!): Room!
+    deleteRoom(id: ID!): Boolean!
+    createBooking(input: BookingInput!): Booking!
+    updateBooking(id: ID!, status: String!): Booking!
+    deleteBooking(id: ID!): Boolean!
     createReview(input: ReviewInput!): Review
   }
 `;
@@ -224,17 +279,17 @@ export const resolvers = {
     user: async (_, { id }) => {
       return prisma.user.findUnique({ where: { id } });
     },
-    hotels: async () => {
-      return prisma.hotel.findMany();
+    hotels: async (_, args, context) => {
+      return context.hotels;
     },
-    hotel: async (_, { id }) => {
-      return prisma.hotel.findUnique({ where: { id } });
+    hotel: async (_, { id }, context) => {
+      return context.hotels.find(h => h.id === id);
     },
-    rooms: async (_, { hotelId }) => {
-      return prisma.room.findMany({ where: { hotelId } });
+    rooms: async (_, { hotelId }, context) => {
+      return context.rooms.filter(r => r.hotelId === hotelId);
     },
-    room: async (_, { id }) => {
-      return prisma.room.findUnique({ where: { id } });
+    room: async (_, { id }, context) => {
+      return context.rooms.find(r => r.id === id);
     },
     bookings: async (_, { userId }) => {
       return prisma.booking.findMany({
@@ -246,7 +301,7 @@ export const resolvers = {
         },
       });
     },
-    booking: async (_, { id }) => {
+    booking: async (_, { id }, context) => {
       return prisma.booking.findUnique({
         where: { id },
         include: {
@@ -277,6 +332,20 @@ export const resolvers = {
     conversations: async (_, { userId }) => {
       return prisma.conversation.findMany({ where: { userId } });
     },
+    hotelRooms: async (_, { hotelId }, context) => {
+      const hotel = context.hotels.find(h => h.id === hotelId);
+      return hotel ? hotel.rooms : [];
+    },
+    userBookings: async (_, { userId }, context) => {
+      return prisma.booking.findMany({
+        where: { userId },
+        include: {
+          user: true,
+          hotel: true,
+          room: true,
+        },
+      });
+    },
   },
   Mutation: {
     createUser: async (_, { input }) => {
@@ -291,7 +360,31 @@ export const resolvers = {
     deleteUser: async (_, { id }) => {
       return prisma.user.delete({ where: { id } });
     },
-    createBooking: async (_, { input }) => {
+    createHotel: async (_, { input }, context) => {
+      return prisma.hotel.create({ data: input });
+    },
+    updateHotel: async (_, { id, input }, context) => {
+      return prisma.hotel.update({
+        where: { id },
+        data: input,
+      });
+    },
+    deleteHotel: async (_, { id }, context) => {
+      return prisma.hotel.delete({ where: { id } });
+    },
+    createRoom: async (_, { input }, context) => {
+      return prisma.room.create({ data: input });
+    },
+    updateRoom: async (_, { id, input }, context) => {
+      return prisma.room.update({
+        where: { id },
+        data: input,
+      });
+    },
+    deleteRoom: async (_, { id }, context) => {
+      return prisma.room.delete({ where: { id } });
+    },
+    createBooking: async (_, { input }, context) => {
       return prisma.booking.create({
         data: input,
         include: {
@@ -301,7 +394,7 @@ export const resolvers = {
         },
       });
     },
-    updateBookingStatus: async (_, { id, status }) => {
+    updateBooking: async (_, { id, status }, context) => {
       return prisma.booking.update({
         where: { id },
         data: { status },
@@ -311,6 +404,9 @@ export const resolvers = {
           room: true,
         },
       });
+    },
+    deleteBooking: async (_, { id }, context) => {
+      return prisma.booking.delete({ where: { id } });
     },
     createReview: async (_, { input }) => {
       return prisma.review.create({
@@ -322,4 +418,11 @@ export const resolvers = {
       });
     },
   },
-}; 
+};
+
+export const schema = makeExecutableSchema({
+  typeDefs,
+  resolvers,
+});
+
+export type { QueryResolvers, MutationResolvers }; 

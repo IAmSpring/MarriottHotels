@@ -1,3 +1,10 @@
+export type HotelType = 'LUXURY' | 'RESORT' | 'BOUTIQUE' | 'BUSINESS' | 'STANDARD';
+
+export interface Price {
+  base: number;
+  currency: string;
+}
+
 export interface Room {
   id?: string;
   type: string;
@@ -8,45 +15,39 @@ export interface Room {
   size: string;
 }
 
-export interface BookingRoom extends Room {
-  id: string;
+export interface Contact {
+  phone: string;
+  email: string;
+  address: string;
 }
 
 export interface Hotel {
   id: string;
   name: string;
+  type: HotelType;
   location: string;
   description: string;
+  price: Price;
   rating: number;
-  rooms: number;
-  status: 'ACTIVE' | 'MAINTENANCE' | 'CLOSED';
+  reviews: number;
+  image: string;
   amenities: string[];
-  images: string[];
-  price: {
-    base: number;
-    currency: string;
-  };
-  contact: {
-    phone: string;
-    email: string;
-    address: string;
-  };
+  rooms: Room[];
+  status: 'ACTIVE' | 'INACTIVE';
+  contact: Contact;
   checkInTime: string;
   checkOutTime: string;
-  createdAt: string;
-  updatedAt: string;
-  featured?: boolean;
-  type?: 'LUXURY' | 'BUSINESS' | 'RESORT' | 'BOUTIQUE';
+  policies: string[];
+  features: string[];
 }
 
 export interface BookingFilters {
   priceRange: [number, number];
   minRating: number;
   amenities: string[];
-  location?: string;
-  checkIn?: Date;
-  checkOut?: Date;
-  guests?: number;
+  checkIn: Date | null;
+  checkOut: Date | null;
+  guests: number;
 }
 
 export interface BookingDetails {

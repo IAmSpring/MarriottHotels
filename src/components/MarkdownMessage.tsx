@@ -2,6 +2,8 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import type { Components } from 'react-markdown';
 import { Play, Pause, Square, Loader2 } from 'lucide-react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface CodeProps {
   node?: any;
@@ -78,16 +80,25 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({
                     {children}
                   </a>
                 ),
-                code: ({ inline, className, children }) => {
+                code({ node, className, children, ...props }) {
                   const match = /language-(\w+)/.exec(className || '');
-                  return !inline ? (
-                    <pre className="bg-gray-800 text-gray-100 rounded p-2 my-2 overflow-x-auto">
-                      <code className={className}>
-                        {children}
-                      </code>
-                    </pre>
-                  ) : (
-                    <code className="bg-gray-200 text-gray-800 px-1 py-0.5 rounded">
+                  const hasSyntaxHighlight = match && match[1];
+                  
+                  if (hasSyntaxHighlight) {
+                    return (
+                      <SyntaxHighlighter
+                        style={vscDarkPlus}
+                        language={match[1]}
+                        PreTag="div"
+                        {...props}
+                      >
+                        {String(children).replace(/\n$/, '')}
+                      </SyntaxHighlighter>
+                    );
+                  }
+
+                  return (
+                    <code className={className} {...props}>
                       {children}
                     </code>
                   );

@@ -41,10 +41,9 @@ export interface Destination {
   name: string;
   country: string;
   description: string;
-  images: string[];
-  highlights: string[];
-  bestTimeToVisit: string;
-  popularHotels: string[];
+  image: string;
+  weather: string;
+  hotelIds: string[];
 }
 
 export interface Reward {
@@ -137,13 +136,14 @@ export const mockHotels: Hotel[] = [
   {
     id: '1',
     name: 'Marriott Downtown',
+    type: 'LUXURY',
     location: 'New York',
     description: 'Luxury hotel in the heart of Manhattan',
     rating: 4.5,
-    rooms: 405,
+    reviews: 1205,
     status: 'ACTIVE',
     amenities: ['Pool', 'Spa', 'Gym', 'Restaurant'],
-    images: ['/images/hotel1.jpg', '/images/hotel2.jpg'],
+    image: '/images/hotel1.jpg',
     price: {
       base: 299,
       currency: 'USD'
@@ -155,19 +155,50 @@ export const mockHotels: Hotel[] = [
     },
     checkInTime: '15:00',
     checkOutTime: '11:00',
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z'
+    rooms: [
+      {
+        id: 'md-1',
+        type: 'Deluxe Room',
+        price: 299,
+        description: 'Spacious room with city views',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '400 sq ft'
+      },
+      {
+        id: 'md-2',
+        type: 'Executive Suite',
+        price: 499,
+        description: 'Luxury suite with separate living area',
+        beds: '1 King',
+        occupancy: '2-3 Adults',
+        size: '600 sq ft'
+      }
+    ],
+    policies: [
+      'No smoking',
+      'Pet friendly',
+      'Check-in time: 3:00 PM',
+      'Check-out time: 11:00 AM'
+    ],
+    features: [
+      'City views',
+      '24/7 room service',
+      'Business center',
+      'Fitness center'
+    ]
   },
   {
     id: '2',
     name: 'Marriott Beach Resort',
+    type: 'RESORT',
     location: 'Miami',
     description: 'Beachfront resort with stunning ocean views',
     rating: 4.8,
-    rooms: 712,
-    status: 'MAINTENANCE',
+    reviews: 892,
+    status: 'ACTIVE',
     amenities: ['Beach Access', 'Pool', 'Spa', 'Water Sports'],
-    images: ['/images/resort1.jpg', '/images/resort2.jpg'],
+    image: '/images/resort1.jpg',
     price: {
       base: 399,
       currency: 'USD'
@@ -179,19 +210,50 @@ export const mockHotels: Hotel[] = [
     },
     checkInTime: '16:00',
     checkOutTime: '10:00',
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z'
+    rooms: [
+      {
+        id: 'mbr-1',
+        type: 'Ocean View Room',
+        price: 399,
+        description: 'Room with stunning ocean views',
+        beds: '2 Queen',
+        occupancy: '2-4 Adults',
+        size: '450 sq ft'
+      },
+      {
+        id: 'mbr-2',
+        type: 'Beach Villa',
+        price: 699,
+        description: 'Private villa steps from the beach',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '800 sq ft'
+      }
+    ],
+    policies: [
+      'No smoking',
+      'Pet friendly',
+      'Beach access included',
+      'Water sports equipment rental available'
+    ],
+    features: [
+      'Ocean views',
+      'Private beach',
+      'Water sports',
+      'Beach service'
+    ]
   },
   {
     id: '3',
     name: 'Marriott City Center',
+    type: 'BUSINESS',
     location: 'Los Angeles',
     description: 'Modern hotel in downtown LA',
     rating: 4.3,
-    rooms: 550,
+    reviews: 1567,
     status: 'ACTIVE',
     amenities: ['Pool', 'Business Center', 'Restaurant', 'Bar'],
-    images: ['/images/la1.jpg', '/images/la2.jpg'],
+    image: '/images/la1.jpg',
     price: {
       base: 279,
       currency: 'USD'
@@ -203,8 +265,38 @@ export const mockHotels: Hotel[] = [
     },
     checkInTime: '15:00',
     checkOutTime: '11:00',
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z'
+    rooms: [
+      {
+        id: 'mcc-1',
+        type: 'Business Room',
+        price: 279,
+        description: 'Modern room with work desk',
+        beds: '1 Queen',
+        occupancy: '1-2 Adults',
+        size: '350 sq ft'
+      },
+      {
+        id: 'mcc-2',
+        type: 'Executive Suite',
+        price: 429,
+        description: 'Suite with meeting area',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '550 sq ft'
+      }
+    ],
+    policies: [
+      'No smoking',
+      'Pet friendly',
+      'Business center access',
+      'Meeting rooms available'
+    ],
+    features: [
+      'Downtown location',
+      'Business facilities',
+      'Express check-in/out',
+      'Conference rooms'
+    ]
   }
 ];
 
@@ -332,95 +424,85 @@ export const mockExperiences: Experience[] = [
 
 export const mockDestinations: Destination[] = [
   {
-    id: 'new-york',
-    name: 'New York',
+    id: 'miami',
+    name: 'Miami Beach',
     country: 'United States',
-    description: 'Experience the energy of the city that never sleeps, with world-class hotels, dining, shopping, and entertainment.',
-    images: [
-      'https://images.pexels.com/photos/378570/pexels-photo-378570.jpeg',
-      'https://images.pexels.com/photos/378571/pexels-photo-378571.jpeg',
-    ],
-    highlights: ['Times Square', 'Central Park', 'Broadway Shows', 'World-Class Shopping', 'Fine Dining'],
-    bestTimeToVisit: 'April to June or September to November',
-    popularHotels: ['marriott-marquis', 'st-regis-ny', 'ritz-carlton-ny']
+    description: 'Experience the vibrant culture and beautiful beaches of Miami.',
+    image: 'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg',
+    weather: 'Warm and Sunny',
+    hotelIds: ['rcmb-001', 'dos-004']
   },
   {
-    id: 'dubai',
-    name: 'Dubai',
-    country: 'United Arab Emirates',
-    description: 'Discover a city of superlatives, where luxury meets tradition in the heart of the Arabian Desert.',
-    images: [
-      'https://images.pexels.com/photos/1519088/pexels-photo-1519088.jpeg',
-      'https://images.pexels.com/photos/1519089/pexels-photo-1519089.jpeg',
-    ],
-    highlights: ['Burj Khalifa', 'Dubai Mall', 'Desert Safaris', 'Palm Jumeirah', 'Gold Souk'],
-    bestTimeToVisit: 'November to March',
-    popularHotels: ['burj-al-arab', 'atlantis-palm', 'ritz-carlton-dubai']
-  },
-  {
-    id: 'paris',
-    name: 'Paris',
-    country: 'France',
-    description: 'Fall in love with the City of Light, where romance, culture, and gastronomy create unforgettable memories.',
-    images: [
-      'https://images.pexels.com/photos/2082103/pexels-photo-2082103.jpeg',
-      'https://images.pexels.com/photos/705764/pexels-photo-705764.jpeg'
-    ],
-    highlights: ['Eiffel Tower', 'Louvre Museum', 'Notre-Dame', 'Champs-Élysées', 'French Cuisine'],
-    bestTimeToVisit: 'June to August or September to October',
-    popularHotels: ['ritz-paris', 'four-seasons-paris', 'le-bristol']
-  },
-  {
-    id: 'tokyo',
-    name: 'Tokyo',
-    country: 'Japan',
-    description: 'Immerse yourself in a fascinating blend of ultra-modern technology and traditional culture in Japan\'s capital.',
-    images: [
-      'https://images.pexels.com/photos/1388030/pexels-photo-1388030.jpeg',
-      'https://images.pexels.com/photos/1388031/pexels-photo-1388031.jpeg',
-    ],
-    highlights: ['Shibuya Crossing', 'Imperial Palace', 'Tokyo Skytree', 'Tsukiji Market', 'Japanese Gardens'],
-    bestTimeToVisit: 'March to May or September to November',
-    popularHotels: ['park-hyatt-tokyo', 'mandarin-oriental-tokyo', 'ritz-carlton-tokyo']
-  },
-  {
-    id: 'mount-rainier',
-    name: 'Mount Rainier',
+    id: 'nyc',
+    name: 'New York City',
     country: 'United States',
-    description: 'Experience the majestic beauty of the Pacific Northwest with stunning mountain views, pristine wilderness, and luxurious accommodations.',
-    images: [
-      'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg',
-      'https://images.pexels.com/photos/417075/pexels-photo-417075.jpeg',
-    ],
-    highlights: ['National Park Access', 'Hiking Trails', 'Wildlife Viewing', 'Scenic Drives', 'Mountain Climbing'],
-    bestTimeToVisit: 'July to September',
-    popularHotels: ['rainier-lodge', 'mountain-view-resort']
+    description: 'The city that never sleeps, offering endless entertainment and cultural experiences.',
+    image: 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg',
+    weather: 'Seasonal',
+    hotelIds: ['1', '4']
   },
   {
-    id: 'las-vegas',
-    name: 'Las Vegas',
+    id: 'aspen',
+    name: 'Aspen',
     country: 'United States',
-    description: 'Discover the entertainment capital of the world, featuring world-class shows, casinos, dining, and luxury resorts.',
-    images: [
-      'https://images.pexels.com/photos/415999/pexels-photo-415999.jpeg',
-      'https://images.pexels.com/photos/416000/pexels-photo-416000.jpeg',
-    ],
-    highlights: ['Casino Resorts', 'Live Shows', 'Fine Dining', 'Shopping', 'Nightlife'],
-    bestTimeToVisit: 'March to May and September to November',
-    popularHotels: ['bellagio', 'venetian', 'caesars-palace']
+    description: 'World-renowned ski resort town with luxury accommodations and mountain views.',
+    image: 'https://images.pexels.com/photos/754268/pexels-photo-754268.jpeg',
+    weather: 'Alpine Climate',
+    hotelIds: ['3', 'jmas-002']
   },
   {
-    id: 'maldives',
-    name: 'Maldives',
-    country: 'Maldives',
-    description: 'Paradise on Earth with crystal clear waters and luxury resorts.',
-    images: [
-      'https://images.pexels.com/photos/1287460/pexels-photo-1287460.jpeg',
-      'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg',
-    ],
-    highlights: ['Overwater villas', 'Coral reefs', 'Water sports', 'Spa retreats'],
-    bestTimeToVisit: 'November to April',
-    popularHotels: ['1', '2', '3']
+    id: 'san-diego',
+    name: 'San Diego',
+    country: 'United States',
+    description: 'Perfect weather, beautiful beaches, and family-friendly attractions.',
+    image: 'https://images.pexels.com/photos/1538177/pexels-photo-1538177.jpeg',
+    weather: 'Mild Year-round',
+    hotelIds: ['cis-005']
+  },
+  {
+    id: 'charleston',
+    name: 'Charleston',
+    country: 'United States',
+    description: 'Historic charm meets Southern hospitality in this coastal gem.',
+    image: 'https://images.pexels.com/photos/2889493/pexels-photo-2889493.jpeg',
+    weather: 'Subtropical',
+    hotelIds: ['hdb-006']
+  },
+  {
+    id: 'lake-tahoe',
+    name: 'Lake Tahoe',
+    country: 'United States',
+    description: 'Crystal clear waters and mountain adventures await.',
+    image: 'https://images.pexels.com/photos/338504/pexels-photo-338504.jpeg',
+    weather: 'Alpine',
+    hotelIds: ['lsr-007']
+  },
+  {
+    id: 'austin',
+    name: 'Austin',
+    country: 'United States',
+    description: 'Live music capital with a vibrant food scene and tech culture.',
+    image: 'https://images.pexels.com/photos/1563256/pexels-photo-1563256.jpeg',
+    weather: 'Hot Summers',
+    hotelIds: ['bci-008']
+  },
+  {
+    id: 'chicago',
+    name: 'Chicago',
+    country: 'United States',
+    description: 'Iconic architecture, world-class dining, and lakefront beauty.',
+    image: 'https://images.pexels.com/photos/1334605/pexels-photo-1334605.jpeg',
+    weather: 'Four Seasons',
+    hotelIds: ['lms-009']
+  },
+  {
+    id: 'hong-kong',
+    name: 'Hong Kong',
+    country: 'China',
+    description: 'Where East meets West in a dazzling harbor city.',
+    image: 'https://images.pexels.com/photos/2417842/pexels-photo-2417842.jpeg',
+    weather: 'Subtropical',
+    hotelIds: ['park-lane-hong-kong']
   }
 ];
 
@@ -436,9 +518,6 @@ export const mockRewards: Reward[] = [
   },
   // Add more rewards...
 ];
-
-// Helper function to get featured hotels
-export const getFeaturedHotels = () => mockHotels.filter(hotel => hotel.featured);
 
 // Helper function to get hotels by type
 export const getHotelsByType = (type: Hotel['type']) => mockHotels.filter(hotel => hotel.type === type);

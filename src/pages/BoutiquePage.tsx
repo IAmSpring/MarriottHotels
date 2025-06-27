@@ -1,30 +1,35 @@
 import React, { useState } from 'react';
-import { mockHotels } from '../data/mockData';
+import { Hotel } from '../data/hotels';
 import { Search, Star, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const BoutiquePage: React.FC = () => {
+interface BoutiquePageProps {
+  hotels: Hotel[];
+}
+
+const BoutiquePage: React.FC<BoutiquePageProps> = ({ hotels }) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [priceRange, setPriceRange] = useState<string>('all');
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
 
-  const boutiqueHotels = mockHotels.filter(hotel => hotel.type === 'boutique');
-  
-  const priceRanges = {
-    all: { min: 0, max: Infinity },
-    '0-200': { min: 0, max: 200 },
-    '201-400': { min: 201, max: 400 },
-    '401+': { min: 401, max: Infinity }
+  const boutiqueHotels = hotels.filter(hotel => 
+    hotel.type === "BOUTIQUE" &&
+    hotel.price.base >= priceRange.min &&
+    hotel.price.base <= priceRange.max &&
+    (selectedAmenities.length === 0 || 
+      selectedAmenities.every(amenity => 
+        hotel.amenities.includes(amenity)
+      ))
+  );
+
+  const handleAmenityToggle = (amenity: string) => {
+    setSelectedAmenities(prev =>
+      prev.includes(amenity)
+        ? prev.filter(a => a !== amenity)
+        : [...prev, amenity]
+    );
   };
-
-  const filteredHotels = boutiqueHotels.filter(hotel => {
-    const matchesSearch = hotel.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         hotel.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         hotel.location.toLowerCase().includes(searchQuery.toLowerCase());
-    const selectedRange = priceRanges[priceRange as keyof typeof priceRanges];
-    const matchesPrice = hotel.price >= selectedRange.min && hotel.price <= selectedRange.max;
-    return matchesSearch && matchesPrice;
-  });
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -53,21 +58,44 @@ const BoutiquePage: React.FC = () => {
           </div>
           <div className="md:w-64">
             <select
-              value={priceRange}
-              onChange={(e) => setPriceRange(e.target.value)}
+              value={priceRange.min.toString() + '-' + priceRange.max.toString()}
+              onChange={(e) => {
+                const [min, max] = e.target.value.split('-').map(Number);
+                setPriceRange({ min, max });
+              }}
               className="w-full pl-4 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent"
             >
-              <option value="all">All Prices</option>
+              <option value="0-1000">All Prices</option>
               <option value="0-200">$0 - $200</option>
               <option value="201-400">$201 - $400</option>
-              <option value="401+">$401+</option>
+              <option value="401-600">$401 - $600</option>
+              <option value="601-800">$601 - $800</option>
+              <option value="801-1000">$801 - $1000</option>
             </select>
+          </div>
+        </div>
+
+        {/* Amenities Filter */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold mb-4">Amenities</h2>
+          <div className="space-y-2">
+            {['Pool', 'Spa', 'Gym', 'Restaurant', 'Bar', 'Room Service'].map(amenity => (
+              <label key={amenity} className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={selectedAmenities.includes(amenity)}
+                  onChange={() => handleAmenityToggle(amenity)}
+                  className="rounded border-gray-300 text-[#8B1538] focus:ring-[#8B1538]"
+                />
+                <span className="ml-2 text-sm text-gray-600">{amenity}</span>
+              </label>
+            ))}
           </div>
         </div>
 
         {/* Hotels Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredHotels.map(hotel => (
+          {boutiqueHotels.map(hotel => (
             <div
               key={hotel.id}
               className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
@@ -75,12 +103,12 @@ const BoutiquePage: React.FC = () => {
             >
               <div className="relative h-48">
                 <img
-                  src={hotel.images[0]}
+                  src={hotel.image}
                   alt={hotel.name}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute top-4 right-4 bg-white px-2 py-1 rounded-full text-sm font-semibold text-gray-900">
-                  ${hotel.price}/night
+                  ${hotel.price.base}/night
                 </div>
               </div>
               <div className="p-6">
@@ -131,7 +159,7 @@ const BoutiquePage: React.FC = () => {
         </div>
 
         {/* No Results */}
-        {filteredHotels.length === 0 && (
+        {boutiqueHotels.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-600 text-lg">
               No boutique hotels found matching your criteria.

@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { Star, Wifi, Waves, Coffee, UtensilsCrossed, Dumbbell, Car, Calendar, Users, Filter, MapPin } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { mockHotels } from '../data/mockData';
-import type { Hotel, BookingFilters } from '../types/hotel';
+import { hotels } from '../data/hotels';
+import type { BookingFilters } from '../types/hotel';
 import Footer from '../components/Footer';
 
 const HotelsPage = () => {
@@ -27,10 +27,10 @@ const HotelsPage = () => {
   };
 
   const filteredHotels = useMemo(() => {
-    return mockHotels.filter(hotel => {
+    return hotels.filter(hotel => {
       return (
-        hotel.price >= filters.priceRange[0] &&
-        hotel.price <= filters.priceRange[1] &&
+        hotel.price.base >= filters.priceRange[0] &&
+        hotel.price.base <= filters.priceRange[1] &&
         hotel.rating >= filters.minRating &&
         (filters.amenities.length === 0 || 
           filters.amenities.every(amenity => 
@@ -42,194 +42,141 @@ const HotelsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Search Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-            {/* Location */}
-            <div className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Where are you going?"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent"
-                />
-              </div>
-            </div>
-            
-            {/* Check-in */}
-            <div className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Check-in</label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <DatePicker
-                  selected={filters.checkIn}
-                  onChange={(date) => setFilters(prev => ({
-                    ...prev,
-                    checkIn: date as Date
-                  }))}
-                  placeholderText="Check-in"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent"
-                />
-              </div>
-            </div>
-            
-            {/* Check-out */}
-            <div className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Check-out</label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <DatePicker
-                  selected={filters.checkOut}
-                  onChange={(date) => setFilters(prev => ({
-                    ...prev,
-                    checkOut: date as Date
-                  }))}
-                  placeholderText="Check-out"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent"
-                />
-              </div>
-            </div>
-            
-            {/* Guests */}
-            <div className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Guests</label>
-              <div className="relative">
-                <Users className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type="number"
-                  min="1"
-                  value={filters.guests}
-                  onChange={(e) => setFilters(prev => ({
-                    ...prev,
-                    guests: parseInt(e.target.value)
-                  }))}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent"
-                />
-              </div>
-            </div>
-            
-            {/* Filter Button */}
-            <div className="flex items-end">
-              <button
-                className="w-full px-6 py-3 bg-[#8B1538] text-white font-semibold rounded-lg hover:bg-[#6B1028] transition-colors duration-200 flex items-center justify-center space-x-2"
-              >
-                <Filter className="h-5 w-5" />
-                <span>Filters</span>
-              </button>
-            </div>
-          </div>
+      {/* Hero Section */}
+      <div className="bg-[#8B1538] text-white py-16">
+        <div className="container mx-auto px-4">
+          <h1 className="text-4xl font-bold mb-4">Find Your Perfect Stay</h1>
+          <p className="text-xl">Discover luxury accommodations worldwide</p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row gap-8">
           {/* Filters Sidebar */}
-          <div className="lg:w-80">
-            <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-24">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">Filters</h3>
-              
-              {/* Price Range */}
-              <div className="mb-6">
-                <h4 className="font-semibold text-gray-900 mb-3">Price Range</h4>
-                <div className="space-y-2">
+          <div className="w-full md:w-1/4 bg-white rounded-lg shadow p-6">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center">
+                <Filter className="w-5 h-5 mr-2" />
+                Filters
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Price Range</label>
                   <input
                     type="range"
                     min="0"
                     max="1000"
+                    step="50"
                     value={filters.priceRange[1]}
                     onChange={(e) => setFilters(prev => ({
                       ...prev,
-                      priceRange: [prev.priceRange[0], parseInt(e.target.value)]
+                      priceRange: [0, parseInt(e.target.value)]
                     }))}
-                    className="w-full accent-[#8B1538]"
+                    className="w-full"
                   />
                   <div className="flex justify-between text-sm text-gray-600">
-                    <span>$0</span>
+                    <span>${filters.priceRange[0]}</span>
                     <span>${filters.priceRange[1]}</span>
                   </div>
                 </div>
-              </div>
-              
-              {/* Rating */}
-              <div className="mb-6">
-                <h4 className="font-semibold text-gray-900 mb-3">Minimum Rating</h4>
-                <div className="space-y-2">
-                  <select
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Minimum Rating</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="5"
+                    step="0.5"
                     value={filters.minRating}
                     onChange={(e) => setFilters(prev => ({
                       ...prev,
                       minRating: parseFloat(e.target.value)
                     }))}
-                    className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent"
-                  >
-                    <option value={0}>All Ratings</option>
-                    <option value={4.5}>4.5+</option>
-                    <option value={4}>4.0+</option>
-                    <option value={3.5}>3.5+</option>
-                    <option value={3}>3.0+</option>
-                  </select>
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>0</span>
+                    <span>{filters.minRating}</span>
+                    <span>5</span>
+                  </div>
                 </div>
-              </div>
-              
-              {/* Amenities */}
-              <div className="mb-6">
-                <h4 className="font-semibold text-gray-900 mb-3">Amenities</h4>
-                <div className="space-y-2">
-                  {Object.keys(amenityIcons).map(amenity => (
-                    <label key={amenity} className="flex items-center space-x-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={filters.amenities.includes(amenity)}
-                        onChange={(e) => {
-                          setFilters(prev => ({
-                            ...prev,
-                            amenities: e.target.checked
-                              ? [...prev.amenities, amenity]
-                              : prev.amenities.filter(a => a !== amenity)
-                          }));
-                        }}
-                        className="text-[#8B1538]"
-                      />
-                      <span className="text-sm capitalize">{amenity}</span>
-                    </label>
-                  ))}
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Amenities</label>
+                  <div className="space-y-2">
+                    {Object.entries(amenityIcons).map(([amenity, icon]) => (
+                      <label key={amenity} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={filters.amenities.includes(amenity)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFilters(prev => ({
+                                ...prev,
+                                amenities: [...prev.amenities, amenity]
+                              }));
+                            } else {
+                              setFilters(prev => ({
+                                ...prev,
+                                amenities: prev.amenities.filter(a => a !== amenity)
+                              }));
+                            }
+                          }}
+                          className="mr-2"
+                        />
+                        <span className="flex items-center">
+                          {icon}
+                          <span className="ml-2">{amenity}</span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              
-              {/* Dates */}
-              <div className="mb-6">
-                <h4 className="font-semibold text-gray-900 mb-3">Dates</h4>
-                <div className="space-y-2">
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Check-in Date</label>
                   <DatePicker
                     selected={filters.checkIn}
-                    onChange={(date) => setFilters(prev => ({
-                      ...prev,
-                      checkIn: date as Date
-                    }))}
-                    placeholderText="Check-in"
-                    className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent"
+                    onChange={(date) => setFilters(prev => ({ ...prev, checkIn: date }))}
+                    className="w-full p-2 border rounded"
+                    placeholderText="Select date"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Check-out Date</label>
                   <DatePicker
                     selected={filters.checkOut}
-                    onChange={(date) => setFilters(prev => ({
-                      ...prev,
-                      checkOut: date as Date
-                    }))}
-                    placeholderText="Check-out"
-                    className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent"
+                    onChange={(date) => setFilters(prev => ({ ...prev, checkOut: date }))}
+                    className="w-full p-2 border rounded"
+                    placeholderText="Select date"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Guests</label>
+                  <div className="flex items-center">
+                    <Users className="w-5 h-5 mr-2" />
+                    <input
+                      type="number"
+                      min="1"
+                      value={filters.guests}
+                      onChange={(e) => setFilters(prev => ({
+                        ...prev,
+                        guests: parseInt(e.target.value)
+                      }))}
+                      className="w-full p-2 border rounded"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-          
-          {/* Hotel Listings */}
+
+          {/* Hotel List */}
           <div className="flex-1">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredHotels.map((hotel: Hotel) => (
+              {filteredHotels.map((hotel) => (
                 <Link 
                   key={hotel.id} 
                   to={`/hotels/${hotel.id}`}
@@ -237,7 +184,7 @@ const HotelsPage = () => {
                 >
                   <div className="relative h-48">
                     <img 
-                      src={hotel.images[0]} 
+                      src={hotel.image}
                       alt={hotel.name}
                       className="w-full h-full object-cover rounded-t-lg"
                       onError={(e) => {
@@ -252,11 +199,15 @@ const HotelsPage = () => {
                   </div>
                   
                   <div className="p-4">
+                    <div className="flex items-center mb-2">
+                      <MapPin className="w-4 h-4 text-gray-500 mr-1" />
+                      <p className="text-gray-600">{hotel.location}</p>
+                    </div>
                     <h3 className="text-xl font-semibold mb-2">{hotel.name}</h3>
-                    <p className="text-gray-600 mb-4">{hotel.location}</p>
+                    <p className="text-gray-500 text-sm mb-4 line-clamp-2">{hotel.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-2xl font-bold text-[#8B1538]">
-                        ${hotel.price}
+                        ${hotel.price.base}
                         <span className="text-sm font-normal text-gray-500">/night</span>
                       </span>
                       <button className="bg-[#8B1538] text-white px-4 py-2 rounded-lg hover:bg-[#6B1028] transition">
@@ -270,7 +221,6 @@ const HotelsPage = () => {
           </div>
         </div>
       </div>
-      
       <Footer />
     </div>
   );
