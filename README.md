@@ -114,6 +114,9 @@ A beautiful, production-ready booking website inspired by Marriott.com with mode
 - **CSS Purging**: Tailwind CSS removes unused styles in production
 - **Skeleton Loading**: Improves perceived performance during data fetching
 
+### Static Deployment
+[https://iamspring.github.io/MarriottHotels/](https://iamspring.github.io/MarriottHotels/)
+
 ## 🚀 Getting Started
 
 ### Documentation
