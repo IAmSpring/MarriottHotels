@@ -1,4 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import ReactFlow, {
+  Node,
+  Edge,
+  Background,
+  Controls,
+  MiniMap,
+  useNodesState,
+  useEdgesState,
+} from 'reactflow';
+import 'reactflow/dist/style.css';
 import {
   Activity,
   AlertTriangle,
@@ -21,6 +31,7 @@ import {
   Share2,
   Shield,
   Workflow,
+  X,
 } from 'lucide-react';
 
 interface ResourceMetric {
@@ -196,6 +207,55 @@ const mockServices: ServiceHealth[] = [
   },
 ];
 
+// Add new interfaces for modals
+interface ModalProps {
+  title: string;
+  children: React.ReactNode;
+  onClose: () => void;
+}
+
+const Modal: React.FC<ModalProps> = ({ title, children, onClose }) => (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">{title}</h2>
+        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <X className="w-6 h-6" />
+        </button>
+      </div>
+      {children}
+    </div>
+  </div>
+);
+
+// Add after mockServices
+const initialNodes: Node[] = mockNodes.map((node, index) => ({
+  id: node.id,
+  type: 'default',
+  position: { x: 250 * (index % 2), y: 150 * Math.floor(index / 2) },
+  data: { label: node.name },
+  style: {
+    background: node.type === 'llm' ? '#F3E8FF' : 
+                node.type === 'vector_store' ? '#DBEAFE' : 
+                node.type === 'memory' ? '#DCFCE7' : '#F3F4F6',
+    border: '1px solid',
+    borderColor: node.type === 'llm' ? '#A855F7' : 
+                node.type === 'vector_store' ? '#3B82F6' : 
+                node.type === 'memory' ? '#22C55E' : '#9CA3AF',
+    borderRadius: '8px',
+    padding: '10px',
+    width: 180,
+  },
+}));
+
+const initialEdges: Edge[] = mockEdges.map((edge, index) => ({
+  id: `edge-${index}`,
+  source: edge.from,
+  target: edge.to,
+  animated: true,
+  style: { stroke: '#8B1538' },
+}));
+
 const MetricCard: React.FC<{ metric: ResourceMetric }> = ({ metric }) => (
   <div className="bg-white rounded-lg shadow p-4">
     <div className="flex items-center justify-between mb-2">
@@ -304,6 +364,89 @@ const ServiceStatus: React.FC<{ service: ServiceHealth }> = ({ service }) => (
 );
 
 const InfrastructurePage: React.FC = () => {
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [activeModal, setActiveModal] = useState<string | null>(null);
+
+  const closeModal = () => setActiveModal(null);
+
+  const renderModalContent = () => {
+    switch (activeModal) {
+      case 'topology':
+        return (
+          <div className="space-y-4">
+            <p>View and manage your LangGraph topology settings here.</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 border rounded">
+                <h3 className="font-semibold mb-2">Node Distribution</h3>
+                <p className="text-sm text-gray-600">Configure how nodes are distributed across the infrastructure</p>
+              </div>
+              <div className="p-4 border rounded">
+                <h3 className="font-semibold mb-2">Edge Routing</h3>
+                <p className="text-sm text-gray-600">Manage message routing between nodes</p>
+              </div>
+            </div>
+          </div>
+        );
+      case 'security':
+        return (
+          <div className="space-y-4">
+            <p>Configure security settings for your LangGraph infrastructure.</p>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="p-4 border rounded">
+                <h3 className="font-semibold mb-2">Access Control</h3>
+                <p className="text-sm text-gray-600">Manage authentication and authorization settings</p>
+              </div>
+              <div className="p-4 border rounded">
+                <h3 className="font-semibold mb-2">Encryption Settings</h3>
+                <p className="text-sm text-gray-600">Configure data encryption at rest and in transit</p>
+              </div>
+            </div>
+          </div>
+        );
+      case 'resources':
+        return (
+          <div className="space-y-4">
+            <p>Manage resource allocation for your LangGraph components.</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 border rounded">
+                <h3 className="font-semibold mb-2">CPU Allocation</h3>
+                <div className="h-4 bg-gray-200 rounded">
+                  <div className="h-4 bg-[#8B1538] rounded" style={{ width: '70%' }}></div>
+                </div>
+                <p className="text-sm text-gray-600 mt-2">70% utilized</p>
+              </div>
+              <div className="p-4 border rounded">
+                <h3 className="font-semibold mb-2">Memory Usage</h3>
+                <div className="h-4 bg-gray-200 rounded">
+                  <div className="h-4 bg-[#8B1538] rounded" style={{ width: '45%' }}></div>
+                </div>
+                <p className="text-sm text-gray-600 mt-2">45% utilized</p>
+              </div>
+            </div>
+          </div>
+        );
+      case 'network':
+        return (
+          <div className="space-y-4">
+            <p>Configure network settings for your LangGraph infrastructure.</p>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="p-4 border rounded">
+                <h3 className="font-semibold mb-2">Network Topology</h3>
+                <p className="text-sm text-gray-600">Current Configuration: Multi-region deployment</p>
+              </div>
+              <div className="p-4 border rounded">
+                <h3 className="font-semibold mb-2">Load Balancing</h3>
+                <p className="text-sm text-gray-600">Active-Active configuration with automatic failover</p>
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-8">
@@ -352,8 +495,18 @@ const InfrastructurePage: React.FC = () => {
                 Expand
               </button>
             </div>
-            <div className="h-64 bg-gray-50 rounded-lg border border-dashed border-gray-300 flex items-center justify-center">
-              <p className="text-gray-500">Graph visualization would go here</p>
+            <div className="h-64 rounded-lg border border-gray-300">
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                fitView
+              >
+                <Background />
+                <Controls />
+                <MiniMap />
+              </ReactFlow>
             </div>
           </div>
         </div>
@@ -371,19 +524,31 @@ const InfrastructurePage: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
             <div className="space-y-2">
-              <button className="w-full flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button
+                onClick={() => setActiveModal('topology')}
+                className="w-full flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
                 <GitGraph className="w-5 h-5 mr-2 text-[#8B1538]" />
                 View Graph Topology
               </button>
-              <button className="w-full flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button
+                onClick={() => setActiveModal('security')}
+                className="w-full flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
                 <Shield className="w-5 h-5 mr-2 text-[#8B1538]" />
                 Security Settings
               </button>
-              <button className="w-full flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button
+                onClick={() => setActiveModal('resources')}
+                className="w-full flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
                 <CircuitBoard className="w-5 h-5 mr-2 text-[#8B1538]" />
                 Resource Allocation
               </button>
-              <button className="w-full flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button
+                onClick={() => setActiveModal('network')}
+                className="w-full flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
                 <Network className="w-5 h-5 mr-2 text-[#8B1538]" />
                 Network Config
               </button>
@@ -391,8 +556,22 @@ const InfrastructurePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {activeModal && (
+        <Modal
+          title={
+            activeModal === 'topology' ? 'Graph Topology' :
+            activeModal === 'security' ? 'Security Settings' :
+            activeModal === 'resources' ? 'Resource Allocation' :
+            'Network Configuration'
+          }
+          onClose={closeModal}
+        >
+          {renderModalContent()}
+        </Modal>
+      )}
     </div>
   );
 };
 
-export default InfrastructurePage; 
+export default InfrastructurePage;

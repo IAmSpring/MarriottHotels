@@ -11,6 +11,7 @@ import MaintenancePage from './MaintenancePage';
 import StaffSchedulePage from './StaffSchedulePage';
 import InventoryPage from './InventoryPage';
 import RevenuePage from './RevenuePage';
+import AIRoutes from './AIRoutes';
 
 const AdminApp = () => {
   const { isLoggedIn, isAdmin } = useAuth();
@@ -23,7 +24,7 @@ const AdminApp = () => {
   return (
     <AdminLayout>
       <Routes>
-        {/* These paths are relative to /MarriottHotels/admin/ */}
+        {/* Main admin routes */}
         <Route index element={<DashboardPage />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="bookings" element={<BookingsPage />} />
@@ -33,6 +34,10 @@ const AdminApp = () => {
         <Route path="staff" element={<StaffSchedulePage />} />
         <Route path="inventory" element={<InventoryPage />} />
         <Route path="revenue" element={<RevenuePage />} />
+        
+        {/* AI admin routes */}
+        <Route path="ai/*" element={<AIRoutes />} />
+        
         {/* Catch-all redirect to dashboard */}
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>

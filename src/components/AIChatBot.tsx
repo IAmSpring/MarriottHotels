@@ -277,7 +277,7 @@ const AIChatBot: React.FC = () => {
     if (!trimmedInput || isLoading) return;
 
     console.log('📤 Sending message:', trimmedInput);
-    
+
     // Add user message
     const newMessage: Message = {
       text: trimmedInput,
@@ -306,7 +306,7 @@ const AIChatBot: React.FC = () => {
 
       const data = await response.json();
       console.log('📥 Received AI response');
-      
+
       const aiMessage: Message = {
         text: data.message,
         isUser: false,
@@ -317,11 +317,11 @@ const AIChatBot: React.FC = () => {
       setThreadId(data.threadId);
 
       // Auto-play response if TTS is enabled
-      if (isTTSEnabled) {
+        if (isTTSEnabled) {
         console.log('🔊 Auto-playing AI response...');
         const messageId = messages.length + 1;
         handlePlayback(messageId, data.message);
-      }
+        }
 
       // If in continuous mode, go back to wake word detection
       if (isContinuousMode) {
@@ -388,64 +388,64 @@ const AIChatBot: React.FC = () => {
       <div className="fixed bottom-6 right-6 z-[1000]">
         <div className="flex flex-col items-end space-y-4">
           {!isOpen && (
-            <button
+      <button
               onClick={() => setIsOpen(true)}
               className="p-4 bg-[#8B1538] text-white rounded-full shadow-lg hover:bg-[#6B1028] transition-colors"
-            >
-              <MessageCircle className="w-6 h-6" />
-            </button>
+      >
+        <MessageCircle className="w-6 h-6" />
+      </button>
           )}
-          
+
           {isOpen && (
-            <div 
+      <div
               className={`bg-white rounded-lg shadow-xl flex flex-col ${
-                isExpanded 
+          isExpanded 
                   ? 'fixed top-[10vh] left-[10vw] w-[80vw] h-[80vh]' 
                   : 'w-[420px] h-[600px]'
               }`}
-            >
+      >
               <div className="flex items-center justify-between p-4 border-b">
-                <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
                   <Bot className="w-6 h-6 text-[#8B1538]" />
-                  <span className="font-semibold">Marriott AI Assistant</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setIsExpanded(!isExpanded)}
+            <span className="font-semibold">Marriott AI Assistant</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
                     className="p-1 hover:bg-gray-100 rounded-full"
-                  >
+            >
                     {isExpanded ? <Minimize className="w-5 h-5" /> : <Expand className="w-5 h-5" />}
-                  </button>
-                  <button
-                    onClick={() => setIsOpen(false)}
+            </button>
+            <button
+              onClick={() => setIsOpen(false)}
                     className="p-1 hover:bg-gray-100 rounded-full"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
 
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.map((message, index) => (
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.map((message, index) => (
                   <MarkdownMessage
-                    key={index}
-                    text={message.text}
-                    isUser={message.isUser}
-                    timestamp={message.timestamp}
-                    messageId={index}
-                    audioState={audioState}
+              key={index}
+              text={message.text}
+              isUser={message.isUser}
+              timestamp={message.timestamp}
+              messageId={index}
+              audioState={audioState}
                     onPlayPause={(messageId, text) => handlePlayback(messageId, text)}
-                    onStop={stopPlayback}
-                  />
-                ))}
-                {isLoading && (
+              onStop={stopPlayback}
+            />
+          ))}
+          {isLoading && (
                   <div className="flex justify-center">
                     <Loader2 className="w-6 h-6 animate-spin text-[#8B1538]" />
-                  </div>
-                )}
-              </div>
+            </div>
+          )}
+        </div>
 
-              <div className="flex-shrink-0 p-4 border-t bg-white">
+        <div className="flex-shrink-0 p-4 border-t bg-white">
                 <div className="flex items-start space-x-2">
                   <button
                     onClick={handleContinuousModeToggle}
@@ -463,19 +463,19 @@ const AIChatBot: React.FC = () => {
                   </button>
                   
                   <div className="flex-1">
-                    <textarea
+            <textarea
                       value={isRecording ? currentTranscription : inputText}
-                      onChange={(e) => setInputText(e.target.value)}
-                      onKeyPress={handleKeyPress}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyPress={handleKeyPress}
                       placeholder={isRecording ? 'Listening...' : 'Type your message...'}
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B1538] focus:border-transparent resize-none overflow-hidden"
                       style={{
                         minHeight: '42px',
                         maxHeight: '120px',
                       }}
-                      rows={1}
-                      disabled={isLoading || isRecording || isTranscribing}
-                    />
+              rows={1}
+              disabled={isLoading || isRecording || isTranscribing}
+            />
                   </div>
 
                   <div className="flex-shrink-0 flex items-start space-x-2">
@@ -491,29 +491,29 @@ const AIChatBot: React.FC = () => {
                       {isTTSEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
                     </button>
 
-                    <button
+            <button
                       onClick={async () => {
-                        if (isRecording) {
-                          await stopRecording();
-                        } else {
-                          await startRecording();
-                        }
-                      }}
+                  if (isRecording) {
+                    await stopRecording();
+                  } else {
+                    await startRecording();
+                }
+              }}
                       disabled={isLoading || isTranscribing || isListeningForWakeWord}
-                      className={`p-2 rounded-full transition-colors ${
-                        isRecording 
-                          ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
-                          : isTranscribing
-                          ? 'bg-gray-200'
-                          : 'bg-gray-200 hover:bg-gray-300'
+              className={`p-2 rounded-full transition-colors ${
+                isRecording 
+                  ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
+                  : isTranscribing
+                  ? 'bg-gray-200'
+                  : 'bg-gray-200 hover:bg-gray-300'
                       } relative`}
                       title={isRecording ? 'Stop recording' : 'Start recording'}
-                    >
-                      {isTranscribing ? (
+            >
+              {isTranscribing ? (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
+                <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
                         </div>
-                      ) : (
+              ) : (
                         <Mic 
                           className={`w-5 h-5 ${
                             isRecording 
@@ -521,20 +521,20 @@ const AIChatBot: React.FC = () => {
                               : 'text-gray-600'
                           }`} 
                         />
-                      )}
+              )}
                       {isRecording && (
                         <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                      )}
-                    </button>
+              )}
+            </button>
 
-                    <button
+            <button
                       onClick={() => handleSend()}
                       disabled={!inputText?.trim() || isLoading || isRecording || isTranscribing}
-                      className="p-2 bg-[#8B1538] text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#6B1028] transition-colors"
-                    >
-                      <Send className="w-5 h-5" />
-                    </button>
-                  </div>
+              className="p-2 bg-[#8B1538] text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#6B1028] transition-colors"
+            >
+              <Send className="w-5 h-5" />
+            </button>
+          </div>
                 </div>
 
                 {/* Show different status messages based on mode */}

@@ -137,10 +137,24 @@ A sophisticated, enterprise-grade AI system designed for Marriott's hospitality 
 
 ![Documentation Walkthrough](./documentation.gif)
 
-## 🤝 Contributing
+## 🎯 Project Context
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+This project is a technical showcase developed for a Marriott AI Architecture interview, demonstrating my approach to:
 
-## 📄 License
+- Enterprise-grade AI system architecture
+- Advanced model orchestration and management
+- Real-time monitoring and observability
+- Production-ready security and compliance
+- Scalable, multi-cloud infrastructure design
 
-This project is proprietary and confidential. All rights reserved. 
+The implementation reflects my vision for next-generation AI systems in hospitality, combining:
+- Modern AI frameworks (LangChain, LangGraph)
+- Enterprise monitoring solutions
+- Advanced visualization techniques
+- Robust security practices
+
+While this is an interview project, it represents my thorough understanding of enterprise AI architecture and my ability to design scalable, production-ready systems.
+
+## 📄 Note
+
+This is a technical showcase project developed specifically for demonstrating AI architecture capabilities. It is not affiliated with or endorsed by Marriott International. 
