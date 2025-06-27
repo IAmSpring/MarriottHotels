@@ -4,6 +4,8 @@ A sophisticated, enterprise-grade AI system designed for Marriott's hospitality 
 
 ![Extraordinary Experiences Await You](./walkthrough.gif)
 
+![Marriott Hotels Admin](./admin.gif)
+
 ## 🌟 AI Architecture Overview
 
 ### Core AI Infrastructure
