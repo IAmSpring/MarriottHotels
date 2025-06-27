@@ -359,19 +359,19 @@ const TourController: React.FC = () => {
 
   const handlePrevious = () => {
     if (state.currentSectionIndex > 0) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      dispatch({ type: 'PREVIOUS_SECTION' });
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    dispatch({ type: 'PREVIOUS_SECTION' });
     }
   };
 
   const handleNext = () => {
     if (state.currentSectionIndex < state.sections.length - 1) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      dispatch({ type: 'NEXT_SECTION' });
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    dispatch({ type: 'NEXT_SECTION' });
     }
   };
 
@@ -389,7 +389,7 @@ const TourController: React.FC = () => {
       >
         <ChevronLeft className="w-6 h-6" />
       </button>
-
+      
       <button
         onClick={handlePlayPause}
         disabled={state.isLoading}

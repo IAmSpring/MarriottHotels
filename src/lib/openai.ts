@@ -168,18 +168,72 @@ export const getCachedAudioResponse = async (
 // Audio transcription utility
 export const transcribeAudio = async (openai: OpenAI, audioBlob: Blob): Promise<string> => {
   try {
-    const formData = new FormData();
-    formData.append('file', audioBlob, 'audio.webm');
-    formData.append('model', 'whisper-1');
-    
-    const response = await openai.audio.transcriptions.create({
-      file: audioBlob,
-      model: 'whisper-1',
+    console.log('[OpenAI Transcribe] Starting transcription process');
+    console.log('[OpenAI Transcribe] Audio blob details:', {
+      size: audioBlob.size,
+      type: audioBlob.type
     });
 
-    return response.text;
+    // Convert Blob to File object for OpenAI API
+    const file = new File([audioBlob], 'audio.webm', { 
+      type: audioBlob.type,
+      lastModified: Date.now()
+    });
+    
+    console.log('[OpenAI Transcribe] Created File object:', {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      lastModified: new Date(file.lastModified).toISOString()
+    });
+
+    // Verify file is not empty
+    if (file.size === 0) {
+      throw new Error('Audio file is empty');
+    }
+
+    // Verify file type
+    if (!file.type.includes('audio/')) {
+      throw new Error(`Invalid file type: ${file.type}`);
+    }
+    
+    console.log('[OpenAI Transcribe] Sending request to OpenAI API');
+    const response = await openai.audio.transcriptions.create({
+      file: file,
+      model: 'whisper-1',
+      language: 'en',
+      response_format: 'text'
+    });
+
+    if (!response) {
+      throw new Error('OpenAI returned empty response');
+    }
+
+    console.log('[OpenAI Transcribe] Received response from OpenAI:', {
+      responseType: typeof response,
+      textLength: response.length,
+      preview: response.substring(0, 100) + '...'
+    });
+
+    return response;
   } catch (error) {
-    console.error('Transcription error:', error);
-    throw new Error('Failed to transcribe audio');
+    console.error('[OpenAI Transcribe] Error during transcription:', {
+      error,
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+
+    // Check for specific error types
+    if (error instanceof Error) {
+      if (error.message.includes('API key')) {
+        throw new Error('OpenAI API key is invalid or missing');
+      }
+      if (error.message.includes('file too large')) {
+        throw new Error('Audio file is too large. Maximum size is 25MB');
+      }
+    }
+
+    throw new Error('Failed to transcribe audio: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 }; 

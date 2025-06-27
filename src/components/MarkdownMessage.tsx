@@ -1,6 +1,14 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
+import type { Components } from 'react-markdown';
 import { Play, Pause, Square, Loader2 } from 'lucide-react';
+
+interface CodeProps {
+  node?: any;
+  inline?: boolean;
+  className?: string;
+  children: React.ReactNode;
+}
 
 interface MarkdownMessageProps {
   text: string;
@@ -60,8 +68,8 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({
             <ReactMarkdown
               components={{
                 p: ({ children }) => <p className="m-0">{children}</p>,
-                ul: ({ children }) => <ul className="m-0 pl-4">{children}</ul>,
-                ol: ({ children }) => <ol className="m-0 pl-4">{children}</ol>,
+                ul: ({ children }) => <ul className="m-0 pl-4 space-y-1">{children}</ul>,
+                ol: ({ children }) => <ol className="m-0 pl-4 space-y-1">{children}</ol>,
                 li: ({ children }) => <li className="m-0">{children}</li>,
                 strong: ({ children }) => <strong className="font-bold">{children}</strong>,
                 em: ({ children }) => <em className="italic">{children}</em>,
@@ -69,6 +77,25 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({
                   <a href={href} className={`${isUser ? 'text-white' : 'text-[#8B1538]'} underline`} target="_blank" rel="noopener noreferrer">
                     {children}
                   </a>
+                ),
+                code: ({ inline, className, children }) => {
+                  const match = /language-(\w+)/.exec(className || '');
+                  return !inline ? (
+                    <pre className="bg-gray-800 text-gray-100 rounded p-2 my-2 overflow-x-auto">
+                      <code className={className}>
+                        {children}
+                      </code>
+                    </pre>
+                  ) : (
+                    <code className="bg-gray-200 text-gray-800 px-1 py-0.5 rounded">
+                      {children}
+                    </code>
+                  );
+                },
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-gray-300 pl-4 my-2 italic">
+                    {children}
+                  </blockquote>
                 ),
               }}
             >
@@ -83,25 +110,25 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({
                 </div>
               ) : (
                 <div className="flex items-center space-x-1">
-                  <button
-                    onClick={handlePlayClick}
+              <button
+                onClick={handlePlayClick}
                     className="p-1.5 rounded-full hover:bg-gray-200 transition-colors"
                     title={isCurrentMessage && audioState.isPlaying ? "Pause" : "Play"}
-                  >
+              >
                     {isCurrentMessage && audioState.isPlaying ? (
                       <Pause className="w-5 h-5 text-gray-700" />
-                    ) : (
+                ) : (
                       <Play className="w-5 h-5 text-gray-700" />
-                    )}
-                  </button>
+                )}
+              </button>
                   {showControls && audioState.isPlaying && (
-                    <button
-                      onClick={onStop}
+                <button
+                  onClick={onStop}
                       className="p-1.5 rounded-full hover:bg-gray-200 transition-colors"
                       title="Stop"
-                    >
+                >
                       <Square className="w-5 h-5 text-gray-700" />
-                    </button>
+                </button>
                   )}
                 </div>
               )}

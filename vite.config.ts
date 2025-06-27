@@ -6,19 +6,29 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   base: '/MarriottHotels/',
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
   server: {
     proxy: {
       '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,
       },
+      '/ws': {
+        target: 'ws://localhost:3000',
+        ws: true,
+      }
     },
     fs: {
-      // Allow serving files from one level up to the project root
-      allow: ['..', './public']
+      strict: false
     },
-    port: 5173,
-    host: true,
+    hmr: {
+      clientPort: 5173,
+      path: 'ws'
+    }
   },
   build: {
     rollupOptions: {
@@ -29,6 +39,7 @@ export default defineConfig({
           'date-vendor': ['react-datepicker', 'date-fns'],
           'stripe-vendor': ['@stripe/stripe-js'],
           'trpc-vendor': ['@trpc/client', '@trpc/react-query', '@trpc/server'],
+          'socket-vendor': ['socket.io-client'],
         },
       },
       input: path.resolve(__dirname, 'index.html')
@@ -41,12 +52,6 @@ export default defineConfig({
     reportCompressedSize: false,
     outDir: 'dist'
   },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@docs': path.resolve(__dirname, './docs')
-    },
-  },
   optimizeDeps: {
     include: [
       'react',
@@ -58,6 +63,7 @@ export default defineConfig({
       '@stripe/stripe-js',
       '@trpc/client',
       '@trpc/react-query',
+      'socket.io-client',
     ],
   },
   define: {

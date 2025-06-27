@@ -199,7 +199,7 @@ const DocsPage: React.FC = () => {
     ),
     h3: ({ children }: MarkdownComponentProps) => (
       <h3 className="text-2xl font-medium text-gray-700 mt-6 mb-3">
-        {children}
+          {children}
       </h3>
     )
   };
