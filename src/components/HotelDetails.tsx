@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { hotels, Room } from '../data/hotels';
+import type { Hotel, Room } from '../data/hotels';
+import { hotels } from '../data/hotels';
 import BookingModal from '../components/BookingModal';
 
 const HotelDetails: React.FC = () => {
@@ -45,7 +46,7 @@ const HotelDetails: React.FC = () => {
           <div className="mb-6">
             <h2 className="text-xl font-semibold mb-3">Amenities</h2>
               <div className="grid grid-cols-2 gap-4">
-              {hotel.amenities.map((amenity, index) => (
+              {hotel.amenities.map((amenity: string, index: number) => (
                 <div key={index} className="flex items-center">
                   <span className="text-gray-600">{amenity}</span>
                   </div>
@@ -56,7 +57,7 @@ const HotelDetails: React.FC = () => {
           <div className="mb-6">
             <h2 className="text-xl font-semibold mb-3">Rooms</h2>
               <div className="space-y-4">
-              {hotel.rooms.map((room) => (
+              {hotel.rooms.map((room: Room) => (
                 <div
                   key={room.id}
                   className="border rounded-lg p-4 hover:shadow-md transition cursor-pointer"
@@ -90,7 +91,7 @@ const HotelDetails: React.FC = () => {
             <div className="space-y-2">
               <p>Check-in: {hotel.checkInTime}</p>
               <p>Check-out: {hotel.checkOutTime}</p>
-              {hotel.policies.map((policy, index) => (
+              {hotel.policies.map((policy: string, index: number) => (
                 <p key={index} className="text-gray-600">{policy}</p>
               ))}
             </div>

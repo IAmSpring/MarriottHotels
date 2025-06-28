@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { Hotel, Room } from '../data/hotels';
+import type { Hotel, Room } from '../data/hotels';
 
 interface BookingModalProps {
   isOpen: boolean;

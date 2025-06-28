@@ -1,5 +1,6 @@
 import React from 'react';
 import { hotels } from '../../data/hotels';
+import type { Hotel } from '../../data/hotels';
 
 const HotelsPage: React.FC = () => {
   const stats = [
@@ -8,6 +9,19 @@ const HotelsPage: React.FC = () => {
     { label: 'Inactive Hotels', value: hotels.filter(h => h.status === 'INACTIVE').length },
     { label: 'Under Maintenance', value: hotels.filter(h => h.status === 'MAINTENANCE').length }
   ];
+
+  const getStatusColor = (status: Hotel['status']) => {
+    switch (status) {
+      case 'ACTIVE':
+        return 'bg-green-100 text-green-800';
+      case 'INACTIVE':
+        return 'bg-red-100 text-red-800';
+      case 'MAINTENANCE':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   return (
     <div className="p-6">
@@ -67,10 +81,7 @@ const HotelsPage: React.FC = () => {
                   ${hotel.price.base}
                 </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
-                    ${hotel.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 
-                      hotel.status === 'INACTIVE' ? 'bg-red-100 text-red-800' : 
-                      'bg-yellow-100 text-yellow-800'}`}>
+                  <span className={getStatusColor(hotel.status)}>
                   {hotel.status}
                 </span>
               </td>

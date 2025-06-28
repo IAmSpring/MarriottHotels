@@ -1,6 +1,6 @@
-import type { Hotel, Room, Price } from '../types/hotel';
+import type { Price } from '../types/hotel';
 
-export type HotelType = 'LUXURY' | 'BUSINESS' | 'RESORT' | 'BOUTIQUE';
+export type HotelType = 'LUXURY' | 'RESORT' | 'BOUTIQUE' | 'BUSINESS' | 'STANDARD';
 
 export interface Hotel {
   id: string;
@@ -14,7 +14,7 @@ export interface Hotel {
   image: string;
   amenities: string[];
   rooms: Room[];
-  status: string;
+  status: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE';
   contact: {
     phone: string;
     email: string;
@@ -24,6 +24,17 @@ export interface Hotel {
   checkOutTime: string;
   policies: string[];
   features: string[];
+}
+
+export interface Room {
+  id: string;
+  hotelId: string;
+  type: string;
+  price: number;
+  description: string;
+  beds: string;
+  occupancy: string;
+  size: string;
 }
 
 // Featured hotels at the start
@@ -54,6 +65,7 @@ export const hotels: Hotel[] = [
     rooms: [
       {
         id: 'rcmb-001-deluxe',
+        hotelId: 'rcmb-001',
         type: 'Deluxe Ocean View',
         price: 420,
         description: 'Spacious room with stunning ocean views',
@@ -63,6 +75,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: 'rcmb-001-club',
+        hotelId: 'rcmb-001',
         type: 'Club Level Suite',
         price: 750,
         description: 'Luxury suite with club lounge access',
@@ -72,6 +85,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: 'rcmb-001-pres',
+        hotelId: 'rcmb-001',
         type: 'Presidential Suite',
         price: 1200,
         description: 'Ultimate luxury with panoramic ocean views',
@@ -127,6 +141,7 @@ export const hotels: Hotel[] = [
     rooms: [
       {
         id: 'jmas-002-mv',
+        hotelId: 'jmas-002',
         type: 'Mountain View Room',
         price: 650,
         description: 'Cozy room with mountain views',
@@ -136,6 +151,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: 'jmas-002-fs',
+        hotelId: 'jmas-002',
         type: 'Fireplace Suite',
         price: 950,
         description: 'Suite with private fireplace and balcony',
@@ -145,6 +161,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: 'jmas-002-ph',
+        hotelId: 'jmas-002',
         type: 'Penthouse Suite',
         price: 1500,
         description: 'Luxury penthouse with panoramic views',
@@ -200,6 +217,7 @@ export const hotels: Hotel[] = [
     rooms: [
       {
         id: 'mmny-003-cv',
+        hotelId: 'mmny-003',
         type: 'City View Room',
         price: 315,
         description: 'Modern room with city views',
@@ -209,6 +227,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: 'mmny-003-ts',
+        hotelId: 'mmny-003',
         type: 'Times Square View Suite',
         price: 550,
         description: 'Suite overlooking Times Square',
@@ -218,6 +237,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: 'mmny-003-ps',
+        hotelId: 'mmny-003',
         type: 'Presidential Suite',
         price: 1000,
         description: 'Luxury suite with panoramic views',
@@ -273,6 +293,7 @@ export const hotels: Hotel[] = [
     rooms: [
       {
         id: 'mhhi-004-ov',
+        hotelId: 'mhhi-004',
         type: 'Ocean View',
         price: 550,
         description: 'Room with stunning ocean views',
@@ -282,6 +303,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: 'mhhi-004-bs',
+        hotelId: 'mhhi-004',
         type: 'Beach Suite',
         price: 850,
         description: 'Luxury suite steps from the beach',
@@ -291,6 +313,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: 'mhhi-004-rp',
+        hotelId: 'mhhi-004',
         type: 'Royal Penthouse',
         price: 1800,
         description: 'Ultimate luxury with panoramic views',
@@ -346,6 +369,7 @@ export const hotels: Hotel[] = [
     rooms: [
       {
         id: 'msf-005-td',
+        hotelId: 'msf-005',
         type: 'Tower Deluxe',
         price: 450,
         description: 'Modern room with city views',
@@ -355,6 +379,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: 'msf-005-ts',
+        hotelId: 'msf-005',
         type: 'Tower Suite',
         price: 750,
         description: 'Spacious suite with living area',
@@ -364,6 +389,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: 'msf-005-ps',
+        hotelId: 'msf-005',
         type: 'Presidential Suite',
         price: 1500,
         description: 'Luxury suite with panoramic views',
@@ -419,6 +445,7 @@ export const hotels: Hotel[] = [
     rooms: [
       {
         id: 'rcla-006-dlx',
+        hotelId: 'rcla-006',
         type: 'Deluxe City View',
         price: 495,
         description: 'Modern room with stunning city views',
@@ -428,6 +455,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: 'rcla-006-club',
+        hotelId: 'rcla-006',
         type: 'Club Level Suite',
         price: 795,
         description: 'Luxury suite with club access',
@@ -437,6 +465,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: 'rcla-006-pres',
+        hotelId: 'rcla-006',
         type: 'Presidential Suite',
         price: 1500,
         description: 'Ultimate luxury with panoramic views',
@@ -487,6 +516,7 @@ export const hotels: Hotel[] = [
     rooms: [
       {
         id: "gl-1",
+        hotelId: "1",
         type: "Deluxe Suite",
         price: 799,
         description: "Spacious suite with floor-to-ceiling windows offering panoramic city views, separate living area, and marble bathroom with deep soaking tub",
@@ -496,6 +526,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: "gl-2",
+        hotelId: "1",
         type: "Presidential Suite",
         price: 1299,
         description: "Ultimate luxury with private terrace, dining room, butler's pantry, and spectacular skyline views",
@@ -505,6 +536,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: "gl-3",
+        hotelId: "1",
         type: "Executive Room",
         price: 599,
         description: "Refined comfort with city views, work desk, and access to Executive Lounge",
@@ -559,6 +591,7 @@ export const hotels: Hotel[] = [
     rooms: [
       {
         id: "ob-1",
+        hotelId: "2",
         type: "Ocean View Room",
         price: 450,
         description: "Bright, airy room with private balcony overlooking the Atlantic Ocean, featuring modern coastal décor",
@@ -568,6 +601,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: "ob-2",
+        hotelId: "2",
         type: "Beachfront Suite",
         price: 750,
         description: "Luxurious suite with direct beach views, separate living area, and wraparound balcony",
@@ -577,6 +611,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: "ob-3",
+        hotelId: "2",
         type: "Pool Villa",
         price: 1200,
         description: "Private villa with personal plunge pool, garden, and beach access",
@@ -631,6 +666,7 @@ export const hotels: Hotel[] = [
     rooms: [
       {
         id: "mp-1",
+        hotelId: "3",
         type: "Mountain View Suite",
         price: 650,
         description: "Cozy suite with stone fireplace, private balcony, and panoramic mountain views",
@@ -640,6 +676,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: "mp-2",
+        hotelId: "3",
         type: "Alpine Penthouse",
         price: 1100,
         description: "Luxury penthouse with full kitchen, multiple fireplaces, and wraparound terrace",
@@ -649,6 +686,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: "mp-3",
+        hotelId: "3",
         type: "Chalet Room",
         price: 450,
         description: "Charming room with rustic décor and mountain views",
@@ -703,6 +741,7 @@ export const hotels: Hotel[] = [
     rooms: [
       {
         id: "cc-1",
+        hotelId: "4",
         type: "Business Room",
         price: 280,
         description: "Well-appointed room with ergonomic workspace and city views",
@@ -712,6 +751,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: "cc-2",
+        hotelId: "4",
         type: "Executive Suite",
         price: 450,
         description: "Spacious suite with separate living area and meeting space",
@@ -721,6 +761,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: "cc-3",
+        hotelId: "4",
         type: "Smart Room",
         price: 320,
         description: "Tech-enabled room with automated controls and superior connectivity",
@@ -775,6 +816,7 @@ export const hotels: Hotel[] = [
     rooms: [
       {
         id: "do-1",
+        hotelId: "5",
         type: "Desert View Room",
         price: 399,
         description: "Serene room with private patio overlooking the desert landscape",
@@ -784,6 +826,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: "do-2",
+        hotelId: "5",
         type: "Casita Suite",
         price: 699,
         description: "Private casita with living area and outdoor shower",
@@ -793,6 +836,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: "do-3",
+        hotelId: "5",
         type: "Golf Villa",
         price: 899,
         description: "Luxury villa with golf course views and private pool",
@@ -850,6 +894,7 @@ export const hotels: Hotel[] = [
     rooms: [
       {
         id: "ssm-001",
+        hotelId: "sandbourne-santa-monica",
         type: "Ocean View Room",
         price: 450,
         description: "Elegant room with stunning ocean views and private balcony",
@@ -859,6 +904,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: "ssm-002",
+        hotelId: "sandbourne-santa-monica",
         type: "Luxury Suite",
         price: 750,
         description: "Spacious suite with separate living area and ocean views",
@@ -868,6 +914,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: "ssm-003",
+        hotelId: "sandbourne-santa-monica",
         type: "Penthouse Suite",
         price: 1200,
         description: "Ultimate luxury with panoramic views and private terrace",
@@ -919,6 +966,7 @@ export const hotels: Hotel[] = [
     rooms: [
       {
         id: "th-001",
+        hotelId: "trailborn-highlands",
         type: "Mountain View Room",
         price: 380,
         description: "Cozy room with stunning mountain views",
@@ -928,6 +976,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: "th-002",
+        hotelId: "trailborn-highlands",
         type: "Highland Suite",
         price: 580,
         description: "Luxurious suite with fireplace and private balcony",
@@ -979,6 +1028,7 @@ export const hotels: Hotel[] = [
     rooms: [
       {
         id: "plhk-001",
+        hotelId: "park-lane-hong-kong",
         type: "Deluxe City View",
         price: 520,
         description: "Modern room with city skyline views",
@@ -988,6 +1038,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: "plhk-002",
+        hotelId: "park-lane-hong-kong",
         type: "Harbour Suite",
         price: 820,
         description: "Luxury suite with Victoria Harbour views",
@@ -997,6 +1048,7 @@ export const hotels: Hotel[] = [
       },
       {
         id: "plhk-003",
+        hotelId: "park-lane-hong-kong",
         type: "Executive Suite",
         price: 1100,
         description: "Premium suite with lounge access and harbour views",
