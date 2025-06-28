@@ -52,7 +52,7 @@ export const hotels: Hotel[] = [
       base: 420,
       currency: 'USD'
     },
-    image: 'https://images.pexels.com/photos/338504/pexels-photo-338504.jpeg',
+    image: '/MarriottHotels/images/miami-beach.jpg',
     description: 'Experience luxury oceanfront living at its finest at The Ritz-Carlton Miami Beach. This five-star resort offers breathtaking views of the Atlantic Ocean and Biscayne Bay.',
     amenities: [
       'Private Beach Access',
@@ -125,7 +125,7 @@ export const hotels: Hotel[] = [
       base: 650,
       currency: 'USD'
     },
-    image: 'https://images.pexels.com/photos/754268/pexels-photo-754268.jpeg',
+    image: '/MarriottHotels/images/aspen.jpg',
     description: 'Nestled in the heart of Snowmass Village, this luxury mountain resort offers ski-in/ski-out access and stunning Rocky Mountain views.',
     amenities: [
       'Ski-in/Ski-out Access',
@@ -198,7 +198,7 @@ export const hotels: Hotel[] = [
       base: 315,
       currency: 'USD'
     },
-    image: 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg',
+    image: '/MarriottHotels/images/new-york.jpg',
     description: 'Located in the heart of Times Square, this iconic hotel offers modern luxury and unparalleled access to New York City\'s most famous attractions.',
     amenities: [
       'Times Square Views',
@@ -249,15 +249,234 @@ export const hotels: Hotel[] = [
     checkOutTime: '11:00 AM',
     policies: [
       'No smoking',
-      'No pets allowed',
+      'Pet friendly (with fee)',
       'Cancellation policy: 24 hours',
-      'Valet parking only'
+      'Valet parking available'
     ],
     features: [
       'Times Square location',
       'City views',
-      'Broadway access',
+      'Theater district',
       'Business facilities'
+    ]
+  },
+  {
+    id: 'mhhi-004',
+    name: 'Marriott Halekulani Hawaii',
+    type: 'RESORT',
+    location: 'Honolulu, HI',
+    rating: 4.9,
+    reviews: 1563,
+    price: {
+      base: 550,
+      currency: 'USD'
+    },
+    image: '/images/miami-beach.jpg',
+    description: 'An oceanfront paradise in Waikiki Beach, offering world-class Hawaiian hospitality, stunning Pacific views, and exclusive beach access.',
+    amenities: [
+      'Private Beach',
+      'Infinity Pool',
+      'Spa Services',
+      'Beachfront Dining',
+      'Water Sports',
+      'Cultural Activities',
+      'Kids Club',
+      'Concierge'
+    ],
+    rooms: [
+      {
+        id: 'mhhi-004-ov',
+        type: 'Ocean View',
+        price: 550,
+        description: 'Room with stunning ocean views',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '500 sq ft'
+      },
+      {
+        id: 'mhhi-004-bs',
+        type: 'Beach Suite',
+        price: 850,
+        description: 'Luxury suite steps from the beach',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '750 sq ft'
+      },
+      {
+        id: 'mhhi-004-rp',
+        type: 'Royal Penthouse',
+        price: 1800,
+        description: 'Ultimate luxury with panoramic views',
+        beds: '2 King',
+        occupancy: '4 Adults',
+        size: '2,000 sq ft'
+      }
+    ],
+    status: 'ACTIVE',
+    contact: {
+      phone: '+1 (808) 555-0123',
+      email: 'halekulani.hawaii@marriott.com',
+      address: '2199 Kalia Road, Honolulu, HI 96815'
+    },
+    checkInTime: '3:00 PM',
+    checkOutTime: '12:00 PM',
+    policies: [
+      'No smoking',
+      'Pet friendly (with restrictions)',
+      'Cancellation policy: 72 hours',
+      'Resort fee includes beach amenities'
+    ],
+    features: [
+      'Beachfront location',
+      'Ocean views',
+      'Cultural experiences',
+      'Water activities'
+    ]
+  },
+  {
+    id: 'msf-005',
+    name: 'Marriott St. Francis San Francisco',
+    type: 'LUXURY',
+    location: 'San Francisco, CA',
+    rating: 4.7,
+    reviews: 1892,
+    price: {
+      base: 450,
+      currency: 'USD'
+    },
+    image: 'https://images.pexels.com/photos/1388069/pexels-photo-1388069.jpeg',
+    description: 'A historic landmark in Union Square, combining timeless luxury with modern amenities and spectacular city views of San Francisco.',
+    amenities: [
+      'Historic Building',
+      'City Views',
+      'Fine Dining',
+      'Luxury Spa',
+      'Fitness Center',
+      'Meeting Spaces',
+      'Concierge',
+      'Valet Parking'
+    ],
+    rooms: [
+      {
+        id: 'msf-005-td',
+        type: 'Tower Deluxe',
+        price: 450,
+        description: 'Modern room with city views',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '425 sq ft'
+      },
+      {
+        id: 'msf-005-ts',
+        type: 'Tower Suite',
+        price: 750,
+        description: 'Spacious suite with living area',
+        beds: '1 King',
+        occupancy: '3 Adults',
+        size: '800 sq ft'
+      },
+      {
+        id: 'msf-005-ps',
+        type: 'Presidential Suite',
+        price: 1500,
+        description: 'Luxury suite with panoramic views',
+        beds: '2 King',
+        occupancy: '4 Adults',
+        size: '1,600 sq ft'
+      }
+    ],
+    status: 'ACTIVE',
+    contact: {
+      phone: '+1 (415) 555-0123',
+      email: 'stfrancis.sf@marriott.com',
+      address: '335 Powell Street, San Francisco, CA 94102'
+    },
+    checkInTime: '4:00 PM',
+    checkOutTime: '11:00 AM',
+    policies: [
+      'No smoking',
+      'Pet friendly (with fee)',
+      'Cancellation policy: 48 hours',
+      'Valet parking only'
+    ],
+    features: [
+      'Historic property',
+      'Union Square location',
+      'City views',
+      'Fine dining'
+    ]
+  },
+  {
+    id: 'rcla-006',
+    name: 'The Ritz-Carlton Los Angeles',
+    type: 'LUXURY',
+    location: 'Los Angeles, CA',
+    rating: 4.8,
+    reviews: 1435,
+    price: {
+      base: 495,
+      currency: 'USD'
+    },
+    image: 'https://images.pexels.com/photos/1134176/pexels-photo-1134176.jpeg',
+    description: 'Experience the height of luxury in downtown LA, featuring panoramic city views, world-class dining, and an award-winning spa.',
+    amenities: [
+      'Rooftop Pool',
+      'Luxury Spa',
+      'Fine Dining',
+      'City Views',
+      'Valet Parking',
+      'Fitness Center',
+      'Club Lounge',
+      'Concierge Service'
+    ],
+    rooms: [
+      {
+        id: 'rcla-006-dlx',
+        type: 'Deluxe City View',
+        price: 495,
+        description: 'Modern room with stunning city views',
+        beds: '1 King',
+        occupancy: '2 Adults',
+        size: '450 sq ft'
+      },
+      {
+        id: 'rcla-006-club',
+        type: 'Club Level Suite',
+        price: 795,
+        description: 'Luxury suite with club access',
+        beds: '1 King',
+        occupancy: '3 Adults',
+        size: '750 sq ft'
+      },
+      {
+        id: 'rcla-006-pres',
+        type: 'Presidential Suite',
+        price: 1500,
+        description: 'Ultimate luxury with panoramic views',
+        beds: '2 King',
+        occupancy: '4 Adults',
+        size: '1,800 sq ft'
+      }
+    ],
+    status: 'ACTIVE',
+    contact: {
+      phone: '+1 (213) 555-0123',
+      email: 'ritzcarlton.la@marriott.com',
+      address: '900 W Olympic Blvd, Los Angeles, CA 90015'
+    },
+    checkInTime: '4:00 PM',
+    checkOutTime: '11:00 AM',
+    policies: [
+      'No smoking',
+      'Pet friendly (with fee)',
+      'Cancellation policy: 48 hours',
+      'Valet parking only'
+    ],
+    features: [
+      'Downtown location',
+      'City views',
+      'Club lounge access',
+      'Spa services'
     ]
   },
   {
@@ -621,835 +840,201 @@ export const hotels: Hotel[] = [
     ]
   },
   {
-    id: 'cch-003',
-    type: 'BUSINESS',
-    name: 'City Central Hotel',
-    location: 'Manhattan, NY',
-    rating: 4.3,
-    price: {
-      base: 280,
-      currency: 'USD'
-    },
-    image: 'https://images.pexels.com/photos/1134176/pexels-photo-1134176.jpeg',
-    description: 'Modern urban hotel in the heart of Manhattan with easy access to attractions.',
-    reviews: 2156,
-    amenities: [
-      'WiFi',
-      'Restaurant',
-      'Gym',
-      'Parking',
-      'Business Center'
-    ],
-    rooms: [
-      {
-        id: 'cch-003-room-1',
-        type: 'City View Room',
-        price: 280,
-        description: 'Modern room with city views',
-        beds: '1 King or 2 Double',
-        occupancy: '2 Adults',
-        size: '350 sq ft'
-      },
-      {
-        id: 'cch-003-room-2',
-        type: 'Executive Suite',
-        price: 450,
-        description: 'Spacious suite with living area',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '600 sq ft'
-      }
-    ],
-    status: 'ACTIVE',
-    contact: {
-      phone: '+1 (212) 555-0123',
-      email: 'citycentral@hotel.com',
-      address: '123 Main Street, Manhattan, NY 10001'
-    },
-    checkInTime: '3:00 PM',
-    checkOutTime: '11:00 AM',
-    policies: [
-      'No smoking',
-      'Pet friendly',
-      'Cancellation policy: 24 hours'
-    ],
-    features: [
-      'City views',
-      '24/7 security',
-      'Express check-in/out'
-    ]
-  },
-  {
-    id: 'dos-004',
-    type: 'LUXURY',
-    name: 'Desert Oasis Spa Resort',
-    location: 'Scottsdale, AZ',
-    rating: 4.7,
-    price: {
-      base: 380,
-      currency: 'USD'
-    },
-    image: 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg',
-    description: 'Tranquil desert resort featuring award-winning spa treatments and golf course.',
-    reviews: 743,
-    amenities: [
-      'WiFi',
-      'Pool',
-      'Spa',
-      'Restaurant',
-      'Golf Course',
-      'Tennis Courts'
-    ],
-    rooms: [
-      {
-        id: 'dos-004-room-1',
-        type: 'Desert View Room',
-        price: 380,
-        description: 'Room with desert landscape views',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '475 sq ft'
-      },
-      {
-        id: 'dos-004-room-2',
-        type: 'Spa Suite',
-        price: 580,
-        description: 'Suite with private spa bath',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '700 sq ft'
-      }
-    ],
-    status: 'ACTIVE',
-    contact: {
-      phone: '+1 (480) 555-0123',
-      email: 'desertoasis@resort.com',
-      address: '123 Desert Road, Scottsdale, AZ 85259'
-    },
-    checkInTime: '3:00 PM',
-    checkOutTime: '11:00 AM',
-    policies: [
-      'No smoking',
-      'Pet friendly',
-      'Cancellation policy: 48 hours'
-    ],
-    features: [
-      'Spa treatments',
-      'Golf course access',
-      'Express check-in/out'
-    ]
-  },
-  {
-    id: 'cis-005',
-    type: 'BOUTIQUE',
-    name: 'Coastal Inn & Suites',
-    location: 'San Diego, CA',
-    rating: 4.1,
-    price: {
-      base: 180,
-      currency: 'USD'
-    },
-    image: 'https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg',
-    description: 'Comfortable coastal accommodation with easy beach access and family-friendly amenities.',
-    reviews: 1534,
-    amenities: [
-      'WiFi',
-      'Pool',
-      'Parking',
-      'Beach Access',
-      'Kids Club'
-    ],
-    rooms: [
-      {
-        id: 'cis-005-room-1',
-        type: 'Standard Room',
-        price: 180,
-        description: 'Comfortable room with basic amenities',
-        beds: '2 Queen',
-        occupancy: '4 Adults',
-        size: '400 sq ft'
-      },
-      {
-        id: 'cis-005-room-2',
-        type: 'Family Suite',
-        price: 280,
-        description: 'Suite with kitchenette',
-        beds: '2 Queen + Sofa Bed',
-        occupancy: '6 Adults',
-        size: '600 sq ft'
-      }
-    ],
-    status: 'ACTIVE',
-    contact: {
-      phone: '+1 (619) 555-0123',
-      email: 'coastalinnsuites@inn.com',
-      address: '123 Beach Road, San Diego, CA 92109'
-    },
-    checkInTime: '3:00 PM',
-    checkOutTime: '11:00 AM',
-    policies: [
-      'No smoking',
-      'Pet friendly',
-      'Cancellation policy: 24 hours'
-    ],
-    features: [
-      'Beach access',
-      'Kids club',
-      'Express check-in/out'
-    ]
-  },
-  {
-    id: 'hdb-006',
-    type: 'BOUTIQUE',
-    name: 'Historic Downtown Boutique',
-    location: 'Charleston, SC',
-    rating: 4.5,
-    price: {
-      base: 220,
-      currency: 'USD'
-    },
-    image: 'https://images.pexels.com/photos/2034335/pexels-photo-2034335.jpeg',
-    description: 'Charming boutique hotel in historic district with Southern hospitality and elegance.',
-    reviews: 687,
-    amenities: [
-      'WiFi',
-      'Restaurant',
-      'Spa',
-      'Garden',
-      'Afternoon Tea'
-    ],
-    rooms: [
-      {
-        id: 'hdb-006-room-1',
-        type: 'Historic Room',
-        price: 220,
-        description: 'Charming room with period features',
-        beds: '1 Queen',
-        occupancy: '2 Adults',
-        size: '300 sq ft'
-      },
-      {
-        id: 'hdb-006-room-2',
-        type: 'Garden Suite',
-        price: 350,
-        description: 'Suite with garden views',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '500 sq ft'
-      }
-    ],
-    status: 'ACTIVE',
-    contact: {
-      phone: '+1 (843) 555-0123',
-      email: 'historicdowntown@boutique.com',
-      address: '123 Market Street, Charleston, SC 29401'
-    },
-    checkInTime: '3:00 PM',
-    checkOutTime: '11:00 AM',
-    policies: [
-      'No smoking',
-      'Pet friendly',
-      'Cancellation policy: 24 hours'
-    ],
-    features: [
-      'Historic district location',
-      'Southern hospitality',
-      'Express check-in/out'
-    ]
-  },
-  {
-    id: 'lsr-007',
-    type: 'LUXURY',
-    name: 'Lakeside Retreat',
-    location: 'Lake Tahoe, CA',
-    rating: 4.6,
-    price: {
-      base: 290,
-      currency: 'USD'
-    },
-    image: '/images/lakeside-retreat.jpg',
-    description: 'Serene lakeside hotel with breathtaking mountain and water views.',
-    reviews: 956,
-    amenities: [
-      'WiFi',
-      'Restaurant',
-      'Gym',
-      'Parking',
-      'Lake Access',
-      'Water Sports'
-    ],
-    rooms: [
-      {
-        id: 'lsr-007-room-1',
-        type: 'Lake View Room',
-        price: 290,
-        description: 'Room with stunning lake views',
-        beds: '2 Queen',
-        occupancy: '4 Adults',
-        size: '400 sq ft'
-      },
-      {
-        id: 'lsr-007-room-2',
-        type: 'Waterfront Suite',
-        price: 490,
-        description: 'Luxury suite with direct lake access',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '650 sq ft'
-      }
-    ],
-    status: 'ACTIVE',
-    contact: {
-      phone: '+1 (775) 555-0123',
-      email: 'lakesideretreat@hotel.com',
-      address: '123 Lake Tahoe Road, Tahoe City, CA 96145'
-    },
-    checkInTime: '4:00 PM',
-    checkOutTime: '11:00 AM',
-    policies: [
-      'No smoking',
-      'Pet friendly',
-      'Cancellation policy: 48 hours'
-    ],
-    features: [
-      'Lake views',
-      'Water sports access',
-      'Express check-in/out'
-    ]
-  },
-  {
-    id: 'bci-008',
-    type: 'BOUTIQUE',
-    name: 'Budget Comfort Inn',
-    location: 'Austin, TX',
-    rating: 3.8,
-    price: {
-      base: 95,
-      currency: 'USD'
-    },
-    image: '/images/budget-comfort.jpg',
-    description: 'Clean, comfortable, and affordable accommodation in the heart of Austin.',
-    reviews: 2341,
-    amenities: [
-      'WiFi',
-      'Parking',
-      'Continental Breakfast',
-      'Business Center'
-    ],
-    rooms: [
-      {
-        id: 'bci-008-std',
-        type: 'Standard Room',
-        price: 95,
-        description: 'Basic comfortable room',
-        beds: '2 Double',
-        occupancy: '4 Adults',
-        size: '300 sq ft'
-      },
-      {
-        id: 'bci-008-bus',
-        type: 'Business Room',
-        price: 120,
-        description: 'Room with work desk',
-        beds: '1 Queen',
-        occupancy: '2 Adults',
-        size: '325 sq ft'
-      }
-    ],
-    status: 'ACTIVE',
-    contact: {
-      phone: '+1 (512) 555-0123',
-      email: 'budgetcomfort@inn.com',
-      address: '123 Austin Road, Austin, TX 78701'
-    },
-    checkInTime: '3:00 PM',
-    checkOutTime: '11:00 AM',
-    policies: [
-      'No smoking',
-      'Pet friendly',
-      'Cancellation policy: 24 hours'
-    ],
-    features: [
-      'Affordable',
-      'Business center',
-      'Express check-in/out'
-    ]
-  },
-  {
-    id: 'lms-009',
-    type: 'BOUTIQUE',
-    name: 'Luxury Metropolitan Suite',
-    location: 'Chicago, IL',
-    rating: 4.9,
-    price: {
-      base: 520,
-      currency: 'USD'
-    },
-    image: '/images/luxury-metro.jpg',
-    description: 'Ultra-luxury suites with panoramic city views and personalized concierge service.',
-    reviews: 423,
-    amenities: [
-      'WiFi',
-      'Spa',
-      'Restaurant',
-      'Gym',
-      'Concierge',
-      'Valet Parking'
-    ],
-    rooms: [
-      {
-        id: 'lms-009-city',
-        type: 'City Suite',
-        price: 520,
-        description: 'Luxury suite with city views',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '800 sq ft'
-      },
-      {
-        id: 'lms-009-ph',
-        type: 'Penthouse Suite',
-        price: 1200,
-        description: 'Ultimate luxury experience',
-        beds: '2 King',
-        occupancy: '4 Adults',
-        size: '1,500 sq ft'
-      }
-    ],
-    status: 'ACTIVE',
-    contact: {
-      phone: '+1 (312) 555-0123',
-      email: 'luxurymetro@suite.com',
-      address: '123 Chicago Avenue, Chicago, IL 60601'
-    },
-    checkInTime: '4:00 PM',
-    checkOutTime: '11:00 AM',
-    policies: [
-      'No smoking',
-      'Pet friendly',
-      'Cancellation policy: 48 hours'
-    ],
-    features: [
-      'Panoramic city views',
-      'Personal concierge service',
-      'Ultimate luxury experience'
-    ]
-  },
-  {
-    id: 'sandbourne-santa-monica',
-    type: 'LUXURY',
-    name: 'Sandbourne Santa Monica',
-    location: 'Santa Monica, California, USA',
+    id: "sandbourne-santa-monica",
+    name: "Sandbourne Santa Monica",
+    type: "LUXURY",
+    location: "Santa Monica, California, USA",
     rating: 4.9,
     price: {
       base: 450,
-      currency: 'USD'
+      currency: "USD"
     },
-    image: 'https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg',
-    description: 'A luxurious boutique hotel steps away from Santa Monica Beach, offering a perfect blend of coastal charm and modern luxury.',
+    image: "https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg",
+    description: "A luxurious boutique hotel steps away from Santa Monica Beach, offering a perfect blend of coastal charm and modern luxury.",
     reviews: 856,
     amenities: [
-      'Beach Access',
-      'Rooftop Pool',
-      'Spa',
-      'Restaurant',
-      'Fitness Center',
-      'Valet Parking'
+      "Beach Access",
+      "Rooftop Pool",
+      "Spa",
+      "Restaurant",
+      "Fitness Center",
+      "Valet Parking"
     ],
     rooms: [
       {
-        id: 'ssm-001',
-        type: 'Ocean View Room',
+        id: "ssm-001",
+        type: "Ocean View Room",
         price: 450,
-        description: 'Elegant room with stunning ocean views and private balcony',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '475 sq ft'
+        description: "Elegant room with stunning ocean views and private balcony",
+        beds: "1 King",
+        occupancy: "2 Adults",
+        size: "475 sq ft"
       },
       {
-        id: 'ssm-002',
-        type: 'Luxury Suite',
+        id: "ssm-002",
+        type: "Luxury Suite",
         price: 750,
-        description: 'Spacious suite with separate living area and ocean views',
-        beds: '1 King',
-        occupancy: '3 Adults',
-        size: '750 sq ft'
+        description: "Spacious suite with separate living area and ocean views",
+        beds: "1 King",
+        occupancy: "3 Adults",
+        size: "750 sq ft"
       },
       {
-        id: 'ssm-003',
-        type: 'Penthouse Suite',
+        id: "ssm-003",
+        type: "Penthouse Suite",
         price: 1200,
-        description: 'Ultimate luxury with panoramic views and private terrace',
-        beds: '2 King',
-        occupancy: '4 Adults',
-        size: '1,200 sq ft'
+        description: "Ultimate luxury with panoramic views and private terrace",
+        beds: "2 King",
+        occupancy: "4 Adults",
+        size: "1,200 sq ft"
       }
     ],
-    status: 'ACTIVE',
+    status: "ACTIVE",
     contact: {
-      phone: '+1 (310) 555-0123',
-      email: 'sandbournesantamonica@boutique.com',
-      address: '123 Beach Road, Santa Monica, CA 90401'
+      phone: "+1 (310) 555-0123",
+      email: "sandbournesantamonica@boutique.com",
+      address: "123 Beach Road, Santa Monica, CA 90401"
     },
-    checkInTime: '3:00 PM',
-    checkOutTime: '11:00 AM',
+    checkInTime: "3:00 PM",
+    checkOutTime: "11:00 AM",
     policies: [
-      'No smoking',
-      'Pet friendly',
-      'Cancellation policy: 48 hours'
+      "No smoking",
+      "Pet friendly",
+      "Cancellation policy: 48 hours"
     ],
     features: [
-      'Coastal charm',
-      'Modern luxury',
-      'Beach access'
+      "Coastal charm",
+      "Modern luxury",
+      "Beach access"
     ]
   },
   {
-    id: 'trailborn-highlands',
-    type: 'BOUTIQUE',
-    name: 'Trailborn Highlands',
-    location: 'Asheville, North Carolina, USA',
+    id: "trailborn-highlands",
+    name: "Trailborn Highlands",
+    type: "BOUTIQUE",
+    location: "Asheville, North Carolina, USA",
     rating: 4.8,
     price: {
       base: 380,
-      currency: 'USD'
+      currency: "USD"
     },
-    image: 'https://images.pexels.com/photos/2662116/pexels-photo-2662116.jpeg',
-    description: 'Nestled in the Blue Ridge Mountains, this boutique retreat offers a perfect blend of rustic charm and modern comfort.',
+    image: "https://images.pexels.com/photos/2662116/pexels-photo-2662116.jpeg",
+    description: "Nestled in the Blue Ridge Mountains, this boutique retreat offers a perfect blend of rustic charm and modern comfort.",
     reviews: 634,
     amenities: [
-      'Mountain Views',
-      'Hiking Trails',
-      'Spa',
-      'Farm-to-Table Restaurant',
-      'Yoga Studio',
-      'Private Balconies'
+      "Mountain Views",
+      "Hiking Trails",
+      "Spa",
+      "Farm-to-Table Restaurant",
+      "Yoga Studio",
+      "Private Balconies"
     ],
     rooms: [
       {
-        id: 'th-001',
-        type: 'Mountain View Room',
+        id: "th-001",
+        type: "Mountain View Room",
         price: 380,
-        description: 'Cozy room with stunning mountain views',
-        beds: '1 King or 2 Queen',
-        occupancy: '2-4 Adults',
-        size: '400 sq ft'
+        description: "Cozy room with stunning mountain views",
+        beds: "1 King or 2 Queen",
+        occupancy: "2-4 Adults",
+        size: "400 sq ft"
       },
       {
-        id: 'th-002',
-        type: 'Highland Suite',
+        id: "th-002",
+        type: "Highland Suite",
         price: 580,
-        description: 'Luxurious suite with fireplace and private balcony',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '650 sq ft'
+        description: "Luxurious suite with fireplace and private balcony",
+        beds: "1 King",
+        occupancy: "2 Adults",
+        size: "650 sq ft"
       }
     ],
-    status: 'ACTIVE',
+    status: "ACTIVE",
     contact: {
-      phone: '+1 (828) 555-0123',
-      email: 'trailbornhighlands@boutique.com',
-      address: '123 Blue Ridge Road, Asheville, NC 28801'
+      phone: "+1 (828) 555-0123",
+      email: "trailbornhighlands@boutique.com",
+      address: "123 Blue Ridge Road, Asheville, NC 28801"
     },
-    checkInTime: '4:00 PM',
-    checkOutTime: '11:00 AM',
+    checkInTime: "4:00 PM",
+    checkOutTime: "11:00 AM",
     policies: [
-      'No smoking',
-      'Pet friendly',
-      'Cancellation policy: 48 hours'
+      "No smoking",
+      "Pet friendly",
+      "Cancellation policy: 48 hours"
     ],
     features: [
-      'Mountain views',
-      'Rustic charm',
-      'Modern comfort'
+      "Mountain views",
+      "Rustic charm",
+      "Modern comfort"
     ]
   },
   {
-    id: 'park-lane-hong-kong',
-    type: 'LUXURY',
-    name: 'Park Lane Hong Kong',
-    location: 'Causeway Bay, Hong Kong',
+    id: "park-lane-hong-kong",
+    name: "Park Lane Hong Kong",
+    type: "LUXURY",
+    location: "Causeway Bay, Hong Kong",
     rating: 4.9,
     price: {
       base: 520,
-      currency: 'USD'
+      currency: "USD"
     },
-    image: 'https://images.pexels.com/photos/2417842/pexels-photo-2417842.jpeg',
-    description: 'A sophisticated urban retreat in the heart of Hong Kong, offering stunning views of Victoria Harbour and the city skyline.',
+    image: "https://images.pexels.com/photos/2417842/pexels-photo-2417842.jpeg",
+    description: "A sophisticated urban retreat in the heart of Hong Kong, offering stunning views of Victoria Harbour and the city skyline.",
     reviews: 923,
     amenities: [
-      'Harbour Views',
-      'Rooftop Bar',
-      'Spa',
-      'Fine Dining',
-      'Executive Lounge',
-      'Fitness Center'
+      "Harbour Views",
+      "Rooftop Bar",
+      "Spa",
+      "Fine Dining",
+      "Executive Lounge",
+      "Fitness Center"
     ],
     rooms: [
       {
-        id: 'plhk-001',
-        type: 'Deluxe City View',
+        id: "plhk-001",
+        type: "Deluxe City View",
         price: 520,
-        description: 'Modern room with city skyline views',
-        beds: '1 King or 2 Queen',
-        occupancy: '2-3 Adults',
-        size: '450 sq ft'
+        description: "Modern room with city skyline views",
+        beds: "1 King or 2 Queen",
+        occupancy: "2-3 Adults",
+        size: "450 sq ft"
       },
       {
-        id: 'plhk-002',
-        type: 'Harbour Suite',
+        id: "plhk-002",
+        type: "Harbour Suite",
         price: 820,
-        description: 'Luxury suite with Victoria Harbour views',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '700 sq ft'
+        description: "Luxury suite with Victoria Harbour views",
+        beds: "1 King",
+        occupancy: "2 Adults",
+        size: "700 sq ft"
       },
       {
-        id: 'plhk-003',
-        type: 'Executive Suite',
+        id: "plhk-003",
+        type: "Executive Suite",
         price: 1100,
-        description: 'Premium suite with lounge access and harbour views',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '900 sq ft'
+        description: "Premium suite with lounge access and harbour views",
+        beds: "1 King",
+        occupancy: "2 Adults",
+        size: "900 sq ft"
       }
     ],
-    status: 'ACTIVE',
+    status: "ACTIVE",
     contact: {
-      phone: '+1 (852) 555-0123',
-      email: 'parklanehongkong@hotel.com',
-      address: '123 Harbour Road, Causeway Bay, Hong Kong'
+      phone: "+1 (852) 555-0123",
+      email: "parklanehongkong@hotel.com",
+      address: "123 Harbour Road, Causeway Bay, Hong Kong"
     },
-    checkInTime: '4:00 PM',
-    checkOutTime: '11:00 AM',
+    checkInTime: "4:00 PM",
+    checkOutTime: "11:00 AM",
     policies: [
-      'No smoking',
-      'Pet friendly',
-      'Cancellation policy: 48 hours'
+      "No smoking",
+      "Pet friendly",
+      "Cancellation policy: 48 hours"
     ],
     features: [
-      'Harbour views',
-      'Rooftop bar',
-      'Spa'
-    ]
-  },
-  {
-    id: 'mhhi-004',
-    name: 'Marriott Halekulani Hawaii',
-    type: 'RESORT',
-    location: 'Honolulu, HI',
-    rating: 4.9,
-    reviews: 1563,
-    price: {
-      base: 550,
-      currency: 'USD'
-    },
-    image: '/images/miami-beach.jpg',
-    description: 'An oceanfront paradise in Waikiki Beach, offering world-class Hawaiian hospitality, stunning Pacific views, and exclusive beach access.',
-    amenities: [
-      'Private Beach',
-      'Infinity Pool',
-      'Polynesian Spa',
-      'Oceanfront Dining',
-      'Lei Making Classes',
-      'Cultural Center',
-      'Beach Cabanas',
-      'Sunset Lounge'
-    ],
-    rooms: [
-      {
-        id: 'mhhi-004-ov',
-        type: 'Ocean View Room',
-        price: 580,
-        description: 'Elegant room with panoramic ocean views',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '500 sq ft'
-      },
-      {
-        id: 'mhhi-004-bs',
-        type: 'Beach Suite',
-        price: 880,
-        description: 'Luxurious suite steps from the beach',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '750 sq ft'
-      },
-      {
-        id: 'mhhi-004-rp',
-        type: 'Royal Penthouse',
-        price: 1800,
-        description: 'Ultimate luxury with wraparound lanai',
-        beds: '2 King',
-        occupancy: '4 Adults',
-        size: '1,800 sq ft'
-      }
-    ],
-    status: 'ACTIVE',
-    contact: {
-      phone: '+1 (808) 555-0123',
-      email: 'halekulani.hawaii@marriott.com',
-      address: '2199 Kalia Road, Honolulu, HI 96815'
-    },
-    checkInTime: '4:00 PM',
-    checkOutTime: '11:00 AM',
-    policies: [
-      'No smoking',
-      'Pet friendly (under 25 lbs)',
-      'Cancellation policy: 72 hours',
-      'Resort fee includes beach amenities'
-    ],
-    features: [
-      'Beachfront location',
-      'Cultural activities',
-      'Wedding venues',
-      'Water sports'
-    ]
-  },
-  {
-    id: 'msf-005',
-    name: 'Marriott St. Francis San Francisco',
-    type: 'LUXURY',
-    location: 'San Francisco, CA',
-    rating: 4.7,
-    reviews: 1892,
-    price: {
-      base: 450,
-      currency: 'USD'
-    },
-    image: 'https://images.pexels.com/photos/1388069/pexels-photo-1388069.jpeg',
-    description: 'A historic landmark in Union Square, combining timeless luxury with modern amenities and spectacular city views of San Francisco.',
-    amenities: [
-      'Historic Tours',
-      'Luxury Spa',
-      'Fine Dining',
-      'Wine Tasting',
-      'Clock Tower Views',
-      'Fitness Center',
-      'Concierge Service',
-      'Valet Parking'
-    ],
-    rooms: [
-      {
-        id: 'msf-005-cv',
-        type: 'City View Room',
-        price: 450,
-        description: 'Classic room with city views',
-        beds: '1 King or 2 Queen',
-        occupancy: '2-4 Adults',
-        size: '425 sq ft'
-      },
-      {
-        id: 'msf-005-ts',
-        type: 'Tower Suite',
-        price: 750,
-        description: 'Historic tower suite with panoramic views',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '700 sq ft'
-      },
-      {
-        id: 'msf-005-ps',
-        type: 'Presidential Suite',
-        price: 1500,
-        description: 'Luxury corner suite with bay views',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '1,200 sq ft'
-      }
-    ],
-    status: 'ACTIVE',
-    contact: {
-      phone: '+1 (415) 555-0123',
-      email: 'stfrancis.sf@marriott.com',
-      address: '335 Powell Street, San Francisco, CA 94102'
-    },
-    checkInTime: '4:00 PM',
-    checkOutTime: '11:00 AM',
-    policies: [
-      'No smoking',
-      'Pet friendly (with fee)',
-      'Cancellation policy: 48 hours',
-      'Valet parking only'
-    ],
-    features: [
-      'Historic property',
-      'Union Square location',
-      'Wine tasting room',
-      'City tours'
-    ]
-  },
-  {
-    id: 'rcla-006',
-    name: 'The Ritz-Carlton Los Angeles',
-    type: 'LUXURY',
-    location: 'Los Angeles, CA',
-    rating: 4.8,
-    reviews: 1435,
-    price: {
-      base: 495,
-      currency: 'USD'
-    },
-    image: 'https://images.pexels.com/photos/1134176/pexels-photo-1134176.jpeg',
-    description: 'Experience the height of luxury in downtown LA, featuring panoramic city views, world-class dining, and an award-winning spa.',
-    amenities: [
-      'Rooftop Pool',
-      'Luxury Spa',
-      'Fine Dining',
-      'City Views',
-      'Valet Parking',
-      'Fitness Center',
-      'Club Lounge',
-      'Concierge Service'
-    ],
-    rooms: [
-      {
-        id: 'rcla-006-dlx',
-        type: 'Deluxe City View',
-        price: 495,
-        description: 'Modern room with stunning city views',
-        beds: '1 King',
-        occupancy: '2 Adults',
-        size: '450 sq ft'
-      },
-      {
-        id: 'rcla-006-club',
-        type: 'Club Level Suite',
-        price: 795,
-        description: 'Luxury suite with club access',
-        beds: '1 King',
-        occupancy: '3 Adults',
-        size: '750 sq ft'
-      },
-      {
-        id: 'rcla-006-pres',
-        type: 'Presidential Suite',
-        price: 1500,
-        description: 'Ultimate luxury with panoramic views',
-        beds: '2 King',
-        occupancy: '4 Adults',
-        size: '1,800 sq ft'
-      }
-    ],
-    status: 'ACTIVE',
-    contact: {
-      phone: '+1 (213) 555-0123',
-      email: 'ritzcarlton.la@marriott.com',
-      address: '900 W Olympic Blvd, Los Angeles, CA 90015'
-    },
-    checkInTime: '4:00 PM',
-    checkOutTime: '11:00 AM',
-    policies: [
-      'No smoking',
-      'Pet friendly (with fee)',
-      'Cancellation policy: 48 hours',
-      'Valet parking only'
-    ],
-    features: [
-      'Downtown location',
-      'City views',
-      'Club lounge access',
-      'Spa services'
+      "Harbour views",
+      "Rooftop bar",
+      "Spa"
     ]
   }
 ]; 

@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { hotels } from '../data/hotels';
-import { format } from 'date-fns';
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
+import { hotels, Room } from '../data/hotels';
+import BookingModal from '../components/BookingModal';
 
-const HotelDetails = () => {
+const HotelDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const hotel = hotels.find(h => h.id === id);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState<Room | undefined>(undefined);
 
-  const [checkIn, setCheckIn] = useState<Date | null>(null);
-  const [checkOut, setCheckOut] = useState<Date | null>(null);
-  const [guests, setGuests] = useState(1);
-  const [selectedRoomType, setSelectedRoomType] = useState('');
+  const handleBookRoom = (room?: Room) => {
+    setSelectedRoom(room);
+    setIsBookingModalOpen(true);
+  };
 
   if (!hotel) {
     return (
@@ -25,191 +25,164 @@ const HotelDetails = () => {
     );
   }
 
-  const calculateTotalPrice = () => {
-    if (!checkIn || !checkOut || !selectedRoomType) return 0;
-    
-    const selectedRoom = hotel.rooms.find(r => r.type === selectedRoomType);
-    if (!selectedRoom) return 0;
-    
-    const days = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
-    if (days <= 0) return 0;
-    
-    return days * selectedRoom.price;
-  };
-
-  // Get maximum guests from room types
-  const maxGuests = Math.max(...hotel.rooms.map(room => 
-    parseInt(room.occupancy.split(' ')[0]) || 2
-  ));
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Hero Section */}
-      <div className="relative h-[60vh] overflow-hidden">
-        <img 
-          src={hotel.image} 
-          alt={hotel.name}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg';
-          }}
-        />
-        <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center">
-          <div className="container mx-auto px-6">
-            <h1 className="text-5xl font-bold text-white mb-4">{hotel.name}</h1>
-            <div className="flex items-center space-x-4">
-              <p className="text-xl text-white">{hotel.location}</p>
-              <div className="flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
-                <span className="text-yellow-400 mr-1">★</span>
-                <span className="font-medium">{hotel.rating}</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        <div>
+          <img
+            src={hotel.image}
+            alt={hotel.name}
+            className="w-full h-96 object-cover rounded-lg shadow-lg"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg';
+            }}
+          />
+        </div>
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-3xl font-bold">{hotel.name}</h1>
+            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+              {hotel.type}
+            </span>
+          </div>
+          <div className="flex items-center mb-4">
+            <span className="text-yellow-400 text-2xl">★</span>
+            <span className="ml-1 text-xl">{hotel.rating}</span>
+            <span className="mx-2">•</span>
+            <span>{hotel.reviews} reviews</span>
+          </div>
+          <p className="text-gray-600 mb-6">{hotel.description}</p>
+          <div className="mb-6">
+            <h3 className="text-xl font-semibold mb-2">Location</h3>
+            <p className="flex items-center text-gray-600">
+              <span className="mr-2">📍</span>
+              {hotel.location}
+            </p>
+          </div>
+          <div className="mb-6">
+            <h3 className="text-xl font-semibold mb-2">Price</h3>
+            <p className="text-3xl font-bold text-[#8B1538]">
+              ${hotel.price.base} <span className="text-gray-500 text-base">per night</span>
+            </p>
+          </div>
+          <button
+            onClick={() => handleBookRoom()}
+            className="w-full bg-[#8B1538] text-white py-3 rounded-lg hover:bg-[#6d102c] transition-colors"
+          >
+            Book Now
+          </button>
+        </div>
+      </div>
+
+      {/* Features and Amenities */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
+        <div>
+          <h2 className="text-2xl font-bold mb-6">Features</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {hotel.features.map((feature, index) => (
+              <div key={index} className="flex items-center">
+                <span className="mr-2">✦</span>
+                <span className="text-gray-600">{feature}</span>
               </div>
-            </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold mb-6">Amenities</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {hotel.amenities.map((amenity, index) => (
+              <div key={index} className="flex items-center">
+                <span className="mr-2">•</span>
+                <span className="text-gray-600">{amenity}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Hotel Info */}
-          <div className="lg:col-span-2">
-            <h2 className="text-3xl font-semibold mb-6">About the Property</h2>
-            <p className="text-gray-600 mb-8">{hotel.description}</p>
-
-            <h3 className="text-2xl font-semibold mb-4">Amenities</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-              {hotel.amenities.map((amenity, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span>{amenity}</span>
-                </div>
-              ))}
-            </div>
-
-            <h3 className="text-2xl font-semibold mb-4">Room Types</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {hotel.rooms.map((room) => (
-                <div 
-                  key={room.type}
-                  className={`p-6 rounded-lg border-2 cursor-pointer transition-all
-                    ${selectedRoomType === room.type 
-                      ? 'border-[#8B1538] bg-[#8B1538]/10' 
-                      : 'border-gray-200 hover:border-[#8B1538]/50'}`}
-                  onClick={() => setSelectedRoomType(room.type)}
+      {/* Rooms */}
+      <div className="mb-12">
+        <h2 className="text-2xl font-bold mb-6">Available Rooms</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {hotel.rooms.map((room: Room) => (
+            <div key={room.id} className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow">
+              <h3 className="text-xl font-semibold mb-2">{room.type}</h3>
+              <p className="text-gray-600 mb-4">{room.description}</p>
+              <div className="space-y-2 mb-4">
+                <p><span className="font-medium">Beds:</span> {room.beds}</p>
+                <p><span className="font-medium">Occupancy:</span> {room.occupancy}</p>
+                <p><span className="font-medium">Size:</span> {room.size}</p>
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="text-2xl font-bold text-[#8B1538]">${room.price}</p>
+                <button 
+                  onClick={() => handleBookRoom(room)}
+                  className="bg-[#8B1538] text-white px-4 py-2 rounded hover:bg-[#6d102c] transition-colors"
                 >
-                  <h4 className="text-xl font-semibold mb-2">{room.type}</h4>
-                  <p className="text-gray-600 mb-2">{room.description}</p>
-                  <div className="text-sm text-gray-500 space-y-1">
-                    <p>Beds: {room.beds}</p>
-                    <p>Max Occupancy: {room.occupancy}</p>
-                    <p>Size: {room.size}</p>
-                  </div>
-                  <p className="mt-4 text-2xl font-bold text-[#8B1538]">${room.price}/night</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Booking Form */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-lg p-6 sticky top-6">
-              <h3 className="text-2xl font-semibold mb-6">Book Your Stay</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
-                  <select
-                    value={selectedRoomType}
-                    onChange={(e) => setSelectedRoomType(e.target.value)}
-                    className="w-full p-2 border rounded-md"
-                  >
-                    <option value="">Select a room type</option>
-                    {hotel.rooms.map(room => (
-                      <option key={room.type} value={room.type}>
-                        {room.type} - ${room.price}/night
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Check-in Date</label>
-                  <DatePicker
-                    selected={checkIn}
-                    onChange={date => setCheckIn(date)}
-                    minDate={new Date()}
-                    className="w-full p-2 border rounded-md"
-                    placeholderText="Select check-in date"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Check-out Date</label>
-                  <DatePicker
-                    selected={checkOut}
-                    onChange={date => setCheckOut(date)}
-                    minDate={checkIn || new Date()}
-                    className="w-full p-2 border rounded-md"
-                    placeholderText="Select check-out date"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Number of Guests</label>
-                  <select
-                    value={guests}
-                    onChange={(e) => setGuests(Number(e.target.value))}
-                    className="w-full p-2 border rounded-md"
-                  >
-                    {Array.from({ length: maxGuests }, (_, i) => i + 1).map(num => (
-                      <option key={num} value={num}>{num} {num === 1 ? 'Guest' : 'Guests'}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {selectedRoomType && checkIn && checkOut && (
-                  <div className="mt-6 p-4 bg-gray-50 rounded-md">
-                    <h4 className="font-semibold mb-2">Booking Summary</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span>Room Type:</span>
-                        <span>{selectedRoomType}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Check-in:</span>
-                        <span>{format(checkIn, 'MMM dd, yyyy')}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Check-out:</span>
-                        <span>{format(checkOut, 'MMM dd, yyyy')}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Guests:</span>
-                        <span>{guests}</span>
-                      </div>
-                      <div className="pt-2 border-t">
-                        <div className="flex justify-between font-semibold">
-                          <span>Total:</span>
-                          <span>${calculateTotalPrice()}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  className="w-full bg-[#8B1538] text-white py-3 rounded-md font-semibold hover:bg-[#6B1028] transition-colors disabled:bg-gray-400"
-                  disabled={!selectedRoomType || !checkIn || !checkOut}
-                >
-                  Book Now
+                  Select
                 </button>
               </div>
             </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Policies and Contact */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div>
+          <h2 className="text-2xl font-bold mb-6">Policies</h2>
+          <div className="bg-white rounded-lg p-6 shadow-md">
+            <div className="mb-6">
+              <h3 className="font-semibold mb-2">Check-in/Check-out</h3>
+              <p className="text-gray-600">Check-in: {hotel.checkInTime}</p>
+              <p className="text-gray-600">Check-out: {hotel.checkOutTime}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2">Hotel Policies</h3>
+              <ul className="list-disc list-inside space-y-2">
+                {hotel.policies.map((policy, index) => (
+                  <li key={index} className="text-gray-600">{policy}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
+          <div className="bg-white rounded-lg p-6 shadow-md">
+            <div className="space-y-4">
+              <p>
+                <span className="font-semibold">Phone:</span><br />
+                <a href={`tel:${hotel.contact.phone}`} className="text-blue-600 hover:text-blue-800">
+                  {hotel.contact.phone}
+                </a>
+              </p>
+              <p>
+                <span className="font-semibold">Email:</span><br />
+                <a href={`mailto:${hotel.contact.email}`} className="text-blue-600 hover:text-blue-800">
+                  {hotel.contact.email}
+                </a>
+              </p>
+              <p>
+                <span className="font-semibold">Address:</span><br />
+                <span className="text-gray-600">{hotel.contact.address}</span>
+              </p>
+            </div>
           </div>
         </div>
       </div>
+
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => {
+          setIsBookingModalOpen(false);
+          setSelectedRoom(undefined);
+        }}
+        hotel={hotel}
+        selectedRoom={selectedRoom}
+      />
     </div>
   );
 };

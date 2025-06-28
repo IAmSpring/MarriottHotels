@@ -6,7 +6,7 @@ import { hotels } from '../data/hotels';
 const FeaturedHotels: React.FC = () => {
   // Show all six featured hotels
   const featuredHotels = hotels.filter(hotel => 
-    ['rcmb-001', 'jmas-002', 'mmny-003', 'mhhi-004', 'msf-005', 'rcla-006'].includes(hotel.id)
+    ['rcmb-001', 'jmas-002', 'mmny-003', 'mhwk-004', 'msfo-005', 'mla-006'].includes(hotel.id)
   );
 
   return (
@@ -24,7 +24,7 @@ const FeaturedHotels: React.FC = () => {
             >
               <div className="relative h-48">
                 <img
-                  src={hotel.image}
+                  src={`${hotel.image}?t=${Date.now()}`}
                   alt={hotel.name}
                   className="w-full h-full object-cover rounded-t-lg"
                   onError={(e) => {

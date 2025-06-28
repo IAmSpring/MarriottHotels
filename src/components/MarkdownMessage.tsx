@@ -2,8 +2,18 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import type { Components } from 'react-markdown';
 import { Play, Pause, Square, Loader2 } from 'lucide-react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import type { SyntaxHighlighterProps } from 'react-syntax-highlighter';
+import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typescript';
+import javascript from 'react-syntax-highlighter/dist/esm/languages/prism/javascript';
+import css from 'react-syntax-highlighter/dist/esm/languages/prism/css';
+import json from 'react-syntax-highlighter/dist/esm/languages/prism/json';
+
+SyntaxHighlighter.registerLanguage('typescript', typescript);
+SyntaxHighlighter.registerLanguage('javascript', javascript);
+SyntaxHighlighter.registerLanguage('css', css);
+SyntaxHighlighter.registerLanguage('json', json);
 
 interface CodeProps {
   node?: any;
@@ -82,22 +92,18 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({
                 ),
                 code({ node, className, children, ...props }) {
                   const match = /language-(\w+)/.exec(className || '');
-                  const hasSyntaxHighlight = match && match[1];
-                  
-                  if (hasSyntaxHighlight) {
-                    return (
+                  const language = match ? match[1] : '';
+                  return match ? (
+                    <div style={{ margin: 0 }}>
                       <SyntaxHighlighter
-                        style={vscDarkPlus}
-                        language={match[1]}
+                        language={language}
+                        style={vscDarkPlus as any}
                         PreTag="div"
-                        {...props}
                       >
                         {String(children).replace(/\n$/, '')}
                       </SyntaxHighlighter>
-                    );
-                  }
-
-                  return (
+                    </div>
+                  ) : (
                     <code className={className} {...props}>
                       {children}
                     </code>

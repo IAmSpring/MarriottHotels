@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Star, Wifi, Waves, Coffee, UtensilsCrossed, Dumbbell, Car, Calendar, Users, Filter, MapPin } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -8,12 +8,13 @@ import type { BookingFilters } from '../types/hotel';
 import Footer from '../components/Footer';
 
 const HotelsPage = () => {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState<BookingFilters>({
     priceRange: [0, 1000],
     minRating: 0,
     amenities: [],
-    checkIn: undefined,
-    checkOut: undefined,
+    checkIn: null,
+    checkOut: null,
     guests: 2
   });
 
@@ -39,6 +40,10 @@ const HotelsPage = () => {
       );
     });
   }, [filters]);
+
+  const handleHotelClick = (hotelId: string) => {
+    navigate(`/hotels/${hotelId}`);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -178,7 +183,7 @@ const HotelsPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredHotels.map((hotel) => (
                 <Link 
-                  key={hotel.id} 
+                  key={hotel.id}
                   to={`/hotels/${hotel.id}`}
                   className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
                 >
@@ -210,7 +215,13 @@ const HotelsPage = () => {
                         ${hotel.price.base}
                         <span className="text-sm font-normal text-gray-500">/night</span>
                       </span>
-                      <button className="bg-[#8B1538] text-white px-4 py-2 rounded-lg hover:bg-[#6B1028] transition">
+                      <button 
+                        className="bg-[#8B1538] text-white px-4 py-2 rounded-lg hover:bg-[#6B1028] transition"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleHotelClick(hotel.id);
+                        }}
+                      >
                         Book Now
                       </button>
                     </div>

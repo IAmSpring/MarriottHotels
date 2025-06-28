@@ -1,132 +1,146 @@
-import React from 'react';
-import { mockMaintenanceRequests } from '../../data/mockData';
+import React, { useState } from 'react';
 
-// Maintenance Stats Component
-const MaintenanceStats = () => {
-  const stats = [
-    { label: 'Total Requests', value: mockMaintenanceRequests.length },
-    { label: 'High Priority', value: mockMaintenanceRequests.filter(m => m.priority === 'HIGH').length },
-    { label: 'Medium Priority', value: mockMaintenanceRequests.filter(m => m.priority === 'MEDIUM').length },
-    { label: 'Low Priority', value: mockMaintenanceRequests.filter(m => m.priority === 'LOW').length },
-  ];
+interface MaintenanceIssue {
+  id: string;
+  hotelName: string;
+  roomNumber: string;
+  issue: string;
+  priority: string;
+  status: string;
+  assignedTo: string;
+  reportedDate: string;
+}
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {stats.map((stat, index) => (
-        <div key={index} className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
-          <p className="text-3xl font-bold mt-2">{stat.value}</p>
-        </div>
-      ))}
-    </div>
-  );
-};
+const mockIssues: MaintenanceIssue[] = [
+  {
+    id: '1',
+    hotelName: 'The Ritz-Carlton Miami Beach',
+    roomNumber: '301',
+    issue: 'AC not working properly',
+    priority: 'High',
+    status: 'Open',
+    assignedTo: 'John Smith',
+    reportedDate: '2024-03-15'
+  },
+  {
+    id: '2',
+    hotelName: 'JW Marriott Aspen Snowmass',
+    roomNumber: '205',
+    issue: 'Leaking faucet in bathroom',
+    priority: 'Medium',
+    status: 'In Progress',
+    assignedTo: 'Mike Johnson',
+    reportedDate: '2024-03-14'
+  },
+  {
+    id: '3',
+    hotelName: 'Marriott Marquis New York',
+    roomNumber: '1205',
+    issue: 'TV remote not working',
+    priority: 'Low',
+    status: 'Resolved',
+    assignedTo: 'Sarah Wilson',
+    reportedDate: '2024-03-13'
+  }
+];
 
-// Maintenance Actions Component
-const MaintenanceActions = () => {
-  return (
-    <div className="flex gap-4 mb-8">
-      <button className="bg-[#8B1538] text-white px-4 py-2 rounded-lg hover:bg-[#6d102c]">
-        New Request
-      </button>
-      <button className="border border-[#8B1538] text-[#8B1538] px-4 py-2 rounded-lg hover:bg-[#8B1538] hover:text-white">
-        Assign Staff
-      </button>
-      <button className="border border-[#8B1538] text-[#8B1538] px-4 py-2 rounded-lg hover:bg-[#8B1538] hover:text-white">
-        Generate Report
-      </button>
-    </div>
-  );
-};
+const MaintenancePage: React.FC = () => {
+  const [issues, setIssues] = useState<MaintenanceIssue[]>(mockIssues);
+  const [filter, setFilter] = useState('all');
 
-// Maintenance Filters Component
-const MaintenanceFilters = () => {
-  return (
-    <div className="flex gap-4 mb-8">
-      <input
-        type="text"
-        placeholder="Search requests..."
-        className="px-4 py-2 border rounded-lg flex-grow"
-      />
-      <select className="px-4 py-2 border rounded-lg">
-        <option value="">All Hotels</option>
-        <option value="downtown">Marriott Downtown</option>
-        <option value="resort">Marriott Resort</option>
-        <option value="city">Marriott City Center</option>
-      </select>
-      <select className="px-4 py-2 border rounded-lg">
-        <option value="">All Priority</option>
-        <option value="HIGH">High</option>
-        <option value="MEDIUM">Medium</option>
-        <option value="LOW">Low</option>
-      </select>
-      <select className="px-4 py-2 border rounded-lg">
-        <option value="">All Status</option>
-        <option value="PENDING">Pending</option>
-        <option value="IN_PROGRESS">In Progress</option>
-        <option value="COMPLETED">Completed</option>
-      </select>
-    </div>
-  );
-};
+  const filteredIssues = filter === 'all' 
+    ? issues 
+    : issues.filter(issue => issue.status.toLowerCase() === filter);
 
-// Maintenance List Component
-const MaintenanceList = () => {
-  return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      <table className="w-full">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hotel</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Room</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Issue</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Priority</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Assigned To</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200">
-          {mockMaintenanceRequests.map((request) => (
-            <tr key={request.id}>
-              <td className="px-6 py-4 whitespace-nowrap">{request.hotelName}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{request.roomNumber}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{request.issue}</td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`px-2 py-1 text-xs rounded-full ${
-                  request.priority === 'HIGH'
-                    ? 'bg-red-100 text-red-800'
-                    : request.priority === 'MEDIUM'
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-blue-100 text-blue-800'
-                }`}>
-                  {request.priority}
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                {request.assignedTo || 'Unassigned'}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <button className="text-[#8B1538] hover:text-[#6d102c] mr-3">Update</button>
-                <button className="text-green-600 hover:text-green-800">Complete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-};
+  const handleStatusChange = (issueId: string, newStatus: string) => {
+    setIssues(issues.map(issue => 
+      issue.id === issueId ? { ...issue, status: newStatus } : issue
+    ));
+  };
 
-const MaintenancePage = () => {
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-semibold">Maintenance Management</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Maintenance Issues</h1>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setFilter('all')}
+            className={`px-4 py-2 rounded-lg ${filter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setFilter('open')}
+            className={`px-4 py-2 rounded-lg ${filter === 'open' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+          >
+            Open
+          </button>
+          <button
+            onClick={() => setFilter('in progress')}
+            className={`px-4 py-2 rounded-lg ${filter === 'in progress' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+          >
+            In Progress
+          </button>
+          <button
+            onClick={() => setFilter('resolved')}
+            className={`px-4 py-2 rounded-lg ${filter === 'resolved' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+          >
+            Resolved
+          </button>
+        </div>
       </div>
-      <MaintenanceStats />
-      <MaintenanceActions />
-      <MaintenanceFilters />
-      <MaintenanceList />
+
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hotel</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reported</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {filteredIssues.map((issue) => (
+              <tr key={issue.id}>
+                <td className="px-6 py-4 whitespace-nowrap">{issue.hotelName}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{issue.roomNumber}</td>
+                <td className="px-6 py-4">{issue.issue}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium
+                    ${issue.priority === 'High' ? 'bg-red-100 text-red-800' : 
+                      issue.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 
+                      'bg-green-100 text-green-800'}`}>
+                    {issue.priority}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <select
+                    value={issue.status}
+                    onChange={(e) => handleStatusChange(issue.id, e.target.value)}
+                    className="rounded border-gray-300"
+                  >
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
+                  </select>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">{issue.assignedTo}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{issue.reportedDate}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <button className="text-blue-600 hover:text-blue-900">
+                    View Details
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

@@ -1,11 +1,13 @@
 import { gql } from 'apollo-server-express';
 import { prisma } from '../lib/prisma';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { Hotel, Room } from '../data/hotels';
+import { hotels } from '../data/hotels';
 
 interface Context {
-  hotels: Hotel[];
-  rooms: Room[];
+  hotels: typeof hotels;
+  rooms: any[];
+  bookings: any[];
+  users: any[];
 }
 
 interface QueryResolvers {
@@ -27,6 +29,43 @@ interface MutationResolvers {
   createBooking: (_: unknown, { input }: { input: any }, context: Context) => any;
   updateBooking: (_: unknown, { id, status }: { id: string; status: string }, context: Context) => any;
   deleteBooking: (_: unknown, { id }: { id: string }, context: Context) => boolean;
+}
+
+interface UserInput {
+  name: string;
+  email: string;
+  password: string;
+}
+
+interface HotelInput {
+  name: string;
+  type: string;
+  location: string;
+  description: string;
+  price: {
+    base: number;
+    currency: string;
+  };
+  amenities: string[];
+}
+
+interface RoomInput {
+  hotelId: string;
+  type: string;
+  price: number;
+  description: string;
+  beds: string;
+  occupancy: string;
+  size: string;
+}
+
+interface BookingInput {
+  userId: string;
+  hotelId: string;
+  roomId: string;
+  checkIn: string;
+  checkOut: string;
+  guests: number;
 }
 
 export const typeDefs = gql`

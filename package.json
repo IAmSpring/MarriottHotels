@@ -20,6 +20,10 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@apollo/server": "^4.12.2",
+    "@graphql-tools/mock": "^9.0.23",
+    "@graphql-tools/schema": "^10.0.23",
+    "@graphql-tools/utils": "^10.8.6",
     "@headlessui/react": "^1.7.18",
     "@langchain/core": "^0.3.61",
     "@prisma/client": "^5.22.0",
