@@ -21,15 +21,15 @@ const DestinationsPage: React.FC = () => {
         {Object.entries(destinations).map(([city, cityHotels]) => (
           <div key={city} className="bg-white rounded-lg shadow-lg overflow-hidden">
             <div className="relative h-48">
-              <img
+                <img
                 src={cityHotels[0].image}
                 alt={city}
-                className="w-full h-full object-cover"
-              />
+                  className="w-full h-full object-cover"
+                />
               <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
                 <h2 className="text-3xl font-bold text-white">{city}</h2>
-              </div>
-            </div>
+                  </div>
+                </div>
             <div className="p-6">
               <div className="mb-4">
                 <p className="text-gray-600">{cityHotels.length} Hotels</p>
@@ -40,15 +40,15 @@ const DestinationsPage: React.FC = () => {
               <div className="space-y-4">
                 {cityHotels.map(hotel => (
                   <Link
-                    key={hotel.id}
+                        key={hotel.id}
                     to={`/hotels/${hotel.id}`}
                     className="block hover:bg-gray-50 p-4 rounded-lg transition"
-                  >
+                      >
                     <div className="flex justify-between items-start">
-                      <div>
+                          <div>
                         <h3 className="font-semibold text-gray-900">{hotel.name}</h3>
                         <p className="text-sm text-gray-600">{hotel.type}</p>
-                      </div>
+                          </div>
                       <div className="text-right">
                         <p className="font-semibold">${hotel.price.base}</p>
                         <div className="flex items-center text-yellow-400">
@@ -56,9 +56,9 @@ const DestinationsPage: React.FC = () => {
                           <span className="ml-1 text-gray-600">{hotel.rating}</span>
                         </div>
                       </div>
-                    </div>
+                  </div>
                   </Link>
-                ))}
+                    ))}
               </div>
             </div>
           </div>

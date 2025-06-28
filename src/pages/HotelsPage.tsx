@@ -59,7 +59,7 @@ const HotelsPage = () => {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Filters Sidebar */}
           <div className="w-full md:w-1/4 bg-white rounded-lg shadow p-6">
-            <div className="mb-6">
+              <div className="mb-6">
               <h3 className="text-lg font-semibold mb-4 flex items-center">
                 <Filter className="w-5 h-5 mr-2" />
                 Filters
@@ -82,9 +82,9 @@ const HotelsPage = () => {
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>${filters.priceRange[0]}</span>
                     <span>${filters.priceRange[1]}</span>
-                  </div>
                 </div>
-
+              </div>
+              
                 <div>
                   <label className="block text-sm font-medium mb-2">Minimum Rating</label>
                   <input
@@ -103,41 +103,41 @@ const HotelsPage = () => {
                     <span>0</span>
                     <span>{filters.minRating}</span>
                     <span>5</span>
-                  </div>
                 </div>
-
+              </div>
+              
                 <div>
                   <label className="block text-sm font-medium mb-2">Amenities</label>
-                  <div className="space-y-2">
+                <div className="space-y-2">
                     {Object.entries(amenityIcons).map(([amenity, icon]) => (
                       <label key={amenity} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={filters.amenities.includes(amenity)}
-                          onChange={(e) => {
+                      <input
+                        type="checkbox"
+                        checked={filters.amenities.includes(amenity)}
+                        onChange={(e) => {
                             if (e.target.checked) {
                               setFilters(prev => ({
                                 ...prev,
                                 amenities: [...prev.amenities, amenity]
                               }));
                             } else {
-                              setFilters(prev => ({
-                                ...prev,
+                          setFilters(prev => ({
+                            ...prev,
                                 amenities: prev.amenities.filter(a => a !== amenity)
-                              }));
+                          }));
                             }
-                          }}
+                        }}
                           className="mr-2"
-                        />
+                      />
                         <span className="flex items-center">
                           {icon}
                           <span className="ml-2">{amenity}</span>
                         </span>
-                      </label>
-                    ))}
-                  </div>
+                    </label>
+                  ))}
                 </div>
-
+              </div>
+              
                 <div>
                   <label className="block text-sm font-medium mb-2">Check-in Date</label>
                   <DatePicker
@@ -177,13 +177,13 @@ const HotelsPage = () => {
               </div>
             </div>
           </div>
-
+          
           {/* Hotel List */}
           <div className="flex-1">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredHotels.map((hotel) => (
                 <Link 
-                  key={hotel.id}
+                  key={hotel.id} 
                   to={`/hotels/${hotel.id}`}
                   className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
                 >

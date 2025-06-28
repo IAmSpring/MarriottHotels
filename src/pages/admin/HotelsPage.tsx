@@ -18,19 +18,19 @@ const HotelsPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
-            <p className="text-3xl font-bold mt-2">{stat.value}</p>
-          </div>
-        ))}
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {stats.map((stat, index) => (
+        <div key={index} className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
+          <p className="text-3xl font-bold mt-2">{stat.value}</p>
+        </div>
+      ))}
+    </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+    <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
+        <thead className="bg-gray-50">
+          <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hotel</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
@@ -38,11 +38,11 @@ const HotelsPage: React.FC = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
+          </tr>
+        </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {hotels.map((hotel) => (
-              <tr key={hotel.id}>
+            <tr key={hotel.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="h-10 w-10 flex-shrink-0">
@@ -66,23 +66,23 @@ const HotelsPage: React.FC = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   ${hotel.price.base}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
                     ${hotel.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 
                       hotel.status === 'INACTIVE' ? 'bg-red-100 text-red-800' : 
                       'bg-yellow-100 text-yellow-800'}`}>
-                    {hotel.status}
-                  </span>
-                </td>
+                  {hotel.status}
+                </span>
+              </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <button className="text-blue-600 hover:text-blue-900 mr-4">Edit</button>
                   <button className="text-red-600 hover:text-red-900">Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
     </div>
   );
 };

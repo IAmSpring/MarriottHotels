@@ -271,7 +271,7 @@ export const hotels: Hotel[] = [
       base: 550,
       currency: 'USD'
     },
-    image: '/images/miami-beach.jpg',
+    image: '/MarriottHotels/images/hawaii.jpg',
     description: 'An oceanfront paradise in Waikiki Beach, offering world-class Hawaiian hospitality, stunning Pacific views, and exclusive beach access.',
     amenities: [
       'Private Beach',
@@ -344,7 +344,7 @@ export const hotels: Hotel[] = [
       base: 450,
       currency: 'USD'
     },
-    image: 'https://images.pexels.com/photos/1388069/pexels-photo-1388069.jpeg',
+    image: '/MarriottHotels/images/san-francisco.jpg',
     description: 'A historic landmark in Union Square, combining timeless luxury with modern amenities and spectacular city views of San Francisco.',
     amenities: [
       'Historic Building',
@@ -417,7 +417,7 @@ export const hotels: Hotel[] = [
       base: 495,
       currency: 'USD'
     },
-    image: 'https://images.pexels.com/photos/1134176/pexels-photo-1134176.jpeg',
+    image: '/MarriottHotels/images/los-angeles.jpg',
     description: 'Experience the height of luxury in downtown LA, featuring panoramic city views, world-class dining, and an award-winning spa.',
     amenities: [
       'Rooftop Pool',
@@ -491,7 +491,7 @@ export const hotels: Hotel[] = [
     },
     rating: 4.8,
     reviews: 2456,
-    image: "/images/new-york.jpg",
+    image: '/MarriottHotels/images/new-york.jpg',
     amenities: [
       "Spa", "Pool", "Fine Dining", "Fitness Center", "Business Center",
       "Concierge", "Room Service", "Valet Parking", "Rooftop Bar",
@@ -563,7 +563,7 @@ export const hotels: Hotel[] = [
     },
     rating: 4.8,
     reviews: 1247,
-    image: "/images/miami-beach.jpg",
+    image: '/MarriottHotels/images/miami-beach.jpg',
     amenities: [
       "Private Beach", "Multiple Pools", "Spa", "Restaurant", "Beach Bar",
       "Fitness Center", "Room Service", "Water Sports", "Kids Club",
@@ -635,7 +635,7 @@ export const hotels: Hotel[] = [
     },
     rating: 4.9,
     reviews: 892,
-    image: "/images/aspen.jpg",
+    image: '/MarriottHotels/images/aspen.jpg',
     amenities: [
       "Ski-in/Ski-out", "Hot Tubs", "Gourmet Restaurant", "Après-ski Bar",
       "Spa", "Fitness Center", "Ski Valet", "Equipment Rental",
@@ -707,7 +707,7 @@ export const hotels: Hotel[] = [
     },
     rating: 4.3,
     reviews: 2156,
-    image: "/images/manhattan.jpg",
+    image: '/MarriottHotels/images/new-york.jpg',
     amenities: [
       "Business Center", "High-speed WiFi", "Executive Lounge", "Conference Rooms",
       "Restaurant", "Bar", "Fitness Center", "Room Service",
@@ -779,7 +779,7 @@ export const hotels: Hotel[] = [
     },
     rating: 4.7,
     reviews: 1823,
-    image: "/images/scottsdale.jpg",
+    image: '/MarriottHotels/images/miami-beach.jpg',
     amenities: [
       "Championship Golf Course", "Desert Spa", "Multiple Pools", "Tennis Courts",
       "Fine Dining", "Pool Bar", "Fitness Center", "Room Service",
@@ -849,7 +849,7 @@ export const hotels: Hotel[] = [
       base: 450,
       currency: "USD"
     },
-    image: "https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg",
+    image: "/MarriottHotels/images/los-angeles.jpg",
     description: "A luxurious boutique hotel steps away from Santa Monica Beach, offering a perfect blend of coastal charm and modern luxury.",
     reviews: 856,
     amenities: [

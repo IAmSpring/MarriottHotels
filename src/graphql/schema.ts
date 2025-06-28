@@ -457,7 +457,7 @@ export const resolvers = {
       });
     },
   },
-};
+}; 
 
 export const schema = makeExecutableSchema({
   typeDefs,

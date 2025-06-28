@@ -11,15 +11,15 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel }) => {
     <Link to={`/hotels/${hotel.id}`} className="block">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
         <div className="relative h-48">
-          <img
-            src={hotel.image}
-            alt={hotel.name}
+        <img 
+          src={hotel.image} 
+          alt={hotel.name}
             className="w-full h-full object-cover"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg';
             }}
-          />
+        />
           <div className="absolute top-4 right-4 bg-white px-2 py-1 rounded-full text-sm font-semibold text-gray-900">
             ${hotel.price.base}/night
           </div>
@@ -52,7 +52,7 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel }) => {
                   +{hotel.amenities.length - 4} more
                 </span>
               )}
-            </div>
+      </div>
           </div>
           <button 
             className="mt-6 w-full bg-[#8B1538] text-white py-2 rounded-lg hover:bg-[#6d102c] transition-colors"

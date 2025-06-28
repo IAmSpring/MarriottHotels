@@ -74,26 +74,26 @@ const MaintenancePage: React.FC = () => {
             className={`px-4 py-2 rounded-lg ${filter === 'open' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
           >
             Open
-          </button>
+      </button>
           <button
             onClick={() => setFilter('in progress')}
             className={`px-4 py-2 rounded-lg ${filter === 'in progress' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
           >
             In Progress
-          </button>
+      </button>
           <button
             onClick={() => setFilter('resolved')}
             className={`px-4 py-2 rounded-lg ${filter === 'resolved' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
           >
             Resolved
-          </button>
-        </div>
-      </div>
+      </button>
+    </div>
+    </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+    <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
+        <thead className="bg-gray-50">
+          <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hotel</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue</th>
@@ -102,23 +102,23 @@ const MaintenancePage: React.FC = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reported</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
+          </tr>
+        </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredIssues.map((issue) => (
               <tr key={issue.id}>
                 <td className="px-6 py-4 whitespace-nowrap">{issue.hotelName}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{issue.roomNumber}</td>
                 <td className="px-6 py-4">{issue.issue}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium
                     ${issue.priority === 'High' ? 'bg-red-100 text-red-800' : 
                       issue.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 
                       'bg-green-100 text-green-800'}`}>
                     {issue.priority}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                </span>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
                   <select
                     value={issue.status}
                     onChange={(e) => handleStatusChange(issue.id, e.target.value)}
@@ -128,19 +128,19 @@ const MaintenancePage: React.FC = () => {
                     <option value="In Progress">In Progress</option>
                     <option value="Resolved">Resolved</option>
                   </select>
-                </td>
+              </td>
                 <td className="px-6 py-4 whitespace-nowrap">{issue.assignedTo}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{issue.reportedDate}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-6 py-4 whitespace-nowrap">
                   <button className="text-blue-600 hover:text-blue-900">
                     View Details
                   </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
     </div>
   );
 };

@@ -37,7 +37,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, hotel, sel
       checkOut: checkOut.toISOString(),
       guests,
       totalPrice: currentRoom.price * Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24))
-    };
+  };
 
     console.log('Booking:', booking);
     onClose();
@@ -51,7 +51,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, hotel, sel
         <Dialog.Panel className="mx-auto max-w-lg rounded-lg bg-white p-6">
           <Dialog.Title className="text-2xl font-bold mb-4">
             Book Your Stay at {hotel.name}
-          </Dialog.Title>
+            </Dialog.Title>
 
           <div className="space-y-4">
             {!selectedRoom && (
@@ -74,51 +74,51 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, hotel, sel
               </div>
             )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Check-in Date
-              </label>
-              <DatePicker
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Check-in Date
+                  </label>
+                  <DatePicker
                 selected={checkIn}
                 onChange={date => setCheckIn(date)}
                 selectsStart
                 startDate={checkIn}
                 endDate={checkOut}
-                minDate={new Date()}
-                className="w-full p-2 border rounded"
-                placeholderText="Select check-in date"
-              />
-            </div>
+                    minDate={new Date()}
+                    className="w-full p-2 border rounded"
+                    placeholderText="Select check-in date"
+                  />
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Check-out Date
-              </label>
-              <DatePicker
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Check-out Date
+                  </label>
+                  <DatePicker
                 selected={checkOut}
                 onChange={date => setCheckOut(date)}
                 selectsEnd
                 startDate={checkIn}
                 endDate={checkOut}
                 minDate={checkIn || new Date()}
-                className="w-full p-2 border rounded"
-                placeholderText="Select check-out date"
-              />
-            </div>
+                    className="w-full p-2 border rounded"
+                    placeholderText="Select check-out date"
+                  />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Number of Guests
-              </label>
-              <input
-                type="number"
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Number of Guests
+                </label>
+                <input
+                  type="number"
                 min={1}
                 max={currentRoom ? parseInt(currentRoom.occupancy.split('-')[1] || '2') : 2}
                 value={guests}
                 onChange={e => setGuests(parseInt(e.target.value))}
-                className="w-full p-2 border rounded"
-              />
-            </div>
+                  className="w-full p-2 border rounded"
+                />
+              </div>
 
             {currentRoom && (
               <div className="border-t pt-4 mt-4">
@@ -130,11 +130,11 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, hotel, sel
                   <div className="flex justify-between font-semibold">
                     <span>Total ({Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24))} nights)</span>
                     <span>${currentRoom.price * Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24))}</span>
-                  </div>
+                </div>
                 )}
-              </div>
+                </div>
             )}
-          </div>
+              </div>
 
           <div className="mt-6 flex justify-end space-x-4">
             <button
@@ -143,7 +143,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, hotel, sel
             >
               Cancel
             </button>
-            <button
+              <button
               onClick={handleBooking}
               disabled={!currentRoom || !checkIn || !checkOut}
               className={`px-4 py-2 text-white rounded-lg ${!currentRoom || !checkIn || !checkOut ? 
@@ -151,7 +151,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, hotel, sel
                 'bg-[#8B1538] hover:bg-[#6d102c]'}`}
             >
               Book Now
-            </button>
+              </button>
           </div>
         </Dialog.Panel>
       </div>

@@ -48,3 +48,10 @@ yarn-error.log*
 
 # Local development
 .bolt
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+cypress/results/
+.cypress-cache/

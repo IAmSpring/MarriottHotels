@@ -1,0 +1,52 @@
+{
+  "mcpServers": {
+    "dev": {
+      "command": "npm run dev",
+      "port": 5173,
+      "protocol": "http",
+      "host": "localhost",
+      "waitForText": "Local:",
+      "killOnRestart": true
+    },
+    "cypress": {
+      "command": "npm run cypress:open",
+      "port": 5173,
+      "protocol": "http",
+      "host": "localhost",
+      "waitForText": "Opening Cypress",
+      "killOnRestart": true,
+      "env": {
+        "CYPRESS_BASE_URL": "http://localhost:5173"
+      }
+    },
+    "cypress-headless": {
+      "command": "npm run cypress:run",
+      "port": 5173,
+      "protocol": "http",
+      "host": "localhost",
+      "waitForText": "Running:",
+      "killOnRestart": true,
+      "env": {
+        "CYPRESS_BASE_URL": "http://localhost:5173"
+      }
+    },
+    "e2e": {
+      "command": "npm run test:e2e",
+      "port": 5173,
+      "protocol": "http",
+      "host": "localhost",
+      "waitForText": "Running:",
+      "killOnRestart": true,
+      "env": {
+        "CYPRESS_BASE_URL": "http://localhost:5173"
+      }
+    }
+  },
+  "integrations": {
+    "cypress": {
+      "configFile": "cypress.config.ts",
+      "projectRoot": ".",
+      "supportFile": "cypress/support/e2e.ts"
+    }
+  }
+} 

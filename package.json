@@ -14,7 +14,10 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test:e2e": "start-server-and-test dev http://localhost:5173 cypress:run"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -81,6 +84,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
+    "@types/cypress": "^1.1.6",
     "@types/express": "^4.17.23",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20.19.1",
@@ -89,11 +93,14 @@
     "@types/react-dom": "^18.2.18",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.17",
+    "cypress": "^14.5.0",
+    "cypress-real-events": "^1.14.0",
     "eslint": "^8.56.0",
     "gh-pages": "^6.3.0",
     "nodemon": "^3.1.10",
     "postcss": "^8.4.33",
     "prisma": "^5.9.0",
+    "start-server-and-test": "^2.0.12",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.20.2",
     "typescript": "^5.3.3",

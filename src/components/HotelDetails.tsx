@@ -24,17 +24,17 @@ const HotelDetails: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Hotel Image */}
-        <div className="relative h-96">
-          <img
+      <div className="relative h-96">
+        <img
             src={hotel.image}
-            alt={hotel.name}
+          alt={hotel.name}
             className="w-full h-full object-cover rounded-lg"
-          />
+        />
           <div className="absolute top-4 right-4 bg-white px-3 py-1 rounded-full">
             <span className="text-yellow-400">★</span>
             <span className="ml-1 font-semibold">{hotel.rating}</span>
-          </div>
         </div>
+      </div>
 
         {/* Hotel Details */}
         <div>
@@ -44,18 +44,18 @@ const HotelDetails: React.FC = () => {
 
           <div className="mb-6">
             <h2 className="text-xl font-semibold mb-3">Amenities</h2>
-            <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
               {hotel.amenities.map((amenity, index) => (
                 <div key={index} className="flex items-center">
                   <span className="text-gray-600">{amenity}</span>
-                </div>
-              ))}
+                  </div>
+                ))}
             </div>
           </div>
 
           <div className="mb-6">
             <h2 className="text-xl font-semibold mb-3">Rooms</h2>
-            <div className="space-y-4">
+              <div className="space-y-4">
               {hotel.rooms.map((room) => (
                 <div
                   key={room.id}
@@ -79,10 +79,10 @@ const HotelDetails: React.FC = () => {
                       <p className="text-2xl font-bold">${room.price}</p>
                       <p className="text-sm text-gray-500">per night</p>
                     </div>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
           </div>
 
           <div className="border-t pt-6">

@@ -30,15 +30,15 @@ const HotelDetails: React.FC = () => {
       {/* Hero Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         <div>
-          <img
+        <img
             src={hotel.image}
-            alt={hotel.name}
+          alt={hotel.name}
             className="w-full h-96 object-cover rounded-lg shadow-lg"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg';
-            }}
-          />
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg';
+          }}
+        />
         </div>
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -46,13 +46,13 @@ const HotelDetails: React.FC = () => {
             <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
               {hotel.type}
             </span>
-          </div>
+                </div>
           <div className="flex items-center mb-4">
             <span className="text-yellow-400 text-2xl">★</span>
             <span className="ml-1 text-xl">{hotel.rating}</span>
             <span className="mx-2">•</span>
             <span>{hotel.reviews} reviews</span>
-          </div>
+              </div>
           <p className="text-gray-600 mb-6">{hotel.description}</p>
           <div className="mb-6">
             <h3 className="text-xl font-semibold mb-2">Location</h3>
@@ -60,7 +60,7 @@ const HotelDetails: React.FC = () => {
               <span className="mr-2">📍</span>
               {hotel.location}
             </p>
-          </div>
+            </div>
           <div className="mb-6">
             <h3 className="text-xl font-semibold mb-2">Price</h3>
             <p className="text-3xl font-bold text-[#8B1538]">
@@ -85,26 +85,26 @@ const HotelDetails: React.FC = () => {
               <div key={index} className="flex items-center">
                 <span className="mr-2">✦</span>
                 <span className="text-gray-600">{feature}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
         <div>
           <h2 className="text-2xl font-bold mb-6">Amenities</h2>
-          <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4">
             {hotel.amenities.map((amenity, index) => (
               <div key={index} className="flex items-center">
                 <span className="mr-2">•</span>
                 <span className="text-gray-600">{amenity}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Rooms */}
       <div className="mb-12">
-        <h2 className="text-2xl font-bold mb-6">Available Rooms</h2>
+              <h2 className="text-2xl font-bold mb-6">Available Rooms</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {hotel.rooms.map((room: Room) => (
             <div key={room.id} className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow">
@@ -114,7 +114,7 @@ const HotelDetails: React.FC = () => {
                 <p><span className="font-medium">Beds:</span> {room.beds}</p>
                 <p><span className="font-medium">Occupancy:</span> {room.occupancy}</p>
                 <p><span className="font-medium">Size:</span> {room.size}</p>
-              </div>
+                      </div>
               <div className="flex items-center justify-between">
                 <p className="text-2xl font-bold text-[#8B1538]">${room.price}</p>
                 <button 
@@ -123,23 +123,23 @@ const HotelDetails: React.FC = () => {
                 >
                   Select
                 </button>
-              </div>
-            </div>
+                      </div>
+                    </div>
           ))}
         </div>
-      </div>
+                      </div>
 
       {/* Policies and Contact */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-        <div>
+                      <div>
           <h2 className="text-2xl font-bold mb-6">Policies</h2>
           <div className="bg-white rounded-lg p-6 shadow-md">
             <div className="mb-6">
               <h3 className="font-semibold mb-2">Check-in/Check-out</h3>
               <p className="text-gray-600">Check-in: {hotel.checkInTime}</p>
               <p className="text-gray-600">Check-out: {hotel.checkOutTime}</p>
-            </div>
-            <div>
+                      </div>
+                      <div>
               <h3 className="font-semibold mb-2">Hotel Policies</h3>
               <ul className="list-disc list-inside space-y-2">
                 {hotel.policies.map((policy, index) => (
@@ -148,7 +148,7 @@ const HotelDetails: React.FC = () => {
               </ul>
             </div>
           </div>
-        </div>
+                </div>
         <div>
           <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
           <div className="bg-white rounded-lg p-6 shadow-md">
