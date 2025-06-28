@@ -158,6 +158,7 @@ export const mockHotels: Hotel[] = [
     rooms: [
       {
         id: 'md-1',
+        hotelId: '1',
         type: 'Deluxe Room',
         price: 299,
         description: 'Spacious room with city views',
@@ -167,6 +168,7 @@ export const mockHotels: Hotel[] = [
       },
       {
         id: 'md-2',
+        hotelId: '1',
         type: 'Executive Suite',
         price: 499,
         description: 'Luxury suite with separate living area',
@@ -213,6 +215,7 @@ export const mockHotels: Hotel[] = [
     rooms: [
       {
         id: 'mbr-1',
+        hotelId: '2',
         type: 'Ocean View Room',
         price: 399,
         description: 'Room with stunning ocean views',
@@ -222,6 +225,7 @@ export const mockHotels: Hotel[] = [
       },
       {
         id: 'mbr-2',
+        hotelId: '2',
         type: 'Beach Villa',
         price: 699,
         description: 'Private villa steps from the beach',
@@ -268,6 +272,7 @@ export const mockHotels: Hotel[] = [
     rooms: [
       {
         id: 'mcc-1',
+        hotelId: '3',
         type: 'Business Room',
         price: 279,
         description: 'Modern room with work desk',
@@ -277,6 +282,7 @@ export const mockHotels: Hotel[] = [
       },
       {
         id: 'mcc-2',
+        hotelId: '3',
         type: 'Executive Suite',
         price: 429,
         description: 'Suite with meeting area',

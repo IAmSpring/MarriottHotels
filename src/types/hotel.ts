@@ -34,7 +34,7 @@ export interface Hotel {
   image: string;
   amenities: string[];
   rooms: Room[];
-  status: 'ACTIVE' | 'INACTIVE';
+  status: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE';
   contact: Contact;
   checkInTime: string;
   checkOutTime: string;
