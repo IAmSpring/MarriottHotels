@@ -9,7 +9,7 @@ const tourSections: TourSection[] = [
     id: 'hero',
     name: 'Welcome',
     description: 'Start your journey with Marriott Hotels',
-    narration: 'Welcome to Marriott Hotels. Our hero section showcases our commitment to extraordinary experiences and world-class hospitality. You can easily search for your perfect destination, select your dates, and begin your journey.',
+    narration: 'Welcome to Marriott Hotels. Our site showcases our commitment to extraordinary experiences and world-class hospitality. You can easily search for your perfect destination, select your dates, and begin your journey.',
     element: '#hero-section'
   },
   {

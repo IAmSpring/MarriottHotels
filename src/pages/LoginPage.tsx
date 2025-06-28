@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, MapPin, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { trpc } from '../utils/trpc';
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,34 +17,23 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
+  const loginMutation = trpc.login.useMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
+      const result = await loginMutation.mutateAsync({
+        email: formData.email,
+        password: formData.password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-
       // Login successful
-      login(data.user.email, data.user.name, data.user.role);
+      login(result.user.email, result.user.name || result.user.email, result.user.role);
       
       // Redirect based on role
-      if (data.user.role === 'ADMIN') {
+      if (result.user.role === 'ADMIN') {
         navigate('/admin');
       } else {
         navigate('/bookings');
@@ -64,9 +54,24 @@ const LoginPage = () => {
       password: credentials.password
     }));
 
-    // Submit the form
-    const event = new Event('submit');
-    handleSubmit(event as any);
+    try {
+      const result = await loginMutation.mutateAsync({
+        email: credentials.email,
+        password: credentials.password,
+      });
+
+      // Login successful
+      login(result.user.email, result.user.name || result.user.email, result.user.role);
+      
+      // Redirect based on role
+      if (result.user.role === 'ADMIN') {
+        navigate('/admin');
+      } else {
+        navigate('/bookings');
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred during login');
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

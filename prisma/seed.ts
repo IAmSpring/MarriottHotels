@@ -20,6 +20,32 @@ async function main() {
     prisma.user.deleteMany(),
   ]);
 
+  // Create demo accounts
+  const demoUsers = await Promise.all([
+    prisma.user.create({
+      data: {
+        name: 'Admin User',
+        email: 'admin@test.com',
+        password: await bcrypt.hash('admin123', 10),
+        role: 'ADMIN',
+        bonvoyNumber: 'DEMO_ADMIN_001',
+        bonvoyPoints: 100000,
+        bonvoyStatus: 'AMBASSADOR'
+      }
+    }),
+    prisma.user.create({
+      data: {
+        name: 'Regular User',
+        email: 'user@test.com',
+        password: await bcrypt.hash('user123', 10),
+        role: 'USER',
+        bonvoyNumber: 'DEMO_USER_001',
+        bonvoyPoints: 1000,
+        bonvoyStatus: 'MEMBER'
+      }
+    })
+  ]);
+
   // Create admin users
   const adminUsers = await Promise.all([
     prisma.user.create({
@@ -28,7 +54,7 @@ async function main() {
         email: 'john.smith@marriott.com',
         password: await bcrypt.hash('admin123', 10),
         role: 'ADMIN',
-        bonvoyNumber: 'ADMIN001',
+        bonvoyNumber: 'ADMIN_JS_001',
         bonvoyPoints: 100000,
         bonvoyStatus: 'AMBASSADOR'
       }
@@ -39,7 +65,7 @@ async function main() {
         email: 'sarah.johnson@marriott.com',
         password: await bcrypt.hash('admin123', 10),
         role: 'MANAGER',
-        bonvoyNumber: 'ADMIN002',
+        bonvoyNumber: 'ADMIN_SJ_002',
         bonvoyPoints: 75000,
         bonvoyStatus: 'TITANIUM'
       }
@@ -53,7 +79,7 @@ async function main() {
         name: 'Michael Brown',
         email: 'michael@example.com',
         password: await bcrypt.hash('password123', 10),
-        bonvoyNumber: 'BV123456',
+        bonvoyNumber: 'BV_MB_123456',
         bonvoyPoints: 50000,
         bonvoyStatus: 'GOLD'
       }
@@ -63,7 +89,7 @@ async function main() {
         name: 'Emma Wilson',
         email: 'emma@example.com',
         password: await bcrypt.hash('password123', 10),
-        bonvoyNumber: 'BV789012',
+        bonvoyNumber: 'BV_EW_789012',
         bonvoyPoints: 100000,
         bonvoyStatus: 'PLATINUM'
       }
@@ -73,7 +99,7 @@ async function main() {
         name: 'David Chen',
         email: 'david@example.com',
         password: await bcrypt.hash('password123', 10),
-        bonvoyNumber: 'BV345678',
+        bonvoyNumber: 'BV_DC_345678',
         bonvoyPoints: 25000,
         bonvoyStatus: 'SILVER'
       }
@@ -83,7 +109,7 @@ async function main() {
         name: 'Sophie Martin',
         email: 'sophie@example.com',
         password: await bcrypt.hash('password123', 10),
-        bonvoyNumber: 'BV901234',
+        bonvoyNumber: 'BV_SM_901234',
         bonvoyPoints: 150000,
         bonvoyStatus: 'AMBASSADOR'
       }
