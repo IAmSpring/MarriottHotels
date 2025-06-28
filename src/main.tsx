@@ -22,8 +22,11 @@ const iconContainer = document.createElement('div');
 iconContainer.style.cssText = `
   position: relative;
   margin-bottom: 1rem;
-  width: 48px;
-  height: 48px;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 // Marriott Icon
@@ -33,7 +36,7 @@ iconContainer.innerHTML = `
     height="48"
     viewBox="0 0 24 24"
     fill="none"
-    style="color: #8B1538"
+    style="color: #8B1538; position: absolute; z-index: 2;"
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
@@ -51,7 +54,7 @@ iconContainer.innerHTML = `
 const spinner = document.createElement('div');
 spinner.style.cssText = `
   position: absolute;
-  inset: 0;
+  inset: -10px;
   animation: spin 1s linear infinite;
   @keyframes spin {
     from { transform: rotate(0deg); }
@@ -64,7 +67,7 @@ spinnerRing.style.cssText = `
   height: 100%;
   width: 100%;
   border-radius: 9999px;
-  border: 4px solid rgba(139, 21, 56, 0.2);
+  border: 6px solid rgba(139, 21, 56, 0.2);
   border-top-color: #8B1538;
 `;
 
@@ -76,6 +79,8 @@ text.textContent = 'Loading your experience...';
 text.style.cssText = `
   color: #8B1538;
   font-weight: 500;
+  font-size: 1.1rem;
+  margin-top: 1rem;
 `;
 
 overlay.appendChild(iconContainer);
