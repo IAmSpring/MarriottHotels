@@ -6,7 +6,8 @@ export interface Price {
 }
 
 export interface Room {
-  id?: string;
+  id: string;
+  hotelId: string;
   type: string;
   price: number;
   description: string;
@@ -24,7 +25,7 @@ export interface Contact {
 export interface Hotel {
   id: string;
   name: string;
-  type: HotelType;
+  type: string;
   location: string;
   description: string;
   price: Price;
@@ -57,4 +58,40 @@ export interface BookingDetails {
   checkOut: string;
   guests: number;
   totalPrice: number;
+}
+
+export interface Destination {
+  id: string;
+  name: string;
+  country: string;
+  description: string;
+  image: string;
+  images: string[];
+  highlights: string[];
+  bestTimeToVisit: string;
+  popularHotels: string[];
+}
+
+export interface Booking {
+  id: string;
+  userId: string;
+  hotelId: string;
+  roomId: string;
+  checkIn: string;
+  checkOut: string;
+  guests: number;
+  totalPrice: number;
+  status: string;
+}
+
+export interface User {
+  id: number;
+  name: string | null;
+  email: string;
+  role: string;
+  bonvoyNumber: string | null;
+  bonvoyPoints: number | null;
+  bonvoyStatus: string | null;
+  createdAt: string;
+  updatedAt: string;
 } 

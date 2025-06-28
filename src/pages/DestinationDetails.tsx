@@ -2,13 +2,14 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { mockDestinations, mockHotels } from '../data/mockData';
 import { MapPin, Calendar, Hotel, Star } from 'lucide-react';
+import type { Destination, Hotel as HotelType } from '../types/hotel';
 
 const DestinationDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const destination = mockDestinations.find(d => d.id === id);
+  const destination = mockDestinations.find(d => d.id === id) as Destination | undefined;
   const popularHotels = destination?.popularHotels
     .map(hotelId => mockHotels.find(h => h.id === hotelId))
-    .filter(hotel => hotel !== undefined);
+    .filter((hotel): hotel is HotelType => hotel !== undefined);
 
   if (!destination) {
     return (

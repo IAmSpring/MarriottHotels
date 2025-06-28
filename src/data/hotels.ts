@@ -1,19 +1,6 @@
+import type { Hotel, Room, Price } from '../types/hotel';
+
 export type HotelType = 'LUXURY' | 'BUSINESS' | 'RESORT' | 'BOUTIQUE';
-
-export interface Room {
-  id: string;
-  type: string;
-  price: number;
-  description: string;
-  beds: string;
-  occupancy: string;
-  size: string;
-}
-
-export interface Price {
-  base: number;
-  currency: string;
-}
 
 export interface Hotel {
   id: string;
