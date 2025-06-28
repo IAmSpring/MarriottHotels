@@ -137,6 +137,8 @@ A sophisticated, enterprise-grade AI system designed for Marriott's hospitality 
 - **Cross-modal Learning**: Multi-input processing
 - **Autonomous Optimization**: Self-improving systems
 
+![OpenAI Assistant & Chatbot Interface](https://github.com/user-attachments/assets/3fdbae0d-218e-4ff7-9723-de3ebe35102a)
+
 ![Documentation Walkthrough](./documentation.gif)
 
 ## 🎯 Project Context
