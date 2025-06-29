@@ -346,38 +346,38 @@ export async function getDiningOptions(params: any) {
 export async function getBonvoyInfo(params: any) {
   return {
     program: {
-      name: 'Marriott Bonvoy',
-      description: 'Marriott's award-winning loyalty program',
+      name: "Marriott Bonvoy",
+      description: "Marriott's award-winning loyalty program",
       tiers: [
         {
-          name: 'Member',
-          requirements: '0-9 nights',
-          benefits: ['Free WiFi', 'Member Rates', 'Mobile Check-In']
+          name: "Member",
+          requirements: "0-9 nights",
+          benefits: ["Free WiFi", "Member Rates", "Mobile Check-In"]
         },
         {
-          name: 'Silver Elite',
-          requirements: '10-24 nights',
-          benefits: ['10% Bonus Points', 'Priority Late Checkout', 'Ultimate Reservation Guarantee']
+          name: "Silver Elite",
+          requirements: "10-24 nights",
+          benefits: ["10% Bonus Points", "Priority Late Checkout", "Ultimate Reservation Guarantee"]
         },
         {
-          name: 'Gold Elite',
-          requirements: '25-49 nights',
-          benefits: ['25% Bonus Points', 'Enhanced Room Upgrade', '2 PM Late Checkout']
+          name: "Gold Elite",
+          requirements: "25-49 nights",
+          benefits: ["25% Bonus Points", "Enhanced Room Upgrade", "2 PM Late Checkout"]
         },
         {
-          name: 'Platinum Elite',
-          requirements: '50-74 nights',
-          benefits: ['50% Bonus Points', 'Lounge Access', 'Welcome Gift']
+          name: "Platinum Elite",
+          requirements: "50-74 nights",
+          benefits: ["50% Bonus Points", "Lounge Access", "Welcome Gift"]
         }
       ],
       points: {
-        earning: '10 points per USD at most hotels',
-        redemption: 'Free nights starting at 5,000 points',
-        transfer: 'Transfer to 40+ airline partners'
+        earning: "10 points per USD at most hotels",
+        redemption: "Free nights starting at 5,000 points",
+        transfer: "Transfer to 40+ airline partners"
       },
       benefits: {
-        rooms: ['Free Night Awards', 'Room Upgrades', 'Welcome Gifts'],
-        experiences: ['Member Exclusive Rates', 'Mobile Key', 'Points Sharing']
+        rooms: ["Free Night Awards", "Room Upgrades", "Welcome Gifts"],
+        experiences: ["Member Exclusive Rates", "Mobile Key", "Points Sharing"]
       }
     }
   };
@@ -387,32 +387,32 @@ export async function checkTransportation(params: any) {
   return {
     options: [
       {
-        type: 'Hotel Shuttle',
-        schedule: 'Every 30 minutes',
+        type: "Hotel Shuttle",
+        schedule: "Every 30 minutes",
         price: 25,
-        duration: '30-45 minutes',
+        duration: "30-45 minutes",
         reservationRequired: true,
-        availability: '24/7'
+        availability: "24/7"
       },
       {
-        type: 'Taxi/Rideshare',
-        providers: ['Uber', 'Lyft', 'Local Taxi'],
+        type: "Taxi/Rideshare",
+        providers: ["Uber", "Lyft", "Local Taxi"],
         estimatedPrice: { range: { min: 35, max: 45 } },
-        duration: '25-35 minutes',
-        availability: '24/7'
+        duration: "25-35 minutes",
+        availability: "24/7"
       },
       {
-        type: 'Public Transportation',
-        route: 'Metro Blue Line to 7th St/Metro Center',
+        type: "Public Transportation",
+        route: "Metro Blue Line to 7th St/Metro Center",
         price: 1.75,
-        duration: '45-60 minutes',
-        schedule: '5:00 AM - 12:00 AM'
+        duration: "45-60 minutes",
+        schedule: "5:00 AM - 12:00 AM"
       }
     ],
     distances: {
-      airport: { LAX: '18 miles', BUR: '15 miles' },
-      downtown: '0.5 miles',
-      convention_center: '0.3 miles'
+      airport: { LAX: "18 miles", BUR: "15 miles" },
+      downtown: "0.5 miles",
+      convention_center: "0.3 miles"
     }
   };
 } 
