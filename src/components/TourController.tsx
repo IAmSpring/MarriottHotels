@@ -398,13 +398,20 @@ const TourController: React.FC = () => {
   const generateAndPlayAudio = async (text: string) => {
     try {
       // Stop any existing audio
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-      audioManager.setAudio(null);
-    }
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+        audioManager.setAudio(null);
+      }
 
       dispatch({ type: 'SET_LOADING', payload: true });
+
+      // Handle static build
+      if (isStaticBuild()) {
+        console.log('Static build - skipping TTS');
+        dispatch({ type: 'SET_LOADING', payload: false });
+        return;
+      }
       
       // Clean the text for TTS and create cache key
       const cleanText = text.replace(/[*#\[\]]/g, '');
@@ -433,8 +440,7 @@ const TourController: React.FC = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();

@@ -70,8 +70,8 @@ const LoginPage = () => {
 
   const handleDemoLogin = async (type: 'admin' | 'user') => {
     const credentials = type === 'admin' 
-      ? { email: 'admin@test.com', password: 'admin123' }
-      : { email: 'user@test.com', password: 'user123' };
+      ? { email: 'admin@test.com', password: 'admin123', role: 'ADMIN' }
+      : { email: 'user@test.com', password: 'user123', role: 'USER' };
     
     setFormData(prev => ({
       ...prev,
@@ -80,20 +80,20 @@ const LoginPage = () => {
     }));
 
     try {
+      if (isStaticBuild()) {
+        // For demo/static build, simulate successful login
+        login(credentials.email, credentials.email, credentials.role);
+        navigate(credentials.role === 'ADMIN' ? '/admin' : '/bookings');
+        return;
+      }
+
       const result = await loginMutation.mutateAsync({
         email: credentials.email,
         password: credentials.password,
       });
 
-      // Login successful
       login(result.user.email, result.user.name || result.user.email, result.user.role);
-      
-      // Redirect based on role
-      if (result.user.role === 'ADMIN') {
-        navigate('/admin');
-    } else {
-      navigate('/bookings');
-      }
+      navigate(result.user.role === 'ADMIN' ? '/admin' : '/bookings');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'An error occurred during login');
     }
@@ -201,6 +201,7 @@ const LoginPage = () => {
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   required
+                  autoComplete="current-password"
                   value={formData.password}
                   onChange={handleInputChange}
                   className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1538] focus:border-transparent"
