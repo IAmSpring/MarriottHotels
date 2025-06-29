@@ -3,11 +3,29 @@ import { Link } from 'react-router-dom';
 import { Star } from 'lucide-react';
 import { hotels } from '../data/hotels';
 
+// Map of unique images for each hotel
+const hotelImages = {
+  'rcmb-001': 'https://images.pexels.com/photos/338504/pexels-photo-338504.jpeg', // Miami Beach - tropical beach resort
+  'jmas-002': 'https://images.pexels.com/photos/754268/pexels-photo-754268.jpeg', // Aspen - snowy mountain resort
+  'mmny-003': 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg', // New York - city skyline
+  'mhhi-004': 'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg', // Hawaii - tropical paradise
+  'sandbourne-santa-monica': 'https://images.pexels.com/photos/1538177/pexels-photo-1538177.jpeg', // Santa Monica - beach pier
+  'park-lane-hong-kong': 'https://images.pexels.com/photos/2417842/pexels-photo-2417842.jpeg', // Hong Kong - harbor view
+};
+
 const FeaturedHotels: React.FC = () => {
-  // Show all six featured hotels
-  const featuredHotels = hotels.filter(hotel => 
-    ['rcmb-001', 'jmas-002', 'mmny-003', 'mhwk-004', 'msfo-005', 'mla-006'].includes(hotel.id)
-  );
+  // Show featured hotels with unique images
+  const featuredHotels = hotels.filter(hotel => [
+    'rcmb-001',    // Ritz-Carlton Miami Beach
+    'jmas-002',    // JW Marriott Aspen Snowmass
+    'mmny-003',    // Marriott Marquis New York
+    'mhhi-004',    // Marriott Halekulani Hawaii
+    'sandbourne-santa-monica', // Sandbourne Santa Monica
+    'park-lane-hong-kong'     // Park Lane Hong Kong
+  ].includes(hotel.id)).map(hotel => ({
+    ...hotel,
+    image: hotelImages[hotel.id as keyof typeof hotelImages] || hotel.image
+  }));
 
   return (
     <section id="featured-section" className="py-16 bg-white/90 backdrop-blur-sm bg-[#8B1538]/[0.25]">
@@ -24,7 +42,7 @@ const FeaturedHotels: React.FC = () => {
             >
               <div className="relative h-48">
                 <img
-                  src={`${hotel.image}?t=${Date.now()}`}
+                  src={hotel.image}
                   alt={hotel.name}
                   className="w-full h-full object-cover rounded-t-lg"
                   onError={(e) => {
