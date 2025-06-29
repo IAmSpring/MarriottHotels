@@ -1,3 +1,5 @@
+![Marriot Hotels Bonvoy Intro](https://github.com/user-attachments/assets/71b2bb57-0960-4e5b-ab17-6c42ca2dbeda)
+
 # Marriott Hotels - Next-Generation AI Architecture
 
 A sophisticated, enterprise-grade AI system designed for Marriott's hospitality ecosystem, showcasing advanced language models, real-time processing, and intelligent automation.
