@@ -383,6 +383,19 @@ const AIChatBot: React.FC = () => {
       }]);
       setIsLoading(true);
 
+      if (isStaticBuild()) {
+        // For static builds, return a mock response after a delay
+        setTimeout(() => {
+          setMessages(prev => [...prev, { 
+            role: 'assistant', 
+            content: 'This is a demo version running on GitHub Pages. For full functionality including AI chat, please run the application locally.',
+            timestamp: new Date()
+          }]);
+          setIsLoading(false);
+        }, 500);
+        return;
+      }
+
       const response = await fetchApi('chat', {
         method: 'POST',
         headers: {
@@ -407,10 +420,12 @@ const AIChatBot: React.FC = () => {
       }]);
       setThreadId(data.threadId);
     } catch (error) {
-      const { error: errorMessage } = handleApiError(error);
+      const { error: errorMessage, isStatic } = handleApiError(error);
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: errorMessage,
+        content: isStatic 
+          ? 'This is a demo version. For full AI chat functionality, please run the application locally.'
+          : errorMessage,
         timestamp: new Date()
       }]);
     } finally {

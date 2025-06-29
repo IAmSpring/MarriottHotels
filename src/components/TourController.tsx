@@ -406,6 +406,15 @@ const TourController: React.FC = () => {
       }
 
       dispatch({ type: 'SET_LOADING', payload: true });
+
+      if (isStaticBuild()) {
+        // In static mode, just pause after a short delay
+        setTimeout(() => {
+          dispatch({ type: 'PAUSE' });
+          dispatch({ type: 'SET_LOADING', payload: false });
+        }, 500);
+        return;
+      }
       
       // Clean the text for TTS and create cache key
       const cleanText = text.replace(/[*#\[\]]/g, '');
@@ -452,9 +461,11 @@ const TourController: React.FC = () => {
         await newAudio.play();
       }
     } catch (error) {
-      const { error: errorMessage } = handleApiError(error);
+      const { error: errorMessage, isStatic } = handleApiError(error);
       console.error('TTS Error:', errorMessage);
-      dispatch({ type: 'PAUSE' });
+      if (!isStatic) {
+        dispatch({ type: 'PAUSE' });
+      }
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
