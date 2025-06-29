@@ -305,40 +305,40 @@ export async function getDiningOptions(params: any) {
   return {
     restaurants: [
       {
-        name: 'WP24 by Wolfgang Puck',
-        cuisine: 'Asian Fusion',
-        priceRange: '$$$$',
-        hours: { dinner: '5:30 PM - 10:00 PM' },
-        description: 'Fine dining with city views',
+        name: "WP24 by Wolfgang Puck",
+        cuisine: "Asian Fusion",
+        priceRange: "$$$$",
+        hours: { dinner: "5:30 PM - 10:00 PM" },
+        description: "Fine dining with city views",
         reservationRequired: true,
-        dressCode: 'Business Casual',
+        dressCode: "Business Casual",
         menu: {
-          highlights: ['Peking Duck', 'Dim Sum', 'Seafood'],
-          dietary: ['Vegetarian', 'Gluten-Free']
+          highlights: ["Peking Duck", "Dim Sum", "Seafood"],
+          dietary: ["Vegetarian", "Gluten-Free"]
         }
       },
       {
-        name: 'Ford's Filling Station L.A. LIVE',
-        cuisine: 'American',
-        priceRange: '$$$',
+        name: "Ford's Filling Station L.A. LIVE",
+        cuisine: "American",
+        priceRange: "$$$",
         hours: {
-          breakfast: '6:30 AM - 11:00 AM',
-          lunch: '11:30 AM - 2:30 PM',
-          dinner: '5:00 PM - 10:00 PM'
+          breakfast: "6:30 AM - 11:00 AM",
+          lunch: "11:30 AM - 2:30 PM",
+          dinner: "5:00 PM - 10:00 PM"
         },
-        description: 'Casual dining with craft cocktails',
+        description: "Casual dining with craft cocktails",
         reservationRequired: false,
-        dressCode: 'Casual',
+        dressCode: "Casual",
         menu: {
-          highlights: ['Craft Burgers', 'Local Beer', 'Farm-to-Table'],
-          dietary: ['Vegan', 'Gluten-Free']
+          highlights: ["Craft Burgers", "Local Beer", "Farm-to-Table"],
+          dietary: ["Vegan", "Gluten-Free"]
         }
       }
     ],
     inRoomDining: {
       available: true,
-      hours: '24/7',
-      menu: 'Full restaurant menu available'
+      hours: "24/7",
+      menu: "Full restaurant menu available"
     }
   };
 }

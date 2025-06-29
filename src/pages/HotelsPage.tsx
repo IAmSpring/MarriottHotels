@@ -7,6 +7,37 @@ import { hotels } from '../data/hotels';
 import type { BookingFilters } from '../types/hotel';
 import Footer from '../components/Footer';
 
+// Map of unique images for each hotel
+const hotelImages: Record<string, string> = {
+  // Beach & Tropical Resorts
+  'rcmb-001': 'https://images.pexels.com/photos/338504/pexels-photo-338504.jpeg', // Miami Beach - tropical beach resort
+  'mhhi-004': 'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg', // Hawaii - tropical paradise
+  'ocean-breeze': 'https://images.pexels.com/photos/1174732/pexels-photo-1174732.jpeg', // Miami Beach - ocean view
+  'desert-oasis': 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg', // Desert resort
+  
+  // Mountain & Ski Resorts
+  'jmas-002': 'https://images.pexels.com/photos/754268/pexels-photo-754268.jpeg', // Aspen - snowy mountain resort
+  'mountain-peak': 'https://images.pexels.com/photos/355747/pexels-photo-355747.jpeg', // Mountain lodge
+  'trailborn-highlands': 'https://images.pexels.com/photos/2662116/pexels-photo-2662116.jpeg', // Mountain retreat
+
+  // City Hotels
+  'mmny-003': 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg', // New York - city skyline
+  'msf-005': 'https://images.pexels.com/photos/1141853/pexels-photo-1141853.jpeg', // San Francisco
+  'ritz-carlton-la': 'https://images.pexels.com/photos/2034335/pexels-photo-2034335.jpeg', // Los Angeles
+  'city-central': 'https://images.pexels.com/photos/2096983/pexels-photo-2096983.jpeg', // Modern city hotel
+  'grand-marquis': 'https://images.pexels.com/photos/2417842/pexels-photo-2417842.jpeg', // Luxury city hotel
+  
+  // Coastal & Beach Hotels
+  'sandbourne-santa-monica': 'https://images.pexels.com/photos/1538177/pexels-photo-1538177.jpeg', // Santa Monica - beach pier
+  
+  // International Hotels
+  'park-lane-hong-kong': 'https://images.pexels.com/photos/2044434/pexels-photo-2044434.jpeg', // Hong Kong - harbor view
+  'ritz-carlton-tokyo': 'https://images.pexels.com/photos/2397414/pexels-photo-2397414.jpeg', // Tokyo - modern luxury
+  'marriott-paris': 'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg', // Paris - classic elegance
+  'marriott-dubai': 'https://images.pexels.com/photos/2044445/pexels-photo-2044445.jpeg', // Dubai - modern skyline
+  'marriott-sydney': 'https://images.pexels.com/photos/1878293/pexels-photo-1878293.jpeg', // Sydney - harbor view
+} as const;
+
 const HotelsPage = () => {
   const navigate = useNavigate();
   const [filters, setFilters] = useState<BookingFilters>({
@@ -189,13 +220,9 @@ const HotelsPage = () => {
                 >
                   <div className="relative h-48">
                     <img 
-                      src={hotel.image}
+                      src={hotelImages[hotel.id] || 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg'}
                       alt={hotel.name}
                       className="w-full h-full object-cover rounded-t-lg"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg';
-                      }}
                     />
                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center">
                       <Star className="w-4 h-4 text-yellow-400 fill-current" />
