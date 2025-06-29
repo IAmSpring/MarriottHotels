@@ -1,4 +1,4 @@
-import { getOpenAIClient, getOpenAIConfig } from '../lib/openai';
+import { getOpenAIClient, getOpenAIConfig, isStaticBuild } from '../lib/openai';
 
 // Get environment variables - using the same names as our .env file
 const config = getOpenAIConfig();
@@ -57,6 +57,13 @@ const saveToStorage = () => {
       console.warn('Failed to save conversations to storage:', error);
     }
   }
+};
+
+export const getApiUrl = (endpoint: string) => {
+  if (isStaticBuild()) {
+    return `/MarriottHotels/api/${endpoint}`;
+  }
+  return `/api/${endpoint}`;
 };
 
 // Static API handlers

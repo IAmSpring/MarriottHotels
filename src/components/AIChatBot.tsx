@@ -6,6 +6,7 @@ import MessageBubble from './MessageBubble';
 import MarkdownMessage from './MarkdownMessage';
 import ContinuousModeModal from './ContinuousModeModal';
 import { isStaticBuild, getStaticResponse } from '../lib/openai';
+import { fetchApi, handleApiError } from '../lib/staticApi';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -374,6 +375,7 @@ const AIChatBot: React.FC = () => {
 
   const handleSendMessage = async (message: string) => {
     try {
+      console.log('📤 Sending message:', message);
       setMessages(prev => [...prev, { 
         role: 'user', 
         content: message,
@@ -381,20 +383,7 @@ const AIChatBot: React.FC = () => {
       }]);
       setIsLoading(true);
 
-      if (isStaticBuild()) {
-        const mockResponse = getStaticResponse('chat');
-        setTimeout(() => {
-          setMessages(prev => [...prev, { 
-            role: 'assistant', 
-            content: mockResponse.response,
-            timestamp: new Date()
-          }]);
-          setIsLoading(false);
-        }, 1000);
-        return;
-      }
-
-      const response = await fetch('/api/chat', {
+      const response = await fetchApi('chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -407,7 +396,7 @@ const AIChatBot: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`Failed to get response`);
       }
 
       const data = await response.json();
@@ -418,10 +407,10 @@ const AIChatBot: React.FC = () => {
       }]);
       setThreadId(data.threadId);
     } catch (error) {
-      console.error('Chat Error:', error);
+      const { error: errorMessage } = handleApiError(error);
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: 'I apologize, but I encountered an error. Please try again later.',
+        content: errorMessage,
         timestamp: new Date()
       }]);
     } finally {

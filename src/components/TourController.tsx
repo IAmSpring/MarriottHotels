@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom';
 import { audioManager } from '../utils/audioManager';
 import { isStaticBuild, getStaticResponse } from '../lib/openai';
 import { Buffer } from 'buffer';
+import { fetchApi, handleApiError } from '../lib/staticApi';
 
 const tourSections: TourSection[] = [
   {
@@ -405,13 +406,6 @@ const TourController: React.FC = () => {
       }
 
       dispatch({ type: 'SET_LOADING', payload: true });
-
-      // Handle static build
-      if (isStaticBuild()) {
-        console.log('Static build - skipping TTS');
-        dispatch({ type: 'SET_LOADING', payload: false });
-        return;
-      }
       
       // Clean the text for TTS and create cache key
       const cleanText = text.replace(/[*#\[\]]/g, '');
@@ -433,7 +427,7 @@ const TourController: React.FC = () => {
       }
 
       // Call the TTS API endpoint if not cached
-      const response = await fetch('/api/tts', {
+      const response = await fetchApi('tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: cleanText })
@@ -458,7 +452,8 @@ const TourController: React.FC = () => {
         await newAudio.play();
       }
     } catch (error) {
-      console.error('TTS Error:', error);
+      const { error: errorMessage } = handleApiError(error);
+      console.error('TTS Error:', errorMessage);
       dispatch({ type: 'PAUSE' });
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
