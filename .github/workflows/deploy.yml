@@ -35,10 +35,13 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          AI_ASSISTANT_ID: ${{ secrets.AI_ASSISTANT_ID }}
-          AI_ADMIN_ID: ${{ secrets.AI_ADMIN_ID }}
-          ENABLE_AI_CHAT: 'true'
+          VITE_STATIC_BUILD: 'true'
+          VITE_AI_ASSISTANT_ID: 'asst_demo123'
+          VITE_AI_ADMIN_ID: 'admin_demo123'
+          VITE_ENABLE_AI_CHAT: 'true'
+
+      - name: Create .nojekyll
+        run: touch dist/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -5,10 +5,9 @@ import { logger } from '../utils/logger';
 // Singleton pattern for OpenAI client
 let openaiInstance: OpenAI | null = null;
 
-// API endpoint for proxy service
-const API_ENDPOINT = process.env.NODE_ENV === 'production' 
-  ? 'https://marriott-api.taylorbechard.com/api'
-  : '/api';
+// Fallback demo credentials for static builds
+const DEMO_ASSISTANT_ID = 'asst_demo123';
+const DEMO_ADMIN_ID = 'admin_demo123';
 
 export interface OpenAIConfig {
   apiKey: string | undefined;
@@ -16,19 +15,27 @@ export interface OpenAIConfig {
   adminId: string | undefined;
 }
 
+// Helper to check if we're in static build mode
+const isStaticBuild = () => {
+  try {
+    return import.meta.env.VITE_STATIC_BUILD === 'true';
+  } catch {
+    return false;
+  }
+};
+
 export const verifyOpenAIConfig = async (): Promise<{ isValid: boolean; error?: string }> => {
   try {
-    const config = getOpenAIConfig();
-    
-    if (!config.apiKey) {
-      // Try to verify through proxy
-      const response = await fetch(`${API_ENDPOINT}/health`);
-      if (!response.ok) {
-        return { isValid: false, error: 'OpenAI API proxy is not available' };
-      }
+    // For static builds, always return valid
+    if (isStaticBuild()) {
       return { isValid: true };
     }
 
+    const config = getOpenAIConfig();
+    
+    if (!config.apiKey) {
+      return { isValid: false, error: 'OpenAI API key is not configured' };
+    }
     if (!config.assistantId) {
       return { isValid: false, error: 'AI Assistant ID is not configured' };
     }
@@ -51,6 +58,15 @@ export const verifyOpenAIConfig = async (): Promise<{ isValid: boolean; error?: 
 };
 
 export const getOpenAIConfig = (): OpenAIConfig => {
+  // For static builds, return demo credentials
+  if (isStaticBuild()) {
+    return {
+      apiKey: undefined,
+      assistantId: DEMO_ASSISTANT_ID,
+      adminId: DEMO_ADMIN_ID
+    };
+  }
+
   // In the browser, use import.meta.env
   if (typeof window !== 'undefined') {
     return {
@@ -76,12 +92,12 @@ export const getOpenAIClient = (apiKey?: string): OpenAI => {
       apiKey = config.apiKey;
     }
     
-    if (!apiKey) {
+    if (!apiKey && !isStaticBuild()) {
       throw new Error('OpenAI API key is required');
     }
 
     openaiInstance = new OpenAI({
-      apiKey,
+      apiKey: apiKey || 'dummy-key-for-static-build',
       dangerouslyAllowBrowser: typeof window !== 'undefined'
     });
   }
@@ -98,6 +114,19 @@ export const getThread = async (openai: OpenAI, threadId: string): Promise<OpenA
   
   if (cached && (now - cached.timestamp) < THREAD_CACHE_DURATION) {
     return cached.thread;
+  }
+
+  // For static builds, return a mock thread
+  if (isStaticBuild()) {
+    const mockThread = {
+      id: threadId,
+      object: 'thread',
+      created_at: now,
+      metadata: { demo: true },
+      tool_resources: []
+    } as unknown as OpenAI.Beta.Threads.Thread;
+    threadCache.set(threadId, { thread: mockThread, timestamp: now });
+    return mockThread;
   }
 
   const thread = await openai.beta.threads.retrieve(threadId);
@@ -163,21 +192,11 @@ export const getCachedAudioResponse = async (
     return cached.audio;
   }
 
-  // Check if we need to use proxy
-  if (!openai.apiKey) {
-    const response = await fetch(`${API_ENDPOINT}/tts`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, voice })
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to generate audio response');
-    }
-
-    const data = await response.json();
-    audioCache.set(cacheKey, { audio: data.audioBase64, timestamp: now });
-    return data.audioBase64;
+  // For static builds, return a mock audio response
+  if (isStaticBuild()) {
+    const mockAudio = 'MOCK_AUDIO_BASE64_FOR_DEMO';
+    audioCache.set(cacheKey, { audio: mockAudio, timestamp: now });
+    return mockAudio;
   }
 
   const speechResponse = await openai.audio.speech.create({
@@ -195,30 +214,17 @@ export const getCachedAudioResponse = async (
 
 // Audio transcription utility
 export const transcribeAudio = async (openai: OpenAI, audioBlob: Blob): Promise<string> => {
+  // For static builds, return a mock transcription
+  if (isStaticBuild()) {
+    return 'This is a mock transcription for the demo version.';
+  }
+
   try {
     console.log('[OpenAI Transcribe] Starting transcription process');
     console.log('[OpenAI Transcribe] Audio blob details:', {
       size: audioBlob.size,
       type: audioBlob.type
     });
-
-    // Check if we need to use proxy
-    if (!openai.apiKey) {
-      const formData = new FormData();
-      formData.append('file', audioBlob);
-
-      const response = await fetch(`${API_ENDPOINT}/transcribe`, {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to transcribe audio');
-      }
-
-      const data = await response.json();
-      return data.text;
-    }
 
     // Convert Blob to File object for OpenAI API
     const file = new File([audioBlob], 'audio.webm', { 
