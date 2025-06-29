@@ -3,6 +3,8 @@ import { Play, Pause, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TourState, TourAction, TourSection } from '../types';
 import { useLocation } from 'react-router-dom';
 import { audioManager } from '../utils/audioManager';
+import { getOpenAIClient } from '../lib/openai';
+import { Buffer } from 'buffer';
 
 const tourSections: TourSection[] = [
   {
@@ -112,45 +114,133 @@ function tourReducer(state: TourState, action: TourAction): TourState {
   }
 }
 
-// Audio cache for TTS
-const audioCache = new Map<string, { audio: HTMLAudioElement; data: string }>();
+// Move cache outside component to persist across re-renders
+const CACHE_VERSION = '1';
+const CACHE_PREFIX = 'marriott_tts_';
+
+// Enhanced audio cache with versioning and timestamps
+interface CachedAudio {
+  data: string;
+  timestamp: number;
+  version: string;
+}
+
+// Initialize cache map
+const audioCache = new Map<string, CachedAudio>();
+
+// Load cache from localStorage on module load
+try {
+  const savedCache = localStorage.getItem(CACHE_PREFIX + 'cache');
+  if (savedCache) {
+    const parsed = JSON.parse(savedCache);
+    if (parsed.version === CACHE_VERSION) {
+      Object.entries(parsed.data).forEach(([key, value]) => {
+        audioCache.set(key, value as CachedAudio);
+      });
+      console.log('Loaded TTS cache:', audioCache.size, 'entries');
+    }
+  }
+} catch (error) {
+  console.warn('Failed to load TTS cache:', error);
+}
+
+// Save cache to localStorage
+const saveCache = () => {
+  try {
+    const cacheData = Object.fromEntries(audioCache.entries());
+    localStorage.setItem(CACHE_PREFIX + 'cache', JSON.stringify({
+      version: CACHE_VERSION,
+      data: cacheData
+    }));
+  } catch (error) {
+    console.warn('Failed to save TTS cache:', error);
+  }
+};
 
 const loadAndPlayAudio = async (audioData: string, cacheKey: string): Promise<HTMLAudioElement> => {
   return new Promise((resolve, reject) => {
-    // Check cache first
-    const cached = audioCache.get(cacheKey);
-    if (cached) {
-      console.log('Using cached audio for:', cacheKey);
-      // Create a new audio instance from cached data to allow multiple playbacks
-      const audio = new Audio(`data:audio/mp3;base64,${cached.data}`);
-      audio.addEventListener('canplaythrough', () => resolve(audio), { once: true });
-      audio.addEventListener('error', (e) => reject(e), { once: true });
+    try {
+      // Check cache first
+      const cached = audioCache.get(cacheKey);
+      if (cached && cached.version === CACHE_VERSION) {
+        console.log('Using cached audio for:', cacheKey);
+        // Create a new audio instance from cached data
+        const audio = new Audio();
+        audio.src = `data:audio/mp3;base64,${cached.data}`;
+        
+        const onCanPlay = () => {
+          audio.removeEventListener('canplaythrough', onCanPlay);
+          audio.removeEventListener('error', onError);
+          resolve(audio);
+        };
+
+        const onError = (e: Event) => {
+          console.error('Cached audio loading error:', e);
+          audio.removeEventListener('canplaythrough', onCanPlay);
+          audio.removeEventListener('error', onError);
+          // Remove failed audio from cache
+          audioCache.delete(cacheKey);
+          saveCache();
+          reject(new Error('Failed to load cached audio'));
+        };
+
+        audio.addEventListener('canplaythrough', onCanPlay, { once: true });
+        audio.addEventListener('error', onError, { once: true });
+        audio.load();
+        return;
+      }
+
+      console.log('Loading new audio for:', cacheKey);
+      const audio = new Audio();
+      audio.src = `data:audio/mp3;base64,${audioData}`;
+      
+      const onCanPlay = () => {
+        audio.removeEventListener('canplaythrough', onCanPlay);
+        audio.removeEventListener('error', onError);
+        // Store in cache with timestamp
+        audioCache.set(cacheKey, {
+          data: audioData,
+          timestamp: Date.now(),
+          version: CACHE_VERSION
+        });
+        saveCache();
+        resolve(audio);
+      };
+
+      const onError = (e: Event) => {
+        console.error('New audio loading error:', e);
+        audio.removeEventListener('canplaythrough', onCanPlay);
+        audio.removeEventListener('error', onError);
+        reject(new Error('Failed to load new audio'));
+      };
+
+      audio.addEventListener('canplaythrough', onCanPlay, { once: true });
+      audio.addEventListener('error', onError, { once: true });
       audio.load();
-      return;
+    } catch (error) {
+      console.error('Audio setup error:', error);
+      reject(error);
     }
-
-    console.log('Loading new audio for:', cacheKey);
-    const audio = new Audio(`data:audio/mp3;base64,${audioData}`);
-    
-    const onCanPlay = () => {
-      audio.removeEventListener('canplaythrough', onCanPlay);
-      audio.removeEventListener('error', onError);
-      // Store in cache
-      audioCache.set(cacheKey, { audio, data: audioData });
-      resolve(audio);
-    };
-
-    const onError = (e: ErrorEvent) => {
-      console.error('Audio loading error:', e);
-      audio.removeEventListener('canplaythrough', onCanPlay);
-      audio.removeEventListener('error', onError);
-      reject(new Error('Failed to load audio: ' + e.message));
-    };
-
-    audio.addEventListener('canplaythrough', onCanPlay);
-    audio.addEventListener('error', onError);
-    audio.load();
   });
+};
+
+// Cache cleanup function (called periodically)
+const cleanupCache = () => {
+  const now = Date.now();
+  const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+  let cleaned = 0;
+
+  for (const [key, value] of audioCache.entries()) {
+    if (value.version !== CACHE_VERSION || now - value.timestamp > maxAge) {
+      audioCache.delete(key);
+      cleaned++;
+    }
+  }
+
+  if (cleaned > 0) {
+    console.log('Cleaned', cleaned, 'old cache entries');
+    saveCache();
+  }
 };
 
 const TourController: React.FC = () => {
@@ -160,6 +250,13 @@ const TourController: React.FC = () => {
   const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isFirstRender = useRef(true);
   const [isRightMouseDown, setIsRightMouseDown] = useState(false);
+
+  // Add cache cleanup on mount
+  useEffect(() => {
+    cleanupCache();
+    const cleanupInterval = setInterval(cleanupCache, 60 * 60 * 1000); // Every hour
+    return () => clearInterval(cleanupInterval);
+  }, []);
 
   // Add effect to handle section changes
   useEffect(() => {
@@ -233,79 +330,101 @@ const TourController: React.FC = () => {
   }, []);
 
   const setupAudioListeners = (audio: HTMLAudioElement) => {
-    audio.addEventListener('ended', () => {
+    // Remove any existing listeners
+    const newAudio = audio.cloneNode() as HTMLAudioElement;
+    
+    const onEnded = () => {
+      console.log('Audio ended');
       if (state.currentSectionIndex < state.sections.length - 1 && state.isPlaying) {
         dispatch({ type: 'NEXT_SECTION' });
       } else {
         dispatch({ type: 'PAUSE' });
       }
       audioManager.setAudio(null);
-    });
+      newAudio.removeEventListener('ended', onEnded);
+    };
 
-    audio.addEventListener('error', (error) => {
+    const onError = (error: Event) => {
       console.error('Audio playback error:', error);
       dispatch({ type: 'PAUSE' });
       audioManager.setAudio(null);
-    });
+      newAudio.removeEventListener('error', onError);
+    };
 
-    audio.addEventListener('pause', () => {
-      if (!audio.ended) {
+    const onPause = () => {
+      console.log('Audio paused');
+      if (!newAudio.ended) {
         audioManager.setAudio(null);
       }
-    });
+      newAudio.removeEventListener('pause', onPause);
+    };
+
+    newAudio.addEventListener('ended', onEnded);
+    newAudio.addEventListener('error', onError);
+    newAudio.addEventListener('pause', onPause);
+
+    return newAudio;
   };
 
   const generateAndPlayAudio = async (text: string) => {
-    const cacheKey = `tour-${state.currentSectionIndex}-${text.substring(0, 50)}`;
-
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-      audioManager.setAudio(null);
-    }
-
     try {
-      dispatch({ type: 'SET_LOADING', payload: true });
-
-      // Check cache first
-      const cached = audioCache.get(cacheKey);
-      if (cached) {
-        const audio = await loadAndPlayAudio(cached.data, cacheKey);
-        setupAudioListeners(audio);
-        audioRef.current = audio;
-        audioManager.setAudio(audio, 'tour');
-        await audio.play();
-        return;
+      // Stop any existing audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+        audioManager.setAudio(null);
       }
 
+      dispatch({ type: 'SET_LOADING', payload: true });
+      
+      // Clean the text for TTS and create cache key
+      const cleanText = text.replace(/[*#\[\]]/g, '');
+      const cacheKey = `${cleanText}_${CACHE_VERSION}`;
+      
+      // Check cache first
+      const cached = audioCache.get(cacheKey);
+      if (cached && cached.version === CACHE_VERSION) {
+        const audio = await loadAndPlayAudio(cached.data, cacheKey);
+        const newAudio = setupAudioListeners(audio);
+        audioRef.current = newAudio;
+        audioManager.setAudio(newAudio, 'tour');
+        dispatch({ type: 'SET_AUDIO', payload: newAudio });
+        
+        if (state.isPlaying) {
+          await newAudio.play();
+        }
+        return;
+      }
+      
+      // Call the TTS API endpoint if not cached
       const response = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text: cleanText })
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error('Failed to generate speech: ' + (error.details || error.error));
-      }
-
-      const { audioData } = await response.json();
       
-      if (!audioData) {
-        throw new Error('No audio data received');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (!data.audioData) {
+        throw new Error('No audio data received from TTS API');
       }
 
-      const audio = await loadAndPlayAudio(audioData, cacheKey);
-      setupAudioListeners(audio);
-      audioRef.current = audio;
-      audioManager.setAudio(audio, 'tour');
-      await audio.play();
+      const audio = await loadAndPlayAudio(data.audioData, cacheKey);
+      const newAudio = setupAudioListeners(audio);
+      audioRef.current = newAudio;
+      audioManager.setAudio(newAudio, 'tour');
+      dispatch({ type: 'SET_AUDIO', payload: newAudio });
+      
+      if (state.isPlaying) {
+        await newAudio.play();
+      }
     } catch (error) {
       console.error('TTS Error:', error);
       dispatch({ type: 'PAUSE' });
-      audioManager.setAudio(null);
-      // Remove failed audio from cache
-      audioCache.delete(cacheKey);
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }

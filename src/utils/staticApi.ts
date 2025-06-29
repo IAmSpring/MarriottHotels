@@ -16,9 +16,47 @@ if (!config.apiKey || !config.assistantId || !config.adminId) {
 export const openai = getOpenAIClient(config.apiKey);
 
 // Static data store (simulating database)
+const STORAGE_KEY = 'marriott_conversations';
+
 const staticStore = {
   conversations: [] as any[],
   currentThreadId: null as string | null,
+  lastTimestamp: Date.now(),
+};
+
+// Load conversations from localStorage in static builds
+try {
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const data = JSON.parse(stored);
+      staticStore.conversations = data.conversations || [];
+      staticStore.lastTimestamp = data.lastTimestamp || Date.now();
+    }
+  }
+} catch (error) {
+  console.warn('Failed to load conversations from storage:', error);
+}
+
+// Helper to generate unique timestamp
+const getUniqueTimestamp = () => {
+  const now = Date.now();
+  staticStore.lastTimestamp = Math.max(now, staticStore.lastTimestamp + 1);
+  return staticStore.lastTimestamp;
+};
+
+// Helper to save to localStorage
+const saveToStorage = () => {
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        conversations: staticStore.conversations,
+        lastTimestamp: staticStore.lastTimestamp
+      }));
+    } catch (error) {
+      console.warn('Failed to save conversations to storage:', error);
+    }
+  }
 };
 
 // Static API handlers
@@ -109,17 +147,21 @@ export const staticApi = {
       const audioBuffer = await speechResponse.arrayBuffer();
       const audioBase64 = Buffer.from(audioBuffer).toString('base64');
 
-      // Store conversation
+      // Store conversation with unique timestamp
+      const timestamp = new Date(getUniqueTimestamp());
       const conversation = {
-        id: Date.now(),
+        id: `conv_${timestamp.getTime()}`,
         userId: parseInt(userId),
         userMessage: message,
         aiResponse: responseText,
         threadId: currentThreadId,
-        timestamp: new Date(),
+        timestamp,
         isAdmin
       };
       staticStore.conversations.push(conversation);
+      
+      // Save to localStorage in static builds
+      saveToStorage();
 
       return {
         message: responseText,
@@ -135,9 +177,9 @@ export const staticApi = {
 
   // Get conversation history
   getConversations(userId: string = '1', isAdmin: boolean = false) {
-    return staticStore.conversations.filter(
-      conv => conv.userId === parseInt(userId) && conv.isAdmin === isAdmin
-    );
+    return staticStore.conversations
+      .filter(conv => conv.userId === parseInt(userId) && conv.isAdmin === isAdmin)
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   },
 
   // Get current thread

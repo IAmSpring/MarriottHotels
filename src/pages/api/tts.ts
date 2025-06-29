@@ -1,9 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
 
+// Create OpenAI client for server-side only
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true
+  apiKey: process.env.OPENAI_API_KEY
 });
 
 export default async function handler(
@@ -12,6 +12,10 @@ export default async function handler(
 ) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(500).json({ error: 'OpenAI API key is not configured' });
   }
 
   try {

@@ -3,27 +3,30 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command, mode }) => ({
   plugins: [react()],
-  base: '/MarriottHotels/',
+  base: command === 'serve' ? '/' : '/MarriottHotels/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      'buffer': 'buffer'
     },
   },
   server: {
+    host: 'localhost',
     proxy: {
-      '/ws': {
-        target: 'ws://localhost:3000',
-        ws: true,
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+        ws: true
       }
     },
     fs: {
       strict: false
     },
     hmr: {
-      clientPort: 5173,
-      path: 'ws'
+      host: 'localhost'
     }
   },
   build: {
@@ -98,11 +101,14 @@ export default defineConfig({
   },
   define: {
     'process.env': {},
-    'import.meta.env.VITE_STATIC_BUILD': JSON.stringify('true'),
-    'import.meta.env.VITE_AI_ASSISTANT_ID': JSON.stringify('asst_demo123'),
-    'import.meta.env.VITE_AI_ADMIN_ID': JSON.stringify('admin_demo123'),
-    'import.meta.env.VITE_ENABLE_AI_CHAT': JSON.stringify('true'),
+    ...(command === 'build' ? {
+      'import.meta.env.VITE_STATIC_BUILD': JSON.stringify('true'),
+      'import.meta.env.OPENAI_API_KEY': JSON.stringify(process.env.OPENAI_API_KEY || ''),
+      'import.meta.env.AI_ASSISTANT_ID': JSON.stringify(process.env.AI_ASSISTANT_ID || ''),
+      'import.meta.env.AI_ADMIN_ID': JSON.stringify(process.env.AI_ADMIN_ID || ''),
+      'import.meta.env.ENABLE_AI_CHAT': JSON.stringify(process.env.ENABLE_AI_CHAT || 'true'),
+    } : {})
   },
   publicDir: 'public',
   assetsInclude: ['**/*.md']
-});
+}));

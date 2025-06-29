@@ -13,14 +13,17 @@ const HeroSection: React.FC = () => {
   const [checkOut, setCheckOut] = useState<Date | null>(null);
   const [guests, setGuests] = useState(2);
 
+  // Get the base URL based on environment
+  const baseUrl = import.meta.env.VITE_STATIC_BUILD === 'true' ? '/MarriottHotels' : '';
+
   return (
     <div id="hero-section" className="relative h-screen">
       {/* Background Image */}
       <div className="absolute inset-0 overflow-hidden">
         <img
-          src="/MarriottHotels/images/hotel.gif"
+          src={`${baseUrl}/images/hotel.gif`}
           alt="Luxury hotel view"
-          className="w-full h-full object-cover transition-transform duration-[8s] ease-in-out hover:scale-105"
+          className={`w-full h-full object-cover transition-transform duration-[8s] ease-in-out hover:scale-105 ${styles.heroBackground}`}
         />
         <div className="absolute inset-0 bg-black/20" />
       </div>
