@@ -8,8 +8,8 @@ import ContinuousModeModal from './ContinuousModeModal';
 import { isStaticBuild, getStaticResponse } from '../lib/openai';
 
 interface Message {
-  text: string;
-  isUser: boolean;
+  role: 'user' | 'assistant';
+  content: string;
   timestamp: Date;
 }
 
@@ -91,16 +91,10 @@ const loadAndPlayAudio = async (audioData: string, cacheKey: string): Promise<HT
 const AIChatBot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      text: "Hello! I'm your Marriott AI assistant. How can I help you today?",
-      isUser: false,
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [threadId, setThreadId] = useState<string | null>(null);
+  const [threadId, setThreadId] = useState<string>();
   const [audioState, setAudioState] = useState<AudioState>({
     messageId: null,
     isPlaying: false,
@@ -281,8 +275,8 @@ const AIChatBot: React.FC = () => {
 
     // Add user message
     const newMessage: Message = {
-      text: trimmedInput,
-      isUser: true,
+      role: 'user',
+      content: trimmedInput,
       timestamp: new Date()
     };
     setMessages(prev => [...prev, newMessage]);
@@ -309,8 +303,8 @@ const AIChatBot: React.FC = () => {
       console.log('📥 Received AI response');
 
       const aiMessage: Message = {
-        text: data.message,
-        isUser: false,
+        role: 'assistant',
+        content: data.message,
         timestamp: new Date()
       };
 
@@ -332,8 +326,8 @@ const AIChatBot: React.FC = () => {
     } catch (error) {
       console.error('Error:', error);
       setMessages(prev => [...prev, {
-        text: "I apologize, but I encountered an error. Please try again.",
-        isUser: false,
+        role: 'assistant',
+        content: "I apologize, but I encountered an error. Please try again.",
         timestamp: new Date()
       }]);
     } finally {
@@ -380,13 +374,21 @@ const AIChatBot: React.FC = () => {
 
   const handleSendMessage = async (message: string) => {
     try {
-      setMessages(prev => [...prev, { role: 'user', content: message }]);
+      setMessages(prev => [...prev, { 
+        role: 'user', 
+        content: message,
+        timestamp: new Date()
+      }]);
       setIsLoading(true);
 
       if (isStaticBuild()) {
         const mockResponse = getStaticResponse('chat');
         setTimeout(() => {
-          setMessages(prev => [...prev, { role: 'assistant', content: mockResponse.response }]);
+          setMessages(prev => [...prev, { 
+            role: 'assistant', 
+            content: mockResponse.response,
+            timestamp: new Date()
+          }]);
           setIsLoading(false);
         }, 1000);
         return;
@@ -400,7 +402,7 @@ const AIChatBot: React.FC = () => {
         body: JSON.stringify({
           message,
           userId: '1',
-          threadId: threadId,
+          threadId,
         }),
       });
 
@@ -409,13 +411,18 @@ const AIChatBot: React.FC = () => {
       }
 
       const data = await response.json();
-      setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: data.response,
+        timestamp: new Date()
+      }]);
       setThreadId(data.threadId);
     } catch (error) {
       console.error('Chat Error:', error);
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: 'I apologize, but I encountered an error. Please try again later.' 
+        content: 'I apologize, but I encountered an error. Please try again later.',
+        timestamp: new Date()
       }]);
     } finally {
       setIsLoading(false);
@@ -474,8 +481,8 @@ const AIChatBot: React.FC = () => {
           {messages.map((message, index) => (
                   <MarkdownMessage
               key={index}
-              text={message.text}
-              isUser={message.isUser}
+              text={message.content}
+              isUser={message.role === 'user'}
               timestamp={message.timestamp}
               messageId={index}
               audioState={audioState}

@@ -15,8 +15,12 @@ export interface OpenAIConfig {
   adminId: string | undefined;
 }
 
-// Mock responses for static build
-const MOCK_RESPONSES = {
+interface StaticResponses {
+  tts: { audioData: string };
+  chat: { response: string };
+}
+
+const MOCK_RESPONSES: StaticResponses = {
   tts: {
     audioData: '' // Empty audio data for static build
   },
@@ -34,7 +38,7 @@ export const isStaticBuild = () => {
   }
 };
 
-export const getStaticResponse = (endpoint: 'tts' | 'chat') => {
+export const getStaticResponse = <T extends keyof StaticResponses>(endpoint: T): StaticResponses[T] => {
   return MOCK_RESPONSES[endpoint];
 };
 
