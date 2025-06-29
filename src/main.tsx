@@ -1,5 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import App from './App';
 import './index.css';
 
@@ -246,7 +248,11 @@ root.style.transition = 'opacity 1s cubic-bezier(0.4, 0, 0.2, 1)';
 setTimeout(() => {
   createRoot(root).render(
     <StrictMode>
-      <App />
+      <BrowserRouter basename="/MarriottHotels">
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </BrowserRouter>
     </StrictMode>
   );
 
