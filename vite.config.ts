@@ -4,7 +4,10 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => ({
-  plugins: [react()],
+  plugins: [react({
+    jsxRuntime: 'automatic',
+    fastRefresh: true,
+  })],
   base: command === 'serve' ? '/' : '/MarriottHotels/',
   resolve: {
     alias: {
@@ -32,34 +35,11 @@ export default defineConfig(({ command, mode }) => ({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // Vendor chunks
-          if (id.includes('node_modules')) {
-            if (id.includes('react/') || id.includes('react-dom') || id.includes('react-router-dom')) {
-              return 'react-vendor';
-            }
-            if (id.includes('@headlessui') || id.includes('lucide-react')) {
-              return 'ui-vendor';
-            }
-            if (id.includes('react-datepicker') || id.includes('date-fns')) {
-              return 'date-vendor';
-            }
-            if (id.includes('openai')) {
-              return 'openai-vendor';
-            }
-            return 'vendor';
-          }
-
-          // App chunks
-          if (id.includes('/src/components/')) {
-            return 'components';
-          }
-          if (id.includes('/src/pages/')) {
-            return 'pages';
-          }
-          if (id.includes('/src/utils/') || id.includes('/src/lib/')) {
-            return 'utils';
-          }
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['@headlessui/react', 'lucide-react'],
+          'date-vendor': ['react-datepicker', 'date-fns'],
+          'openai-vendor': ['openai']
         },
         assetFileNames: (assetInfo) => {
           if (!assetInfo.name) return 'assets/[name]-[hash][extname]';
@@ -71,14 +51,13 @@ export default defineConfig(({ command, mode }) => ({
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
-      },
-      input: path.resolve(__dirname, 'index.html')
+      }
     },
     chunkSizeWarningLimit: 1000,
     target: 'esnext',
     minify: 'esbuild',
     cssMinify: true,
-    sourcemap: false,
+    sourcemap: true,
     reportCompressedSize: false,
     outDir: 'dist'
   },
