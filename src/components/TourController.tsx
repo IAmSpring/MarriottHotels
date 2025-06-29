@@ -3,7 +3,7 @@ import { Play, Pause, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TourState, TourAction, TourSection } from '../types';
 import { useLocation } from 'react-router-dom';
 import { audioManager } from '../utils/audioManager';
-import { getOpenAIClient } from '../lib/openai';
+import { isStaticBuild, getStaticResponse } from '../lib/openai';
 import { Buffer } from 'buffer';
 
 const tourSections: TourSection[] = [
@@ -160,10 +160,10 @@ const saveCache = () => {
 const loadAndPlayAudio = async (audioData: string, cacheKey: string): Promise<HTMLAudioElement> => {
   return new Promise((resolve, reject) => {
     try {
-      // Check cache first
-      const cached = audioCache.get(cacheKey);
+    // Check cache first
+    const cached = audioCache.get(cacheKey);
       if (cached && cached.version === CACHE_VERSION) {
-        console.log('Using cached audio for:', cacheKey);
+      console.log('Using cached audio for:', cacheKey);
         // Create a new audio instance from cached data
         const audio = new Audio();
         audio.src = `data:audio/mp3;base64,${cached.data}`;
@@ -186,17 +186,17 @@ const loadAndPlayAudio = async (audioData: string, cacheKey: string): Promise<HT
 
         audio.addEventListener('canplaythrough', onCanPlay, { once: true });
         audio.addEventListener('error', onError, { once: true });
-        audio.load();
-        return;
-      }
+      audio.load();
+      return;
+    }
 
-      console.log('Loading new audio for:', cacheKey);
+    console.log('Loading new audio for:', cacheKey);
       const audio = new Audio();
       audio.src = `data:audio/mp3;base64,${audioData}`;
-      
-      const onCanPlay = () => {
-        audio.removeEventListener('canplaythrough', onCanPlay);
-        audio.removeEventListener('error', onError);
+    
+    const onCanPlay = () => {
+      audio.removeEventListener('canplaythrough', onCanPlay);
+      audio.removeEventListener('error', onError);
         // Store in cache with timestamp
         audioCache.set(cacheKey, {
           data: audioData,
@@ -204,19 +204,19 @@ const loadAndPlayAudio = async (audioData: string, cacheKey: string): Promise<HT
           version: CACHE_VERSION
         });
         saveCache();
-        resolve(audio);
-      };
+      resolve(audio);
+    };
 
       const onError = (e: Event) => {
         console.error('New audio loading error:', e);
-        audio.removeEventListener('canplaythrough', onCanPlay);
-        audio.removeEventListener('error', onError);
+      audio.removeEventListener('canplaythrough', onCanPlay);
+      audio.removeEventListener('error', onError);
         reject(new Error('Failed to load new audio'));
-      };
+    };
 
       audio.addEventListener('canplaythrough', onCanPlay, { once: true });
       audio.addEventListener('error', onError, { once: true });
-      audio.load();
+    audio.load();
     } catch (error) {
       console.error('Audio setup error:', error);
       reject(error);
@@ -240,6 +240,35 @@ const cleanupCache = () => {
   if (cleaned > 0) {
     console.log('Cleaned', cleaned, 'old cache entries');
     saveCache();
+  }
+};
+
+const handleTTS = async (text: string) => {
+  try {
+    if (isStaticBuild()) {
+      console.log('Static build - skipping TTS');
+      return;
+    }
+
+    const response = await fetch('/api/tts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data.audioData) {
+      const audio = new Audio(`data:audio/mp3;base64,${data.audioData}`);
+      audio.play();
+    }
+  } catch (error) {
+    console.error('TTS Error:', error);
   }
 };
 
@@ -369,18 +398,18 @@ const TourController: React.FC = () => {
   const generateAndPlayAudio = async (text: string) => {
     try {
       // Stop any existing audio
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-        audioManager.setAudio(null);
-      }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+      audioManager.setAudio(null);
+    }
 
       dispatch({ type: 'SET_LOADING', payload: true });
       
       // Clean the text for TTS and create cache key
       const cleanText = text.replace(/[*#\[\]]/g, '');
       const cacheKey = `${cleanText}_${CACHE_VERSION}`;
-      
+
       // Check cache first
       const cached = audioCache.get(cacheKey);
       if (cached && cached.version === CACHE_VERSION) {
@@ -395,19 +424,19 @@ const TourController: React.FC = () => {
         }
         return;
       }
-      
+
       // Call the TTS API endpoint if not cached
       const response = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: cleanText })
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       if (!data.audioData) {
         throw new Error('No audio data received from TTS API');

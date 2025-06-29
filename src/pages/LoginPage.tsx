@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, MapPin, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { trpc } from '../utils/trpc';
+import { isStaticBuild } from '../lib/openai';
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,6 +16,7 @@ const LoginPage = () => {
     confirmPassword: ''
   });
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
   const loginMutation = trpc.login.useMutation();
@@ -22,24 +24,47 @@ const LoginPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+    setIsLoading(true);
+
     try {
-      const result = await loginMutation.mutateAsync({
-        email: formData.email,
-        password: formData.password,
+      if (isStaticBuild()) {
+        // For demo, allow any login
+        setTimeout(() => {
+          navigate('/');
+          setIsLoading(false);
+        }, 1000);
+        return;
+      }
+
+      const response = await fetch('/api/trpc/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
       });
 
-      // Login successful
-      login(result.user.email, result.user.name || result.user.email, result.user.role);
+      if (!response.ok) {
+        throw new Error('Invalid credentials');
+      }
+
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      login(data.user.email, data.user.name || data.user.email, data.user.role);
       
       // Redirect based on role
-      if (result.user.role === 'ADMIN') {
+      if (data.user.role === 'ADMIN') {
         navigate('/admin');
       } else {
         navigate('/bookings');
       }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'An error occurred during login');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Login failed');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -66,8 +91,8 @@ const LoginPage = () => {
       // Redirect based on role
       if (result.user.role === 'ADMIN') {
         navigate('/admin');
-      } else {
-        navigate('/bookings');
+    } else {
+      navigate('/bookings');
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'An error occurred during login');

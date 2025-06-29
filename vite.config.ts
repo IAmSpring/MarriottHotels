@@ -5,8 +5,7 @@ import path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => ({
   plugins: [react({
-    jsxRuntime: 'automatic',
-    fastRefresh: true,
+    jsxRuntime: 'automatic'
   })],
   base: command === 'serve' ? '/' : '/MarriottHotels/',
   resolve: {
@@ -82,10 +81,11 @@ export default defineConfig(({ command, mode }) => ({
     'process.env': {},
     ...(command === 'build' ? {
       'import.meta.env.VITE_STATIC_BUILD': JSON.stringify('true'),
-      'import.meta.env.OPENAI_API_KEY': JSON.stringify(process.env.OPENAI_API_KEY || ''),
-      'import.meta.env.AI_ASSISTANT_ID': JSON.stringify(process.env.AI_ASSISTANT_ID || ''),
-      'import.meta.env.AI_ADMIN_ID': JSON.stringify(process.env.AI_ADMIN_ID || ''),
-      'import.meta.env.ENABLE_AI_CHAT': JSON.stringify(process.env.ENABLE_AI_CHAT || 'true'),
+      'import.meta.env.VITE_OPENAI_API_KEY': JSON.stringify('demo-key'),
+      'import.meta.env.VITE_AI_ASSISTANT_ID': JSON.stringify('demo-assistant'),
+      'import.meta.env.VITE_AI_ADMIN_ID': JSON.stringify('demo-admin'),
+      'import.meta.env.VITE_ENABLE_AI_CHAT': JSON.stringify('true'),
+      'import.meta.env.VITE_IS_DEMO': JSON.stringify('true')
     } : {})
   },
   publicDir: 'public',

@@ -5,6 +5,7 @@ import { useVoiceRecorder } from '../hooks/useVoiceRecorder';
 import MessageBubble from './MessageBubble';
 import MarkdownMessage from './MarkdownMessage';
 import ContinuousModeModal from './ContinuousModeModal';
+import { isStaticBuild, getStaticResponse } from '../lib/openai';
 
 interface Message {
   text: string;
@@ -375,6 +376,50 @@ const AIChatBot: React.FC = () => {
     setIsWakeWordMode(true);
     setIsTTSEnabled(true); // Auto-enable TTS when accepting continuous mode
     startWakeWordDetection();
+  };
+
+  const handleSendMessage = async (message: string) => {
+    try {
+      setMessages(prev => [...prev, { role: 'user', content: message }]);
+      setIsLoading(true);
+
+      if (isStaticBuild()) {
+        const mockResponse = getStaticResponse('chat');
+        setTimeout(() => {
+          setMessages(prev => [...prev, { role: 'assistant', content: mockResponse.response }]);
+          setIsLoading(false);
+        }, 1000);
+        return;
+      }
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message,
+          userId: '1',
+          threadId: threadId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+      setThreadId(data.threadId);
+    } catch (error) {
+      console.error('Chat Error:', error);
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: 'I apologize, but I encountered an error. Please try again later.' 
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

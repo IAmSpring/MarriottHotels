@@ -15,13 +15,27 @@ export interface OpenAIConfig {
   adminId: string | undefined;
 }
 
-// Helper to check if we're in static build mode
-const isStaticBuild = () => {
+// Mock responses for static build
+const MOCK_RESPONSES = {
+  tts: {
+    audioData: '' // Empty audio data for static build
+  },
+  chat: {
+    response: 'This is a demo version. Please run the application locally to access the full AI features.'
+  }
+};
+
+export const isStaticBuild = () => {
   try {
-    return import.meta.env.VITE_STATIC_BUILD === 'true';
+    return import.meta.env.VITE_STATIC_BUILD === 'true' ||
+           (typeof window !== 'undefined' && window.location.hostname.includes('github.io'));
   } catch {
     return false;
   }
+};
+
+export const getStaticResponse = (endpoint: 'tts' | 'chat') => {
+  return MOCK_RESPONSES[endpoint];
 };
 
 export const verifyOpenAIConfig = async (): Promise<{ isValid: boolean; error?: string }> => {
