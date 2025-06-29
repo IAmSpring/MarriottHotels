@@ -68,10 +68,11 @@ export default defineConfig({
   },
   define: {
     'process.env': {},
-    'import.meta.env.OPENAI_API_KEY': JSON.stringify(process.env.OPENAI_API_KEY || ''),
-    'import.meta.env.AI_ASSISTANT_ID': JSON.stringify(process.env.AI_ASSISTANT_ID || ''),
-    'import.meta.env.AI_ADMIN_ID': JSON.stringify(process.env.AI_ADMIN_ID || ''),
-    'import.meta.env.ENABLE_AI_CHAT': JSON.stringify(process.env.ENABLE_AI_CHAT || 'true'),
+    // Use environment variables with fallbacks for production
+    'import.meta.env.VITE_OPENAI_API_KEY': JSON.stringify(process.env.OPENAI_API_KEY || ''),
+    'import.meta.env.VITE_AI_ASSISTANT_ID': JSON.stringify(process.env.AI_ASSISTANT_ID || ''),
+    'import.meta.env.VITE_AI_ADMIN_ID': JSON.stringify(process.env.AI_ADMIN_ID || ''),
+    'import.meta.env.VITE_ENABLE_AI_CHAT': JSON.stringify(process.env.ENABLE_AI_CHAT || 'true'),
   },
   publicDir: 'public',
   assetsInclude: ['**/*.md']

@@ -5,6 +5,11 @@ import { logger } from '../utils/logger';
 // Singleton pattern for OpenAI client
 let openaiInstance: OpenAI | null = null;
 
+// API endpoint for proxy service
+const API_ENDPOINT = process.env.NODE_ENV === 'production' 
+  ? 'https://marriott-api.taylorbechard.com/api'
+  : '/api';
+
 export interface OpenAIConfig {
   apiKey: string | undefined;
   assistantId: string | undefined;
@@ -16,8 +21,14 @@ export const verifyOpenAIConfig = async (): Promise<{ isValid: boolean; error?: 
     const config = getOpenAIConfig();
     
     if (!config.apiKey) {
-      return { isValid: false, error: 'OpenAI API key is not configured' };
+      // Try to verify through proxy
+      const response = await fetch(`${API_ENDPOINT}/health`);
+      if (!response.ok) {
+        return { isValid: false, error: 'OpenAI API proxy is not available' };
+      }
+      return { isValid: true };
     }
+
     if (!config.assistantId) {
       return { isValid: false, error: 'AI Assistant ID is not configured' };
     }
@@ -152,6 +163,23 @@ export const getCachedAudioResponse = async (
     return cached.audio;
   }
 
+  // Check if we need to use proxy
+  if (!openai.apiKey) {
+    const response = await fetch(`${API_ENDPOINT}/tts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, voice })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate audio response');
+    }
+
+    const data = await response.json();
+    audioCache.set(cacheKey, { audio: data.audioBase64, timestamp: now });
+    return data.audioBase64;
+  }
+
   const speechResponse = await openai.audio.speech.create({
     model: "tts-1",
     voice,
@@ -173,6 +201,24 @@ export const transcribeAudio = async (openai: OpenAI, audioBlob: Blob): Promise<
       size: audioBlob.size,
       type: audioBlob.type
     });
+
+    // Check if we need to use proxy
+    if (!openai.apiKey) {
+      const formData = new FormData();
+      formData.append('file', audioBlob);
+
+      const response = await fetch(`${API_ENDPOINT}/transcribe`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to transcribe audio');
+      }
+
+      const data = await response.json();
+      return data.text;
+    }
 
     // Convert Blob to File object for OpenAI API
     const file = new File([audioBlob], 'audio.webm', { 
