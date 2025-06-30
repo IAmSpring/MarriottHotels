@@ -9,7 +9,9 @@ import { isStaticBuild, getStaticResponse } from '../lib/openai';
 import { fetchApi, handleApiError } from '../lib/staticApi';
 import { StreamingAudioService } from '../utils/streamingAudioService';
 import { navigationLogger } from '../utils/navigationLogger';
+import { logger } from '../utils/logger';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -104,6 +106,7 @@ const MAX_SILENCE_DURATION = 1500; // Max silence duration in ms
 const AIChatBot: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAdmin } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -115,32 +118,45 @@ const AIChatBot: React.FC = () => {
     isPlaying: false,
     isLoading: false
   });
-  const [isTTSEnabled, setIsTTSEnabled] = useState(false);
+  const [isTTSEnabled, setIsTTSEnabled] = useState(true);
   const [currentTranscription, setCurrentTranscription] = useState('');
   const [isContinuousMode, setIsContinuousMode] = useState(false);
   const [showContinuousModal, setShowContinuousModal] = useState(false);
   const [hasSeenContinuousModal, setHasSeenContinuousModal] = useState(() => {
     return localStorage.getItem('hasSeenContinuousModal') === 'true';
   });
+  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [currentAssistantId, setCurrentAssistantId] = useState<string>(import.meta.env.VITE_AI_ASSISTANT_ID);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Reset admin mode when user is not admin
+  useEffect(() => {
+    if (!isAdmin()) {
+      setIsAdminMode(false);
+      setCurrentAssistantId(import.meta.env.VITE_AI_ASSISTANT_ID);
+    }
+  }, [isAdmin]);
 
   const handlePlayback = async (messageId: number, text: string) => {
     if (audioState.isPlaying && audioState.messageId === messageId) {
+      logger.info('Pausing audio playback', { messageId }, 'AIChatBot');
       audioService.pause();
-        setAudioState(prev => ({ ...prev, isPlaying: false }));
+      setAudioState((prev: AudioState) => ({ ...prev, isPlaying: false }));
     } else {
+      logger.info('Starting audio playback', { messageId, textLength: text.length }, 'AIChatBot');
       setAudioState({ messageId, isPlaying: true, isLoading: true });
       try {
         await audioService.playText(text);
-        setAudioState(prev => ({ ...prev, isLoading: false }));
+        setAudioState((prev: AudioState) => ({ ...prev, isLoading: false }));
       } catch (error) {
-        navigationLogger.error('Playback error', error);
+        logger.error('Audio playback error', { error, messageId }, 'AIChatBot');
         setAudioState({ messageId: null, isPlaying: false, isLoading: false });
       }
     }
   };
 
   const stopPlayback = () => {
+    logger.debug('Stopping audio playback', null, 'AIChatBot');
     audioService.stop();
     setAudioState({ messageId: null, isPlaying: false, isLoading: false });
   };
@@ -190,7 +206,7 @@ const AIChatBot: React.FC = () => {
     }
     
     // Respond to user
-    setMessages(prev => [...prev, {
+    setMessages((prev: Message[]) => [...prev, {
       role: 'assistant',
       content: "I'll start the guided tour now! I'll walk you through each section of our platform, explaining the features and benefits. Feel free to ask questions at any time.",
       timestamp: new Date()
@@ -210,88 +226,99 @@ const AIChatBot: React.FC = () => {
     return tourPhrases.some(phrase => text.toLowerCase().includes(phrase));
   };
 
+  const toggleAdminMode = () => {
+    logger.info('Toggling admin mode', { 
+      currentMode: isAdminMode ? 'admin' : 'concierge',
+      newMode: isAdminMode ? 'concierge' : 'admin'
+    }, 'AIChatBot');
+
+    setIsAdminMode((prev: boolean) => !prev);
+    setCurrentAssistantId((prev: string) => 
+      prev === import.meta.env.VITE_AI_ASSISTANT_ID 
+        ? import.meta.env.VITE_AI_ADMIN_ID 
+        : import.meta.env.VITE_AI_ASSISTANT_ID
+    );
+    setMessages([]);
+    setThreadId(undefined);
+  };
+
   const handleSend = async (text?: string) => {
-    const trimmedInput = (text || inputText)?.trim();
-    if (!trimmedInput || isLoading) return;
+    const messageText = text || inputText;
+    if (!messageText.trim() || isLoading) return;
 
     // Check for tour command first
-    if (isTourCommand(trimmedInput)) {
+    if (isTourCommand(messageText)) {
+      logger.info('Starting guided tour', { messageText }, 'AIChatBot');
       setInputText('');
-      setMessages(prev => [...prev, {
+      setMessages((prev: Message[]) => [...prev, {
         role: 'user',
-        content: trimmedInput,
-        timestamp: new Date()
+        content: messageText,
+      timestamp: new Date()
       }]);
       startGuidedTour();
       return;
     }
 
-    // Check if we should interrupt current response
-    const shouldInterrupt = audioState.isPlaying && await isCoherentInput(trimmedInput);
-    if (shouldInterrupt) {
-      audioService.stopCurrentResponse();
-      navigationLogger.info('Interrupting current response for new coherent input');
-    }
+    logger.info('Sending message', { 
+      messageText, 
+      isAdminMode, 
+      assistantId: currentAssistantId,
+      threadId 
+    }, 'AIChatBot');
 
-    navigationLogger.info('Sending message', { text: trimmedInput });
-
-    const newMessage: Message = {
-      role: 'user',
-      content: trimmedInput,
-      timestamp: new Date()
-    };
-    setMessages(prev => [...prev, newMessage]);
     setInputText('');
+    setMessages((prev: Message[]) => [...prev, {
+      role: 'user',
+      content: messageText,
+      timestamp: new Date()
+    }]);
+
     setIsLoading(true);
 
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: trimmedInput,
-          threadId: threadId,
-          stream: true
-        }),
+          message: messageText,
+          threadId,
+          assistantId: currentAssistantId,
+          isAdmin: isAdminMode
+        })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to get response');
+        throw new Error('Failed to send message');
       }
 
-      // Create a new message immediately
-      const aiMessage: Message = {
-        role: 'assistant',
-        content: '',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, aiMessage]);
-
-      // Stream the response
-      if (isTTSEnabled) {
-        navigationLogger.info('Streaming AI response');
-        await audioService.streamResponse(response.body as ReadableStream<Uint8Array>);
-      }
-
-      // Get the complete response text
       const data = await response.json();
+      logger.debug('Received response', { 
+        threadId: data.threadId,
+        responseLength: data.response.length 
+      }, 'AIChatBot');
+
       setThreadId(data.threadId);
 
-      // Update the message with complete text
-      setMessages(prev => prev.map((msg, index) => 
-        index === prev.length - 1 ? { ...msg, content: data.message } : msg
-      ));
+      const messageIndex = messages.length;
+      const aiMessage = {
+        role: 'assistant' as const,
+        content: data.response,
+        timestamp: new Date()
+      };
+      setMessages((prev: Message[]) => [...prev, aiMessage]);
 
-      if (isContinuousMode) {
-        navigationLogger.info('Ready for next input');
+      // Auto-play TTS if enabled and not in admin mode
+      if (isTTSEnabled && !isAdminMode) {
+        logger.debug('Auto-playing TTS response', { messageIndex }, 'AIChatBot');
+        setTimeout(() => {
+          handlePlayback(messageIndex, stripMarkdown(data.response));
+        }, 100); // Small delay to ensure message is rendered
       }
     } catch (error) {
-      navigationLogger.error('Chat error', error);
-      setMessages(prev => [...prev, {
+      logger.error('Message send error', { error, messageText }, 'AIChatBot');
+      setMessages((prev: Message[]) => [...prev, {
         role: 'assistant',
-        content: "I apologize, but I encountered an error. Please try again.",
+        content: 'I apologize, but I encountered an error. Please try again.',
         timestamp: new Date()
       }]);
     } finally {
@@ -366,7 +393,7 @@ const AIChatBot: React.FC = () => {
     } else {
       const newMode = !isContinuousMode;
       navigationLogger.info(`${newMode ? 'Enabling' : 'Disabling'} continuous mode`);
-      setIsContinuousMode(newMode);
+      setIsContinuousMode((prev: boolean) => !prev);
       if (newMode) {
         setIsTTSEnabled(true);
         startRecording();
@@ -386,121 +413,134 @@ const AIChatBot: React.FC = () => {
   };
 
   return (
-    <>
+    <div className={`fixed bottom-4 right-4 z-50 ${isOpen ? 'flex' : ''}`}>
       <ContinuousModeModal
         isOpen={showContinuousModal}
         onClose={() => setShowContinuousModal(false)}
         onAccept={handleAcceptContinuousMode}
       />
       
-      <div className="fixed bottom-6 right-6 z-[1000]">
-        <div className="flex flex-col items-end space-y-4">
-          {!isOpen && (
-      <button
-              onClick={() => setIsOpen(true)}
-              className="p-4 bg-[#8B1538] text-white rounded-full shadow-lg hover:bg-[#6B1028] transition-colors"
-      >
-        <MessageCircle className="w-6 h-6" />
-      </button>
-          )}
+      <div className="flex flex-col items-end space-y-4">
+        {!isOpen && (
+          <button
+            onClick={() => setIsOpen((prev: boolean) => !prev)}
+            className="p-4 bg-[#8B1538] text-white rounded-full shadow-lg hover:bg-[#6B1028] transition-colors"
+          >
+            <MessageCircle className="w-6 h-6" />
+          </button>
+        )}
 
-          {isOpen && (
-      <div
-              className={`bg-white rounded-lg shadow-xl flex flex-col ${
-          isExpanded 
-                  ? 'fixed top-[10vh] left-[10vw] w-[80vw] h-[80vh]' 
-                  : 'w-[420px] h-[600px]'
-              }`}
-      >
-              <div className="flex items-center justify-between p-4 border-b">
-          <div className="flex items-center space-x-2">
-                  <Bot className="w-6 h-6 text-[#8B1538]" />
-            <span className="font-semibold">Marriott AI Assistant</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-                    className="p-1 hover:bg-gray-100 rounded-full"
-            >
-                    {isExpanded ? <Minimize className="w-5 h-5" /> : <Expand className="w-5 h-5" />}
-            </button>
-            <button
-              onClick={() => setIsOpen(false)}
-                    className="p-1 hover:bg-gray-100 rounded-full"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message, index) => (
-                  <MarkdownMessage
-              key={index}
-                    text={message.content}
-                    isUser={message.role === 'user'}
-              timestamp={message.timestamp}
-              messageId={index}
-              audioState={audioState}
-                    onPlayPause={(messageId, text) => handlePlayback(messageId, text)}
-              onStop={stopPlayback}
-            />
-          ))}
-          {isLoading && (
-                  <div className="flex justify-center">
-                    <Loader2 className="w-6 h-6 animate-spin text-[#8B1538]" />
-            </div>
-          )}
-        </div>
-
-        <div className="flex-shrink-0 p-4 border-t bg-white">
-                <div className="flex items-center space-x-2">
+        {isOpen && (
+          <div
+            className={`bg-white rounded-lg shadow-xl flex flex-col ${
+              isExpanded 
+                ? 'fixed top-[10vh] left-[10vw] w-[80vw] h-[80vh]' 
+                : 'w-[420px] h-[600px]'
+            }`}
+          >
+            <div className="flex items-center justify-between p-4 border-b">
+              <div className="flex items-center space-x-2">
+                <Bot className="w-6 h-6 text-[#8B1538]" />
+                <span className="font-semibold">
+                  {isAdminMode ? 'AI Admin Assistant' : 'AI Concierge'}
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setIsTTSEnabled((prev: boolean) => !prev)}
+                  className={`p-2 rounded-full transition-colors ${
+                    isTTSEnabled ? 'text-blue-500 bg-blue-50' : 'text-gray-500 hover:bg-gray-100'
+                  }`}
+                  title={isTTSEnabled ? 'Disable voice' : 'Enable voice'}
+                >
+                  {isTTSEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
+                </button>
+                {isAdmin() && (
                   <button
-                    onClick={handleContinuousModeToggle}
-                    className={`flex-shrink-0 p-2 rounded-full transition-colors ${
-                      isContinuousMode 
-                        ? 'bg-[#8B1538] text-white' 
-                        : 'bg-gray-200 hover:bg-gray-300 text-gray-600'
-                    }`}
-                    title={isContinuousMode ? 'Disable voice assistant' : 'Enable voice assistant'}
+                    onClick={toggleAdminMode}
+                    className="relative w-8 h-8 p-1 rounded-full hover:bg-gray-100 transition-all duration-300"
+                    title={isAdminMode ? 'Switch to Concierge' : 'Switch to Admin'}
                   >
-                    <RefreshCw className={`w-5 h-5 ${isRecording ? 'animate-spin' : ''}`} />
-                    {isRecording && (
-                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                    )}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className={`w-4 h-0.5 bg-gray-600 absolute transform transition-all duration-300 ${isAdminMode ? 'rotate-45' : 'rotate-0'}`} />
+                      <div className={`w-4 h-0.5 bg-gray-600 absolute transform transition-all duration-300 ${isAdminMode ? '-rotate-45' : 'rotate-90'}`} />
+                    </div>
                   </button>
-                  
-                  <div className="flex-1">
-            <textarea
-                      value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyPress={handleKeyPress}
-                      placeholder="Type your message..."
-              rows={1}
-                      className="w-full p-2 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[#8B1538] focus:border-transparent"
-            />
-                  </div>
-
-            <button
-                      onClick={() => handleSend()}
-                    disabled={!inputText?.trim() || isLoading}
-              className="p-2 bg-[#8B1538] text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#6B1028] transition-colors"
-            >
-              <Send className="w-5 h-5" />
-            </button>
-                </div>
-
-                {currentTranscription && (
-                  <div className="mt-2 text-sm text-gray-500 italic">
-                    {currentTranscription}
-                  </div>
                 )}
+                <button
+                  onClick={() => setIsExpanded((prev: boolean) => !prev)}
+                  className="p-1 hover:bg-gray-100 rounded-full"
+                >
+                  {isExpanded ? <Minimize className="w-5 h-5" /> : <Expand className="w-5 h-5" />}
+                </button>
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    stopPlayback();
+                  }}
+                  className="p-1 hover:bg-gray-100 rounded-full"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
             </div>
-          )}
-        </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {messages.map((message, index) => (
+                <MarkdownMessage
+                  key={index}
+                  text={message.content}
+                  isUser={message.role === 'user'}
+                  timestamp={message.timestamp}
+                  messageId={index}
+                  audioState={audioState}
+                  onPlayPause={(messageId, text) => handlePlayback(messageId, text)}
+                  onStop={stopPlayback}
+                />
+              ))}
+              {isLoading && (
+                <div className="flex justify-center">
+                  <Loader2 className="w-6 h-6 animate-spin text-[#8B1538]" />
+                </div>
+              )}
+            </div>
+
+            <div className="flex-shrink-0 p-4 border-t bg-white">
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handleContinuousModeToggle}
+                  className={`flex-shrink-0 p-2 rounded-full transition-colors ${
+                    isContinuousMode ? 'text-blue-500 bg-blue-50' : 'text-gray-500 hover:bg-gray-100'
+                  }`}
+                  title={isContinuousMode ? 'Stop continuous mode' : 'Start continuous mode'}
+                >
+                  <Mic size={20} />
+                </button>
+                <textarea
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  placeholder="Type your message..."
+                  className="flex-1 p-2 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[#8B1538] focus:border-transparent"
+                  rows={1}
+                />
+                <button
+                  onClick={() => handleSend()}
+                  disabled={isLoading || !inputText.trim()}
+                  className={`p-2 rounded-full ${
+                    isLoading || !inputText.trim()
+                      ? 'text-gray-400 bg-gray-100'
+                      : 'text-white bg-[#8B1538] hover:bg-[#6B1028]'
+                  }`}
+                >
+                  <Send className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

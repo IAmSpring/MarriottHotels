@@ -1,5 +1,6 @@
 import React from 'react';
 import { Play, Pause, Square, Loader2 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 interface MessageBubbleProps {
   text: string;
@@ -25,8 +26,8 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   onStop,
 }) => {
   const isCurrentMessage = audioState.messageId === messageId;
-  const showControls = isCurrentMessage && !audioState.isLoading;
-  const showLoader = isCurrentMessage && audioState.isLoading;
+  const showControls = !isUser && (isCurrentMessage || !audioState.messageId);
+  const showLoader = !isUser && isCurrentMessage && audioState.isLoading;
 
   return (
     <div className={`mb-4 ${isUser ? 'text-right' : 'text-left'}`}>
@@ -38,14 +39,16 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
         }`}
       >
         <div className="flex items-start justify-between gap-3">
-          <div className="flex-grow">{text}</div>
+          <div className="flex-grow whitespace-pre-wrap">
+            <ReactMarkdown>{text}</ReactMarkdown>
+          </div>
           {!isUser && (
             <div className="flex items-center space-x-2 ml-2">
               {showLoader ? (
                 <div className="w-8 h-8 flex items-center justify-center">
                   <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
                 </div>
-              ) : (
+              ) : showControls && (
                 <div className="flex items-center space-x-1">
                   <button
                     onClick={() => onPlayPause(messageId, text)}
@@ -58,7 +61,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
                       <Play className="w-5 h-5 text-gray-700" />
                     )}
                   </button>
-                  {showControls && audioState.isPlaying && (
+                  {isCurrentMessage && audioState.isPlaying && (
                     <button
                       onClick={onStop}
                       className="p-1.5 rounded-full hover:bg-gray-200 transition-colors"
