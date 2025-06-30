@@ -6,6 +6,7 @@ import { audioManager } from '../utils/audioManager';
 import { isStaticBuild, getStaticResponse } from '../lib/openai';
 import { Buffer } from 'buffer';
 import { fetchApi, handleApiError } from '../lib/staticApi';
+import { navigationLogger } from '../utils/navigationLogger';
 
 const tourSections: TourSection[] = [
   {
@@ -281,6 +282,21 @@ const TourController: React.FC = () => {
   const isFirstRender = useRef(true);
   const [isRightMouseDown, setIsRightMouseDown] = useState(false);
 
+  // Listen for tour start event
+  useEffect(() => {
+    const handleTourStart = () => {
+      navigationLogger.info('Starting guided tour from voice command');
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      dispatch({ type: 'JUMP_TO_SECTION', payload: 0 });
+      dispatch({ type: 'PLAY' });
+    };
+
+    window.addEventListener('startTour', handleTourStart);
+    return () => window.removeEventListener('startTour', handleTourStart);
+  }, []);
+
   // Add cache cleanup on mount
   useEffect(() => {
     cleanupCache();
@@ -399,11 +415,11 @@ const TourController: React.FC = () => {
   const generateAndPlayAudio = async (text: string) => {
     try {
       // Stop any existing audio
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-        audioManager.setAudio(null);
-      }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+      audioManager.setAudio(null);
+    }
 
       dispatch({ type: 'SET_LOADING', payload: true });
 
@@ -464,7 +480,7 @@ const TourController: React.FC = () => {
       const { error: errorMessage, isStatic } = handleApiError(error);
       console.error('TTS Error:', errorMessage);
       if (!isStatic) {
-        dispatch({ type: 'PAUSE' });
+      dispatch({ type: 'PAUSE' });
       }
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });

@@ -7,6 +7,9 @@ import MarkdownMessage from './MarkdownMessage';
 import ContinuousModeModal from './ContinuousModeModal';
 import { isStaticBuild, getStaticResponse } from '../lib/openai';
 import { fetchApi, handleApiError } from '../lib/staticApi';
+import { StreamingAudioService } from '../utils/streamingAudioService';
+import { navigationLogger } from '../utils/navigationLogger';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -26,13 +29,13 @@ interface AIResponse {
 }
 
 const DEFAULT_OPTIONS = [
-  "What are the best hotels in Miami?",
+  "What are the best hotels this time of year?",
   "Tell me about Marriott Bonvoy rewards",
   "Help me plan a romantic getaway"
 ];
 
 const RECOMMENDED_PROMPTS = [
-  "Help me plan a luxury vacation in Aspen",
+  "Help me plan a luxury vacation next month",
   "What are the best Marriott hotels for a business trip?",
   "Tell me about Marriott Bonvoy rewards program"
 ];
@@ -89,7 +92,18 @@ const loadAndPlayAudio = async (audioData: string, cacheKey: string): Promise<HT
   });
 };
 
+const audioService = new StreamingAudioService();
+
+// Event to communicate with TourController
+const tourEvent = new CustomEvent('startTour');
+
+const MIN_CONFIDENCE_THRESHOLD = 0.7; // Minimum confidence for transcription
+const MIN_WORDS_THRESHOLD = 3; // Minimum words for a valid input
+const MAX_SILENCE_DURATION = 1500; // Max silence duration in ms
+
 const AIChatBot: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -109,172 +123,118 @@ const AIChatBot: React.FC = () => {
     return localStorage.getItem('hasSeenContinuousModal') === 'true';
   });
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isWakeWordMode, setIsWakeWordMode] = useState(false);
-
-  const { 
-    isRecording, 
-    isTranscribing, 
-    isListeningForWakeWord,
-    startRecording, 
-    stopRecording,
-    startWakeWordDetection 
-  } = useVoiceRecorder({
-    onTranscriptionComplete: async (text) => {
-      console.log('🎤 Transcription complete:', text);
-      if (text && text.trim()) {
-        setInputText(text);
-        await handleSend(text);
-      }
-      setCurrentTranscription('');
-      // After sending, go back to wake word detection if in continuous mode
-      if (isContinuousMode) {
-        console.log('🎙️ Returning to wake word detection...');
-        startWakeWordDetection();
-      }
-    },
-    onTranscriptionUpdate: (text) => {
-      console.log('🎤 Transcription update:', text);
-      setCurrentTranscription(text);
-      setInputText(text);
-    },
-    onWakeWordDetected: () => {
-      console.log('🎙️ Wake word detected! Starting recording...');
-      setIsWakeWordMode(false);
-      // Enable TTS for auto-playback of responses
-      setIsTTSEnabled(true);
-      // Start recording automatically
-      startRecording();
-    }
-  });
-
-  // Auto-start wake word detection when continuous mode is enabled
-  useEffect(() => {
-    if (isContinuousMode && !isRecording && !isTranscribing) {
-      console.log('🎙️ Continuous mode enabled, starting wake word detection...');
-      setIsWakeWordMode(true);
-      startWakeWordDetection();
-    }
-  }, [isContinuousMode]);
-
-  // Function to generate cache key for a message
-  const getCacheKey = useCallback((messageId: number, text: string) => {
-    return `message-${messageId}-${text.substring(0, 50)}`;
-  }, []);
 
   const handlePlayback = async (messageId: number, text: string) => {
-    const cacheKey = getCacheKey(messageId, text);
-
-    // If currently playing this message, pause it
-    if (audioState.messageId === messageId && audioState.isPlaying) {
-      if (audioRef.current) {
-        audioRef.current.pause();
+    if (audioState.isPlaying && audioState.messageId === messageId) {
+      audioService.pause();
         setAudioState(prev => ({ ...prev, isPlaying: false }));
-      }
-      return;
-    }
-
-    // If we have a loaded audio for this message but it's paused, resume it
-    if (audioRef.current && audioState.messageId === messageId && !audioState.isPlaying) {
-      audioRef.current.play();
-      setAudioState(prev => ({ ...prev, isPlaying: true }));
-      return;
-    }
-
-    // Stop any currently playing audio
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-
-    // Check if we have cached audio
-    const cached = audioCache.get(cacheKey);
-    if (cached) {
+    } else {
+      setAudioState({ messageId, isPlaying: true, isLoading: true });
       try {
-        setAudioState({ messageId, isPlaying: false, isLoading: true });
-        const audio = await loadAndPlayAudio(cached.data, cacheKey);
-        setupAudioListeners(audio, messageId);
-        audioRef.current = audio;
-        await audio.play();
-        return;
+        await audioService.playText(text);
+        setAudioState(prev => ({ ...prev, isLoading: false }));
       } catch (error) {
-        console.error('Error playing cached audio:', error);
-        // If cached audio fails, remove it from cache and continue to fetch new audio
-        audioCache.delete(cacheKey);
+        navigationLogger.error('Playback error', error);
+        setAudioState({ messageId: null, isPlaying: false, isLoading: false });
       }
     }
-
-    // Start new playback
-    try {
-      const cleanText = text.replace(/[*#\[\]]/g, ''); // Strip markdown
-      setAudioState({ messageId, isPlaying: false, isLoading: true });
-      
-      const response = await fetch('/api/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: cleanText }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error('Failed to generate speech: ' + (error.details || error.error));
-      }
-      
-      const { audioData } = await response.json();
-      
-      if (!audioData) {
-        throw new Error('No audio data received');
-      }
-
-      // Load and setup the audio element
-      const audio = await loadAndPlayAudio(audioData, cacheKey);
-      setupAudioListeners(audio, messageId);
-      audioRef.current = audio;
-      await audio.play();
-    } catch (error) {
-      console.error('TTS Error:', error);
-      setAudioState({ messageId: null, isPlaying: false, isLoading: false });
-      audioRef.current = null;
-      // Remove failed audio from cache
-      audioCache.delete(cacheKey);
-    }
-  };
-
-  // Separate function for setting up audio listeners
-  const setupAudioListeners = (audio: HTMLAudioElement, messageId: number) => {
-    audio.addEventListener('playing', () => {
-      setAudioState(prev => ({ ...prev, isPlaying: true, isLoading: false }));
-    });
-
-    audio.addEventListener('pause', () => {
-      setAudioState(prev => ({ ...prev, isPlaying: false }));
-    });
-
-    audio.addEventListener('ended', () => {
-      setAudioState({ messageId: null, isPlaying: false, isLoading: false });
-      audioRef.current = null;
-    });
   };
 
   const stopPlayback = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
-      setAudioState({
-        messageId: null,
-        isPlaying: false,
-        isLoading: false
-      });
+    audioService.stop();
+    setAudioState({ messageId: null, isPlaying: false, isLoading: false });
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
     }
+  };
+
+  // Function to check if input is coherent
+  const isCoherentInput = async (text: string): Promise<boolean> => {
+    // Quick checks first
+    if (!text || text.trim().split(' ').length < MIN_WORDS_THRESHOLD) {
+      return false;
+    }
+
+    try {
+      // Use AI to check coherence
+      const response = await fetch('/api/check-coherence', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+
+      if (!response.ok) return false;
+      const { isCoherent, confidence } = await response.json();
+      return isCoherent && confidence >= MIN_CONFIDENCE_THRESHOLD;
+    } catch (error) {
+      navigationLogger.error('Coherence check failed', error);
+      // Fall back to basic word count check if AI check fails
+      return text.trim().split(' ').length >= MIN_WORDS_THRESHOLD;
+    }
+  };
+
+  const startGuidedTour = () => {
+    // If not on home page, navigate there first
+    if (location.pathname !== '/') {
+      navigate('/');
+      // Wait for navigation to complete
+      setTimeout(() => {
+        window.dispatchEvent(tourEvent);
+      }, 1000);
+    } else {
+      window.dispatchEvent(tourEvent);
+    }
+    
+    // Respond to user
+    setMessages(prev => [...prev, {
+      role: 'assistant',
+      content: "I'll start the guided tour now! I'll walk you through each section of our platform, explaining the features and benefits. Feel free to ask questions at any time.",
+      timestamp: new Date()
+    }]);
+  };
+
+  // Function to check if input is a tour command
+  const isTourCommand = (text: string): boolean => {
+    const tourPhrases = [
+      'start tour',
+      'begin tour',
+      'start guided tour',
+      'begin guided tour',
+      'give me a tour',
+      'show me around'
+    ];
+    return tourPhrases.some(phrase => text.toLowerCase().includes(phrase));
   };
 
   const handleSend = async (text?: string) => {
     const trimmedInput = (text || inputText)?.trim();
     if (!trimmedInput || isLoading) return;
 
-    console.log('📤 Sending message:', trimmedInput);
+    // Check for tour command first
+    if (isTourCommand(trimmedInput)) {
+      setInputText('');
+      setMessages(prev => [...prev, {
+        role: 'user',
+        content: trimmedInput,
+        timestamp: new Date()
+      }]);
+      startGuidedTour();
+      return;
+    }
 
-    // Add user message
+    // Check if we should interrupt current response
+    const shouldInterrupt = audioState.isPlaying && await isCoherentInput(trimmedInput);
+    if (shouldInterrupt) {
+      audioService.stopCurrentResponse();
+      navigationLogger.info('Interrupting current response for new coherent input');
+    }
+
+    navigationLogger.info('Sending message', { text: trimmedInput });
+
     const newMessage: Message = {
       role: 'user',
       content: trimmedInput,
@@ -292,7 +252,8 @@ const AIChatBot: React.FC = () => {
         },
         body: JSON.stringify({
           message: trimmedInput,
-          threadId: threadId
+          threadId: threadId,
+          stream: true
         }),
       });
 
@@ -300,32 +261,34 @@ const AIChatBot: React.FC = () => {
         throw new Error('Failed to get response');
       }
 
-      const data = await response.json();
-      console.log('📥 Received AI response');
-
+      // Create a new message immediately
       const aiMessage: Message = {
         role: 'assistant',
-        content: data.message,
+        content: '',
         timestamp: new Date()
       };
-
       setMessages(prev => [...prev, aiMessage]);
+
+      // Stream the response
+      if (isTTSEnabled) {
+        navigationLogger.info('Streaming AI response');
+        await audioService.streamResponse(response.body as ReadableStream<Uint8Array>);
+      }
+
+      // Get the complete response text
+      const data = await response.json();
       setThreadId(data.threadId);
 
-      // Auto-play response if TTS is enabled
-        if (isTTSEnabled) {
-        console.log('🔊 Auto-playing AI response...');
-        const messageId = messages.length + 1;
-        handlePlayback(messageId, data.message);
-        }
+      // Update the message with complete text
+      setMessages(prev => prev.map((msg, index) => 
+        index === prev.length - 1 ? { ...msg, content: data.message } : msg
+      ));
 
-      // If in continuous mode, go back to wake word detection
       if (isContinuousMode) {
-        console.log('🎙️ Returning to wake word detection after response...');
-        startWakeWordDetection();
+        navigationLogger.info('Ready for next input');
       }
     } catch (error) {
-      console.error('Error:', error);
+      navigationLogger.error('Chat error', error);
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: "I apologize, but I encountered an error. Please try again.",
@@ -336,101 +299,90 @@ const AIChatBot: React.FC = () => {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
+  const { 
+    isRecording, 
+    isSpeaking,
+    startRecording, 
+    stopRecording
+  } = useVoiceRecorder({
+    onStartSpeaking: () => {
+      audioService.handleUserSpeakingStarted();
+      navigationLogger.info('User started speaking, fading out AI audio');
+    },
+    onStopSpeaking: () => {
+      audioService.handleUserSpeakingEnded();
+      navigationLogger.info('User stopped speaking, restoring AI audio');
+    },
+    onRecordingComplete: async (blob) => {
+      const formData = new FormData();
+      formData.append('audio', blob, 'recording.webm');
 
-  const handlePromptClick = (prompt: string) => {
-    setInputText(prompt);
-    handleSend(prompt);
-  };
+      try {
+        const response = await fetch('/api/transcribe', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error('Transcription failed');
+        }
+
+        const { text } = await response.json();
+        if (text && text.trim()) {
+          const isCoherent = await isCoherentInput(text);
+          if (isCoherent) {
+            setInputText(text);
+            await handleSend(text);
+          } else {
+            navigationLogger.info('Skipping incoherent input', { text });
+          }
+        }
+        setCurrentTranscription('');
+
+      } catch (error) {
+        navigationLogger.error('Transcription failed', error);
+      }
+    },
+    silenceThreshold: MAX_SILENCE_DURATION,
+    minDecibels: -45
+  });
+
+  // Start continuous recording when continuous mode is enabled
+  useEffect(() => {
+    if (isContinuousMode && !isRecording) {
+      navigationLogger.info('Starting continuous recording');
+      startRecording();
+    }
+  }, [isContinuousMode, isRecording, startRecording]);
+
+  // Update volume when TTS is toggled
+  useEffect(() => {
+    audioService.setVolume(isTTSEnabled ? 1 : 0);
+  }, [isTTSEnabled]);
 
   const handleContinuousModeToggle = () => {
     if (!hasSeenContinuousModal) {
       setShowContinuousModal(true);
     } else {
       const newMode = !isContinuousMode;
-      console.log(`🔄 ${newMode ? 'Enabling' : 'Disabling'} continuous mode...`);
+      navigationLogger.info(`${newMode ? 'Enabling' : 'Disabling'} continuous mode`);
       setIsContinuousMode(newMode);
       if (newMode) {
-        setIsWakeWordMode(true);
-        setIsTTSEnabled(true); // Auto-enable TTS in continuous mode
-        startWakeWordDetection();
+        setIsTTSEnabled(true);
+        startRecording();
+      } else {
+        stopRecording();
       }
     }
   };
 
   const handleAcceptContinuousMode = () => {
-    console.log('✅ Accepted continuous mode, enabling wake word detection...');
+    navigationLogger.info('Continuous mode accepted');
     setHasSeenContinuousModal(true);
-    localStorage.setItem('hasSeenContinuousMode', 'true');
+    localStorage.setItem('hasSeenContinuousModal', 'true');
     setIsContinuousMode(true);
-    setIsWakeWordMode(true);
-    setIsTTSEnabled(true); // Auto-enable TTS when accepting continuous mode
-    startWakeWordDetection();
-  };
-
-  const handleSendMessage = async (message: string) => {
-    try {
-      console.log('📤 Sending message:', message);
-      setMessages(prev => [...prev, { 
-        role: 'user', 
-        content: message,
-        timestamp: new Date()
-      }]);
-      setIsLoading(true);
-
-      if (isStaticBuild()) {
-        // For static builds, return a mock response after a delay
-        setTimeout(() => {
-          setMessages(prev => [...prev, { 
-            role: 'assistant', 
-            content: 'This is a demo version running on GitHub Pages. For full functionality including AI chat, please run the application locally.',
-            timestamp: new Date()
-          }]);
-          setIsLoading(false);
-        }, 500);
-        return;
-      }
-
-      const response = await fetchApi('chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message,
-          userId: '1',
-          threadId,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to get response`);
-      }
-
-      const data = await response.json();
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: data.response,
-        timestamp: new Date()
-      }]);
-      setThreadId(data.threadId);
-    } catch (error) {
-      const { error: errorMessage, isStatic } = handleApiError(error);
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: isStatic 
-          ? 'This is a demo version. For full AI chat functionality, please run the application locally.'
-          : errorMessage,
-        timestamp: new Date()
-      }]);
-    } finally {
-      setIsLoading(false);
-    }
+    setIsTTSEnabled(true);
+    startRecording();
   };
 
   return (
@@ -485,8 +437,8 @@ const AIChatBot: React.FC = () => {
           {messages.map((message, index) => (
                   <MarkdownMessage
               key={index}
-              text={message.content}
-              isUser={message.role === 'user'}
+                    text={message.content}
+                    isUser={message.role === 'user'}
               timestamp={message.timestamp}
               messageId={index}
               audioState={audioState}
@@ -502,7 +454,7 @@ const AIChatBot: React.FC = () => {
         </div>
 
         <div className="flex-shrink-0 p-4 border-t bg-white">
-                <div className="flex items-start space-x-2">
+                <div className="flex items-center space-x-2">
                   <button
                     onClick={handleContinuousModeToggle}
                     className={`flex-shrink-0 p-2 rounded-full transition-colors ${
@@ -512,94 +464,33 @@ const AIChatBot: React.FC = () => {
                     }`}
                     title={isContinuousMode ? 'Disable voice assistant' : 'Enable voice assistant'}
                   >
-                    <RefreshCw className={`w-5 h-5 ${isListeningForWakeWord ? 'animate-spin' : ''}`} />
-                    {isListeningForWakeWord && (
-                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
+                    <RefreshCw className={`w-5 h-5 ${isRecording ? 'animate-spin' : ''}`} />
+                    {isRecording && (
+                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                     )}
                   </button>
                   
                   <div className="flex-1">
             <textarea
-                      value={isRecording ? currentTranscription : inputText}
+                      value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyPress={handleKeyPress}
-                      placeholder={isRecording ? 'Listening...' : 'Type your message...'}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B1538] focus:border-transparent resize-none overflow-hidden"
-                      style={{
-                        minHeight: '42px',
-                        maxHeight: '120px',
-                      }}
+                      placeholder="Type your message..."
               rows={1}
-              disabled={isLoading || isRecording || isTranscribing}
+                      className="w-full p-2 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[#8B1538] focus:border-transparent"
             />
                   </div>
 
-                  <div className="flex-shrink-0 flex items-start space-x-2">
-                    <button
-                      onClick={() => setIsTTSEnabled(!isTTSEnabled)}
-                      className={`p-2 rounded-full transition-colors ${
-                        isTTSEnabled 
-                          ? 'bg-[#8B1538] text-white' 
-                          : 'bg-gray-200 hover:bg-gray-300 text-gray-600'
-                      }`}
-                      title={isTTSEnabled ? 'Disable auto-read responses' : 'Enable auto-read responses'}
-                    >
-                      {isTTSEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-                    </button>
-
-            <button
-                      onClick={async () => {
-                  if (isRecording) {
-                    await stopRecording();
-                  } else {
-                    await startRecording();
-                }
-              }}
-                      disabled={isLoading || isTranscribing || isListeningForWakeWord}
-              className={`p-2 rounded-full transition-colors ${
-                isRecording 
-                  ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
-                  : isTranscribing
-                  ? 'bg-gray-200'
-                  : 'bg-gray-200 hover:bg-gray-300'
-                      } relative`}
-                      title={isRecording ? 'Stop recording' : 'Start recording'}
-            >
-              {isTranscribing ? (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
-                        </div>
-              ) : (
-                        <Mic 
-                          className={`w-5 h-5 ${
-                            isRecording 
-                              ? 'text-white animate-pulse' 
-                              : 'text-gray-600'
-                          }`} 
-                        />
-              )}
-                      {isRecording && (
-                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-              )}
-            </button>
-
             <button
                       onClick={() => handleSend()}
-                      disabled={!inputText?.trim() || isLoading || isRecording || isTranscribing}
+                    disabled={!inputText?.trim() || isLoading}
               className="p-2 bg-[#8B1538] text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#6B1028] transition-colors"
             >
               <Send className="w-5 h-5" />
             </button>
-          </div>
                 </div>
 
-                {/* Show different status messages based on mode */}
-                {isListeningForWakeWord && (
-                  <div className="mt-2 text-sm text-blue-500 italic">
-                    Listening for wake word (Hey Bonvoy, Hey Marriott, or Hey Concierge)...
-                  </div>
-                )}
-                {isRecording && currentTranscription && (
+                {currentTranscription && (
                   <div className="mt-2 text-sm text-gray-500 italic">
                     {currentTranscription}
                   </div>

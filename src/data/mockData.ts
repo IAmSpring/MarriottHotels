@@ -41,9 +41,10 @@ export interface Destination {
   name: string;
   country: string;
   description: string;
-  image: string;
-  weather: string;
-  hotelIds: string[];
+  images: string[];
+  highlights: string[];
+  bestTimeToVisit: string;
+  popularHotels: string[];
 }
 
 export interface Reward {
@@ -430,85 +431,237 @@ export const mockExperiences: Experience[] = [
 
 export const mockDestinations: Destination[] = [
   {
+    id: 'mount-rainier',
+    name: 'Mount Rainier',
+    country: 'United States',
+    description: 'Experience the majestic beauty of Mount Rainier National Park, featuring ancient forests, wildflower meadows, and the iconic snow-capped peak that dominates the Washington landscape.',
+    images: [
+      'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg',
+      'https://images.pexels.com/photos/572897/pexels-photo-572897.jpeg',
+      'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg',
+      'https://images.pexels.com/photos/2662116/pexels-photo-2662116.jpeg'
+    ],
+    highlights: [
+      'Scenic hiking trails',
+      'Wildlife viewing',
+      'Mountain climbing',
+      'Winter sports',
+      'Paradise visitor center',
+      'Wildflower meadows'
+    ],
+    bestTimeToVisit: 'July to September for hiking, December to March for winter sports',
+    popularHotels: ['mountain-lodge-1', 'paradise-inn', 'national-park-resort']
+  },
+  {
+    id: 'las-vegas',
+    name: 'Las Vegas',
+    country: 'United States',
+    description: 'Experience the dazzling entertainment capital of the world, where luxury resorts, world-class dining, spectacular shows, and non-stop excitement create an unforgettable desert oasis.',
+    images: [
+      'https://images.pexels.com/photos/415999/pexels-photo-415999.jpeg',
+      'https://images.pexels.com/photos/2837909/pexels-photo-2837909.jpeg',
+      'https://images.pexels.com/photos/2670273/pexels-photo-2670273.jpeg',
+      'https://images.pexels.com/photos/2034851/pexels-photo-2034851.jpeg'
+    ],
+    highlights: [
+      'World-famous casinos',
+      'Luxury resorts',
+      'Entertainment shows',
+      'Fine dining',
+      'Shopping centers',
+      'Nightlife'
+    ],
+    bestTimeToVisit: 'March to May and September to November for moderate temperatures',
+    popularHotels: ['bellagio-1', 'caesars-palace', 'venetian-resort']
+  },
+  {
     id: 'miami',
     name: 'Miami Beach',
     country: 'United States',
     description: 'Experience the vibrant culture and beautiful beaches of Miami.',
-    image: 'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg',
-    weather: 'Warm and Sunny',
-    hotelIds: ['rcmb-001', 'dos-004']
+    images: [
+      'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg',
+      'https://images.pexels.com/photos/1450354/pexels-photo-1450354.jpeg',
+      'https://images.pexels.com/photos/1450355/pexels-photo-1450355.jpeg'
+    ],
+    highlights: [
+      'South Beach',
+      'Art Deco District',
+      'Cuban cuisine',
+      'Nightlife',
+      'Water sports',
+      'Shopping'
+    ],
+    bestTimeToVisit: 'November to April for perfect beach weather',
+    popularHotels: ['rcmb-001', 'dos-004']
   },
   {
     id: 'nyc',
     name: 'New York City',
     country: 'United States',
     description: 'The city that never sleeps, offering endless entertainment and cultural experiences.',
-    image: 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg',
-    weather: 'Seasonal',
-    hotelIds: ['1', '4']
+    images: [
+      'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg',
+      'https://images.pexels.com/photos/802024/pexels-photo-802024.jpeg',
+      'https://images.pexels.com/photos/1486222/pexels-photo-1486222.jpeg'
+    ],
+    highlights: [
+      'Times Square',
+      'Central Park',
+      'Broadway shows',
+      'World-class museums',
+      'Iconic landmarks',
+      'Shopping on Fifth Avenue'
+    ],
+    bestTimeToVisit: 'April to June or September to early November for mild weather',
+    popularHotels: ['1', '4']
   },
   {
     id: 'aspen',
     name: 'Aspen',
     country: 'United States',
     description: 'World-renowned ski resort town with luxury accommodations and mountain views.',
-    image: 'https://images.pexels.com/photos/754268/pexels-photo-754268.jpeg',
-    weather: 'Alpine Climate',
-    hotelIds: ['3', 'jmas-002']
+    images: [
+      'https://images.pexels.com/photos/754268/pexels-photo-754268.jpeg',
+      'https://images.pexels.com/photos/3225531/pexels-photo-3225531.jpeg',
+      'https://images.pexels.com/photos/4215113/pexels-photo-4215113.jpeg'
+    ],
+    highlights: [
+      'World-class skiing',
+      'Luxury resorts',
+      'Mountain hiking',
+      'Fine dining',
+      'Shopping',
+      'Summer festivals'
+    ],
+    bestTimeToVisit: 'December to March for skiing, June to September for summer activities',
+    popularHotels: ['3', 'jmas-002']
   },
   {
     id: 'san-diego',
     name: 'San Diego',
     country: 'United States',
     description: 'Perfect weather, beautiful beaches, and family-friendly attractions.',
-    image: 'https://images.pexels.com/photos/1538177/pexels-photo-1538177.jpeg',
-    weather: 'Mild Year-round',
-    hotelIds: ['cis-005']
+    images: [
+      'https://images.pexels.com/photos/1538177/pexels-photo-1538177.jpeg',
+      'https://images.pexels.com/photos/1288803/pexels-photo-1288803.jpeg',
+      'https://images.pexels.com/photos/2519390/pexels-photo-2519390.jpeg'
+    ],
+    highlights: [
+      'San Diego Zoo',
+      'Balboa Park',
+      'SeaWorld',
+      'La Jolla Cove',
+      'Coronado Beach',
+      'Gaslamp Quarter'
+    ],
+    bestTimeToVisit: 'March to May and September to November for perfect weather',
+    popularHotels: ['cis-005']
   },
   {
     id: 'charleston',
     name: 'Charleston',
     country: 'United States',
     description: 'Historic charm meets Southern hospitality in this coastal gem.',
-    image: 'https://images.pexels.com/photos/2889493/pexels-photo-2889493.jpeg',
-    weather: 'Subtropical',
-    hotelIds: ['hdb-006']
+    images: [
+      'https://images.pexels.com/photos/14679216/pexels-photo-14679216.jpeg',
+      'https://images.pexels.com/photos/14679217/pexels-photo-14679217.jpeg',
+      'https://images.pexels.com/photos/14679218/pexels-photo-14679218.jpeg'
+    ],
+    highlights: [
+      'Historic district',
+      'Rainbow Row',
+      'Charleston City Market',
+      'Plantation tours',
+      'Waterfront Park',
+      'Southern cuisine'
+    ],
+    bestTimeToVisit: 'March to May or September to November for mild weather',
+    popularHotels: ['hdb-006']
   },
   {
     id: 'lake-tahoe',
     name: 'Lake Tahoe',
     country: 'United States',
     description: 'Crystal clear waters and mountain adventures await.',
-    image: 'https://images.pexels.com/photos/338504/pexels-photo-338504.jpeg',
-    weather: 'Alpine',
-    hotelIds: ['lsr-007']
+    images: [
+      'https://images.pexels.com/photos/338504/pexels-photo-338504.jpeg',
+      'https://images.pexels.com/photos/338505/pexels-photo-338505.jpeg',
+      'https://images.pexels.com/photos/338506/pexels-photo-338506.jpeg'
+    ],
+    highlights: [
+      'Lake activities',
+      'Ski resorts',
+      'Hiking trails',
+      'Mountain biking',
+      'Casinos',
+      'Scenic drives'
+    ],
+    bestTimeToVisit: 'July to August for summer activities, December to March for winter sports',
+    popularHotels: ['lsr-007']
   },
   {
     id: 'austin',
     name: 'Austin',
     country: 'United States',
     description: 'Live music capital with a vibrant food scene and tech culture.',
-    image: 'https://images.pexels.com/photos/1563256/pexels-photo-1563256.jpeg',
-    weather: 'Hot Summers',
-    hotelIds: ['bci-008']
+    images: [
+      'https://images.pexels.com/photos/1563256/pexels-photo-1563256.jpeg',
+      'https://images.pexels.com/photos/1563257/pexels-photo-1563257.jpeg',
+      'https://images.pexels.com/photos/1563258/pexels-photo-1563258.jpeg'
+    ],
+    highlights: [
+      'Live music venues',
+      'Food trucks',
+      'Barton Springs',
+      'State Capitol',
+      'Lady Bird Lake',
+      'South Congress'
+    ],
+    bestTimeToVisit: 'March to May or September to November for outdoor activities',
+    popularHotels: ['bci-008']
   },
   {
     id: 'chicago',
     name: 'Chicago',
     country: 'United States',
     description: 'Iconic architecture, world-class dining, and lakefront beauty.',
-    image: 'https://images.pexels.com/photos/1334605/pexels-photo-1334605.jpeg',
-    weather: 'Four Seasons',
-    hotelIds: ['lms-009']
+    images: [
+      'https://images.pexels.com/photos/1334605/pexels-photo-1334605.jpeg',
+      'https://images.pexels.com/photos/1334606/pexels-photo-1334606.jpeg',
+      'https://images.pexels.com/photos/1334607/pexels-photo-1334607.jpeg'
+    ],
+    highlights: [
+      'Millennium Park',
+      'Navy Pier',
+      'Art Institute',
+      'Deep dish pizza',
+      'Architecture tours',
+      'Magnificent Mile'
+    ],
+    bestTimeToVisit: 'April to May or September to October for mild temperatures',
+    popularHotels: ['lms-009']
   },
   {
     id: 'hong-kong',
     name: 'Hong Kong',
     country: 'China',
     description: 'Where East meets West in a dazzling harbor city.',
-    image: 'https://images.pexels.com/photos/2417842/pexels-photo-2417842.jpeg',
-    weather: 'Subtropical',
-    hotelIds: ['park-lane-hong-kong']
+    images: [
+      'https://images.pexels.com/photos/2417842/pexels-photo-2417842.jpeg',
+      'https://images.pexels.com/photos/2417843/pexels-photo-2417843.jpeg',
+      'https://images.pexels.com/photos/2417844/pexels-photo-2417844.jpeg'
+    ],
+    highlights: [
+      'Victoria Peak',
+      'Victoria Harbor',
+      'Temple Street',
+      'Dim sum',
+      'Shopping',
+      'Night markets'
+    ],
+    bestTimeToVisit: 'October to December for comfortable temperatures and low rainfall',
+    popularHotels: ['park-lane-hong-kong']
   }
 ];
 

@@ -23,6 +23,9 @@ import DestinationsPage from '../pages/DestinationsPage';
 import DestinationDetails from '../pages/DestinationDetails';
 import AppPage from '../pages/AppPage';
 import AIChatBot from './AIChatBot';
+import { NavigationProvider } from '../contexts/NavigationContext';
+import { NavigationController } from './NavigationController';
+import { NavigationLogViewer } from './NavigationLogViewer';
 
 const AppWrapper: React.FC = () => {
   const { isLoading, setIsLoading } = useLoadingStore();
@@ -44,7 +47,7 @@ const AppWrapper: React.FC = () => {
   }, [setIsLoading]);
 
   return (
-    <>
+    <NavigationProvider>
       <LoadingScreen isLoading={isLoading} />
       <div className={`transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
@@ -73,10 +76,12 @@ const AppWrapper: React.FC = () => {
                 <AIChatBot />
               </div>
             </Router>
+            <NavigationController />
+            <NavigationLogViewer />
           </QueryClientProvider>
         </trpc.Provider>
       </div>
-    </>
+    </NavigationProvider>
   );
 };
 
