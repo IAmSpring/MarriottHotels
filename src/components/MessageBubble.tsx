@@ -1,15 +1,8 @@
 import React from 'react';
 import { Play, Pause, Square, Loader2 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
 
 const parseJsonResponse = (text: string): string => {
-  try {
-    if (text.trim().startsWith('{') && text.trim().endsWith('}')) {
-      const parsed = JSON.parse(text);
-      if (parsed.response) return parsed.response;
-    }
-  } catch (e) {}
-  return text;
+  return text || '';
 };
 
 interface MessageBubbleProps {
@@ -51,7 +44,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-grow whitespace-pre-wrap">
-            <ReactMarkdown>{displayText}</ReactMarkdown>
+            {displayText}
           </div>
           {!isUser && (
             <div className="flex items-center space-x-2 ml-2">

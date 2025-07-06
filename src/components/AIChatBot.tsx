@@ -104,18 +104,7 @@ const MIN_WORDS_THRESHOLD = 3; // Minimum words for a valid input
 const MAX_SILENCE_DURATION = 1500; // Max silence duration in ms
 
 const parseResponse = (text: string): string => {
-  if (!text) return '';
-  try {
-    if (text.trim().startsWith('{') && text.trim().endsWith('}')) {
-      const parsed = JSON.parse(text);
-      if (parsed.response) {
-        return parsed.response;
-      }
-    }
-  } catch (e) {
-    console.debug('Not a JSON response');
-  }
-  return text;
+  return text || '';
 };
 
 const AIChatBot: React.FC = () => {
@@ -320,28 +309,46 @@ const AIChatBot: React.FC = () => {
       }
 
       const data = await response.json();
-      logger.debug('Received response', { 
+      logger.debug('Raw API Response:', { 
+        response: data.response,
         threadId: data.threadId,
-        responseLength: data.response?.length 
       }, 'AIChatBot');
 
       setThreadId(data.threadId);
       
-      const parsedContent = parseResponse(data.response);
+      // Parse the response if it's a JSON string
+      let parsedResponse = data.response;
+      try {
+        if (typeof data.response === 'string') {
+          // First try to parse it as a JSON object
+          const parsed = JSON.parse(data.response);
+          if (parsed.response) {
+            parsedResponse = parsed.response;
+            logger.debug('Parsed outer JSON response:', { parsedResponse }, 'AIChatBot');
+          }
+        }
+      } catch (e) {
+        logger.debug('Response is not in JSON format', { error: e }, 'AIChatBot');
+      }
+
       const messageIndex = messages.length;
       const aiMessage = {
         role: 'assistant' as const,
-        content: parsedContent || 'I apologize, but I received an empty response. Please try again.',
+        content: parsedResponse,
         timestamp: new Date()
       };
+      logger.debug('Storing message:', { content: aiMessage.content }, 'AIChatBot');
       setMessages((prev: Message[]) => [...prev, aiMessage]);
 
       // Auto-play TTS if enabled and not in admin mode
-      if (isTTSEnabled && !isAdminMode && parsedContent) {
-        logger.debug('Auto-playing TTS response', { messageIndex }, 'AIChatBot');
+      if (isTTSEnabled && !isAdminMode && parsedResponse) {
+        logger.debug('Auto-playing TTS response:', { 
+          messageIndex,
+          text: stripMarkdown(parsedResponse)
+        }, 'AIChatBot');
         setTimeout(() => {
-          handlePlayback(messageIndex, stripMarkdown(parsedContent));
-        }, 100); // Small delay to ensure message is rendered
+          handlePlayback(messageIndex, stripMarkdown(parsedResponse));
+        }, 100);
       }
     } catch (error) {
       logger.error('Message send error', { error, messageText }, 'AIChatBot');

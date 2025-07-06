@@ -49,17 +49,7 @@ const stripMarkdown = (text: string): string => {
 };
 
 const parseJsonResponse = (text: string): string => {
-  try {
-    if (text.trim().startsWith('{') && text.trim().endsWith('}')) {
-      const parsed = JSON.parse(text);
-      if (parsed.response) {
-        return parsed.response;
-      }
-    }
-  } catch (e) {
-    console.debug('Not a JSON response');
-  }
-  return text;
+  return text || '';
 };
 
 const MarkdownMessage: React.FC<MarkdownMessageProps> = ({

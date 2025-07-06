@@ -107,10 +107,20 @@ export class StreamingAudioService {
 
       if (!response.ok) throw new Error('TTS request failed');
 
-      const audioData = await this.audioContext.decodeAudioData(
-        await response.arrayBuffer()
-      );
-
+      // Parse the JSON response and get the base64 audio data
+      const data = await response.json();
+      const base64Data = data.audioData;
+      
+      // Convert base64 to array buffer
+      const binaryString = window.atob(base64Data);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      // Decode the audio data
+      const audioData = await this.audioContext.decodeAudioData(bytes.buffer);
       this.playAudioBuffer(audioData);
     } catch (error) {
       navigationLogger.error('Text playback error', error);

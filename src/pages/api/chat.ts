@@ -333,8 +333,9 @@ export default async function handler(
 
     // Create a run with the appropriate assistant
     const run = await openai.beta.threads.runs.create(thread.id, {
-        assistant_id: assistantId,
-      tools: TOOLS
+      assistant_id: assistantId,
+      tools: TOOLS,
+      instructions: "You are a helpful Marriott Hotels concierge. Provide direct responses without any JSON formatting."
     });
 
     // Poll for completion
@@ -352,10 +353,25 @@ export default async function handler(
         });
         const lastMessage = messages.data[0];
         const textContent = lastMessage.content[0] as OpenAI.Beta.Threads.Messages.TextContentBlock;
-        response = textContent.text.value;
+        
+        // Extract the actual message from OpenAI's response
+        let messageText = textContent.text.value;
+        try {
+          // OpenAI might return JSON response due to response_format setting
+          const parsed = JSON.parse(messageText);
+          if (parsed.response) {
+            messageText = parsed.response;
+          }
+        } catch (e) {
+          // If not JSON, use the text as is
+          console.log('Response is not JSON:', messageText);
+        }
+        
+        response = messageText;
         break;
       } else if (runStatus.status === 'requires_action') {
         response = await handleToolCalls(openai, runStatus, thread.id);
+        console.log('Tool Call Response:', response);
       } else if (
         runStatus.status === 'failed' ||
         runStatus.status === 'cancelled' ||
@@ -368,6 +384,7 @@ export default async function handler(
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
+    // Return the clean response
     return res.status(200).json({
       response,
       threadId: thread.id
