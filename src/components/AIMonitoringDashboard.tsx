@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Activity,
   AlertTriangle,
@@ -42,41 +42,55 @@ interface MetricCard {
 
 interface AIMonitoringDashboardProps {
   timeRange: string;
+  metrics: {
+    system: {
+      cpu: number;
+      memory: number;
+      latency: number;
+      errorRate: number;
+    };
+    user: {
+      totalUsers: number;
+      activeUsers: number;
+      sessionDuration: number;
+    };
+    business: {
+      bookings: number;
+      revenue: number;
+      conversionRate: number;
+    };
+  } | null;
 }
-
-const MetricCard: React.FC<{ metric: MetricCard }> = ({ metric }) => (
-  <div className="bg-white rounded-lg shadow p-6">
-    <div className="flex items-center justify-between">
-      <div className="flex items-center">
-        <div className="p-2 bg-blue-100 rounded-lg">
-          {metric.icon}
-        </div>
-        <h3 className="ml-3 text-sm font-medium text-gray-900">{metric.title}</h3>
-      </div>
-      {metric.trend && (
-        <div className={`flex items-center ${metric.trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-          <span className="text-sm font-medium">{metric.trend.value}%</span>
-        </div>
-      )}
-    </div>
-    <p className="mt-4 text-2xl font-semibold text-gray-900">{metric.value}</p>
-  </div>
-);
 
 const SystemHealthIndicator: React.FC<{ health: SystemHealth }> = ({ health }) => (
   <div className="bg-white rounded-lg shadow p-6">
     <h3 className="text-sm font-medium text-gray-900">System Health</h3>
-    <div className="mt-4 flex items-center">
-      <div className={`p-2 rounded-full ${
-        health.status === 'healthy' ? 'bg-green-100' :
-        health.status === 'warning' ? 'bg-yellow-100' : 'bg-red-100'
-      }`}>
-        <Shield className={`h-5 w-5 ${
-          health.status === 'healthy' ? 'text-green-600' :
-          health.status === 'warning' ? 'text-yellow-600' : 'text-red-600'
-            }`} />
-          </div>
-      <span className="ml-3 text-sm font-medium text-gray-900">{health.message}</span>
+    <div className={`mt-4 p-4 rounded-lg ${
+      health.status === 'healthy' ? 'bg-green-50' :
+      health.status === 'warning' ? 'bg-yellow-50' :
+      'bg-red-50'
+    }`}>
+      <div className="flex items-center">
+        <div className={`rounded-full p-2 ${
+          health.status === 'healthy' ? 'bg-green-100 text-green-600' :
+          health.status === 'warning' ? 'bg-yellow-100 text-yellow-600' :
+          'bg-red-100 text-red-600'
+        }`}>
+          {health.status === 'healthy' ? <Shield className="h-5 w-5" /> :
+           health.status === 'warning' ? <AlertTriangle className="h-5 w-5" /> :
+           <AlertTriangle className="h-5 w-5" />}
+        </div>
+        <div className="ml-3">
+          <h3 className={`text-sm font-medium ${
+            health.status === 'healthy' ? 'text-green-800' :
+            health.status === 'warning' ? 'text-yellow-800' :
+            'text-red-800'
+          }`}>
+            {health.status.charAt(0).toUpperCase() + health.status.slice(1)}
+          </h3>
+          <p className="text-sm text-gray-500">{health.message}</p>
+        </div>
+      </div>
     </div>
   </div>
 );
@@ -101,13 +115,72 @@ const ModelPerformance: React.FC<{ metrics: ModelMetrics[] }> = ({ metrics }) =>
   </div>
 );
 
-const AIMonitoringDashboard: React.FC<AIMonitoringDashboardProps> = ({ timeRange }) => {
-  const [systemHealth, setSystemHealth] = useState<SystemHealth>({
-    status: 'healthy',
-    message: 'All systems operational'
-  });
+const AIMonitoringDashboard: React.FC<AIMonitoringDashboardProps> = ({ timeRange, metrics }) => {
+  // Calculate system health based on metrics
+  const calculateSystemHealth = (): SystemHealth => {
+    if (!metrics) {
+      return {
+        status: 'warning',
+        message: 'No metrics available'
+      };
+    }
 
-  const [modelMetrics, setModelMetrics] = useState<ModelMetrics[]>([
+    if (metrics.system.errorRate > 5 || metrics.system.cpu > 90 || metrics.system.latency > 2) {
+      return {
+        status: 'critical',
+        message: 'Critical system issues detected'
+      };
+    }
+
+    if (metrics.system.errorRate > 1 || metrics.system.cpu > 70 || metrics.system.latency > 1) {
+      return {
+        status: 'warning',
+        message: 'Performance degradation detected'
+      };
+    }
+
+    return {
+      status: 'healthy',
+      message: 'All systems operational'
+    };
+  };
+
+  // Transform metrics into cards
+  const getMetricCards = (): MetricCard[] => {
+    if (!metrics) return [];
+
+    return [
+      {
+        title: 'Total Requests',
+        value: metrics.user.totalUsers.toLocaleString(),
+        icon: <Activity className="h-5 w-5 text-blue-600" />,
+        trend: { value: 12, isPositive: true }
+      },
+      {
+        title: 'Average Latency',
+        value: `${metrics.system.latency.toFixed(2)}s`,
+        icon: <Clock className="h-5 w-5 text-blue-600" />,
+        trend: { value: 8, isPositive: false }
+      },
+      {
+        title: 'Error Rate',
+        value: `${metrics.system.errorRate.toFixed(2)}%`,
+        icon: <AlertTriangle className="h-5 w-5 text-blue-600" />,
+        trend: { value: 5, isPositive: true }
+      },
+      {
+        title: 'CPU Usage',
+        value: `${metrics.system.cpu.toFixed(1)}%`,
+        icon: <Cpu className="h-5 w-5 text-blue-600" />
+      }
+    ];
+  };
+
+  const systemHealth = calculateSystemHealth();
+  const metricCards = getMetricCards();
+
+  // Mock model metrics (this would come from your AI monitoring system)
+  const modelMetrics: ModelMetrics[] = [
     {
       name: 'Text Classification',
       accuracy: 95.5,
@@ -126,43 +199,7 @@ const AIMonitoringDashboard: React.FC<AIMonitoringDashboardProps> = ({ timeRange
       latency: 90,
       requests: 680
     }
-  ]);
-
-  const metrics: MetricCard[] = [
-    {
-      title: 'Total Requests',
-      value: '2.5M',
-      icon: <Activity className="h-5 w-5 text-blue-600" />,
-      trend: { value: 12, isPositive: true }
-    },
-    {
-      title: 'Average Latency',
-      value: '145ms',
-      icon: <Clock className="h-5 w-5 text-blue-600" />,
-      trend: { value: 8, isPositive: false }
-    },
-    {
-      title: 'Error Rate',
-      value: '0.12%',
-      icon: <AlertTriangle className="h-5 w-5 text-blue-600" />,
-      trend: { value: 5, isPositive: true }
-    },
-    {
-      title: 'CPU Usage',
-      value: '78%',
-      icon: <Cpu className="h-5 w-5 text-blue-600" />
-    }
   ];
-
-  useEffect(() => {
-    // Simulated data fetching
-    const fetchData = () => {
-      // Update metrics periodically
-    };
-
-    const interval = setInterval(fetchData, 30000);
-    return () => clearInterval(interval);
-  }, [timeRange]);
 
   return (
     <div className="p-6">
@@ -172,8 +209,25 @@ const AIMonitoringDashboard: React.FC<AIMonitoringDashboardProps> = ({ timeRange
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {metrics.map((metric, index) => (
-          <MetricCard key={index} metric={metric} />
+        {metricCards.map((metric, index) => (
+          <div key={index} className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center">
+                <div className="w-8 h-8 rounded-lg bg-[#8B1538] bg-opacity-10 text-[#8B1538] flex items-center justify-center mr-3">
+                  {metric.icon}
+                </div>
+                <h3 className="text-sm text-gray-600">{metric.title}</h3>
+              </div>
+              {metric.trend && (
+                <span className={`flex items-center text-sm ${
+                  metric.trend.isPositive ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {metric.trend.isPositive ? '+' : '-'}{metric.trend.value}%
+                </span>
+              )}
+            </div>
+            <p className="text-2xl font-semibold">{metric.value}</p>
+          </div>
         ))}
       </div>
 

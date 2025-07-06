@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { trpc } from './utils/trpc';
@@ -26,6 +26,8 @@ import DocsPage from './pages/DocsPage';
 import AccountSettings from './pages/AccountSettings';
 import TourController from './components/TourController';
 import AdminApp from './pages/admin';
+import { initializeAnalytics } from './lib/frontendMetrics';
+import { logger } from './lib/browserLogger';
 
 // Wrapper component to handle conditional rendering of TourController
 const TourControllerWrapper = () => {
@@ -40,6 +42,16 @@ const TourControllerWrapper = () => {
 };
 
 const App: React.FC = () => {
+  useEffect(() => {
+    // Initialize analytics and monitoring
+    try {
+      initializeAnalytics();
+      logger.info('Analytics initialized successfully');
+    } catch (error) {
+      logger.error('Failed to initialize analytics', error as Error);
+    }
+  }, []);
+
   return (
     <AuthProvider>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>

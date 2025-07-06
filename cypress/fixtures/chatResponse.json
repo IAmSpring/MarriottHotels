@@ -1,0 +1,14 @@
+{
+  "response": "Here are some beachfront hotels in Miami:\n\n1. Marriott Miami Beach Resort\n- Direct beach access\n- Ocean view rooms\n- Beachfront dining\n\n2. JW Marriott Miami Beach\n- Private beach area\n- Oceanfront pool\n- Luxury spa\n\nWould you like more details about any of these properties?",
+  "threadId": "mock-thread-123",
+  "suggestions": [
+    {
+      "text": "View Marriott Miami Beach Resort",
+      "link": "/hotels/marriott-miami-beach"
+    },
+    {
+      "text": "View JW Marriott Miami Beach",
+      "link": "/hotels/jw-marriott-miami-beach"
+    }
+  ]
+} 

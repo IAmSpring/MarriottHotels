@@ -1,6 +1,8 @@
+/// <reference types="vite/client" />
+
 import OpenAI from 'openai';
 import type { Thread } from 'openai/resources/beta/threads/threads';
-import { logger } from '../utils/logger';
+import { logger } from '../server/logger';
 
 // Singleton pattern for OpenAI client
 let openaiInstance: OpenAI | null = null;

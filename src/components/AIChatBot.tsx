@@ -9,7 +9,7 @@ import { isStaticBuild, getStaticResponse } from '../lib/openai';
 import { fetchApi, handleApiError } from '../lib/staticApi';
 import { StreamingAudioService } from '../utils/streamingAudioService';
 import { navigationLogger } from '../utils/navigationLogger';
-import { logger } from '../utils/logger';
+import { logger } from '../lib/browserLogger';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 

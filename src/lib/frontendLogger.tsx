@@ -1,5 +1,4 @@
 import React from 'react';
-import { navigationLogger } from './navigationLogger';
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
@@ -11,22 +10,24 @@ interface LogEntry {
   component?: string;
 }
 
-class Logger {
-  private static instance: Logger;
+class BrowserLogger {
+  private static instance: BrowserLogger;
   private logs: LogEntry[] = [];
   private maxLogs: number = 1000;
   private debugMode: boolean = process.env.NODE_ENV === 'development';
 
   private constructor() {
-    window.addEventListener('error', this.handleGlobalError.bind(this));
-    window.addEventListener('unhandledrejection', this.handlePromiseRejection.bind(this));
+    if (typeof window !== 'undefined') {
+      window.addEventListener('error', this.handleGlobalError.bind(this));
+      window.addEventListener('unhandledrejection', this.handlePromiseRejection.bind(this));
+    }
   }
 
-  static getInstance(): Logger {
-    if (!Logger.instance) {
-      Logger.instance = new Logger();
+  static getInstance(): BrowserLogger {
+    if (!BrowserLogger.instance) {
+      BrowserLogger.instance = new BrowserLogger();
     }
-    return Logger.instance;
+    return BrowserLogger.instance;
   }
 
   private handleGlobalError(event: ErrorEvent) {
@@ -118,7 +119,7 @@ class Logger {
   }
 }
 
-export const logger = Logger.getInstance();
+export const logger = BrowserLogger.getInstance();
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -147,7 +148,7 @@ export const withErrorLogging = (WrappedComponent: React.ComponentType<any>) => 
       }, WrappedComponent.displayName || WrappedComponent.name);
     }
 
-    render(): JSX.Element {
+    render() {
       if (this.state.hasError) {
         return <div>Something went wrong. Please try again.</div>;
       }

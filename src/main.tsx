@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
@@ -244,9 +244,12 @@ const root = document.getElementById('root')!;
 root.style.opacity = '0';
 root.style.transition = 'opacity 1s cubic-bezier(0.4, 0, 0.2, 1)';
 
+// Create React root before the timeout
+const reactRoot = createRoot(root);
+
 // Delay the app render to ensure loading screen is visible
 setTimeout(() => {
-  createRoot(root).render(
+  reactRoot.render(
     <StrictMode>
       <BrowserRouter basename="/MarriottHotels">
         <AuthProvider>
@@ -255,7 +258,6 @@ setTimeout(() => {
       </BrowserRouter>
     </StrictMode>
   );
-
   // Add extra delay before starting exit sequence
   setTimeout(() => {
     // Prepare card for exit
@@ -275,3 +277,4 @@ setTimeout(() => {
     }, 800);
   }, 2500);
 }, 1000); // Increased initial delay to 1000ms
+

@@ -1,0 +1,47 @@
+{
+  "hotels": [
+    {
+      "id": "mia-beach-01",
+      "name": "Marriott Miami Beach Resort",
+      "location": "Miami Beach, FL",
+      "rating": 4.5,
+      "price": 299,
+      "currency": "USD",
+      "images": [
+        "/images/miami-beach.jpg"
+      ],
+      "amenities": [
+        "Beach Access",
+        "Pool",
+        "Spa",
+        "Restaurant"
+      ],
+      "available": true
+    },
+    {
+      "id": "mia-beach-02",
+      "name": "JW Marriott Miami Beach",
+      "location": "Miami Beach, FL",
+      "rating": 4.8,
+      "price": 399,
+      "currency": "USD",
+      "images": [
+        "/images/jw-miami.jpg"
+      ],
+      "amenities": [
+        "Private Beach",
+        "Infinity Pool",
+        "Luxury Spa",
+        "Fine Dining"
+      ],
+      "available": true
+    }
+  ],
+  "total": 2,
+  "filters": {
+    "location": "Miami Beach",
+    "checkIn": "2025-08-01",
+    "checkOut": "2025-08-05",
+    "guests": 2
+  }
+} 

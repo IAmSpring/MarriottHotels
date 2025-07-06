@@ -4,11 +4,10 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import styles from './HeroSection.module.css';
 import OptimizedImage from './OptimizedImage';
+import { logger } from '../lib/browserLogger';
 
-console.log('HeroSection.tsx: Starting to render');
-
-const HeroSection: React.FC = () => {
-  console.log('HeroSection.tsx: Inside component');
+export const HeroSection = () => {
+  logger.info('HeroSection.tsx: Starting to render');
   const [checkIn, setCheckIn] = useState<Date | null>(null);
   const [checkOut, setCheckOut] = useState<Date | null>(null);
   const [guests, setGuests] = useState(2);

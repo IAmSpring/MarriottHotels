@@ -1,39 +1,38 @@
-import React, { useState } from 'react';
-import {
-  Activity,
-  RefreshCw,
-  Settings,
-  Clock,
-  Filter,
-  Download
-} from 'lucide-react';
-import LangGraphFlow from '../../../components/LangGraphFlow';
+import React, { useState, useEffect } from 'react';
+import { Filter, Download, RefreshCw, Settings, Clock } from 'lucide-react';
 import AIMonitoringDashboard from '../../../components/AIMonitoringDashboard';
-
-const TimeRangeSelector: React.FC<{
-  range: string;
-  setRange: (range: string) => void;
-}> = ({ range, setRange }) => (
-  <div className="flex space-x-2">
-    {['1h', '6h', '24h', '7d', '30d'].map((timeRange) => (
-      <button
-        key={timeRange}
-        onClick={() => setRange(timeRange)}
-        className={`px-3 py-1 rounded-md text-sm ${
-          range === timeRange
-            ? 'bg-[#8B1538] text-white'
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-        }`}
-      >
-        {timeRange}
-      </button>
-    ))}
-  </div>
-);
+import LangGraphFlow from '../../../components/LangGraphFlow';
+import { monitoringService } from '../../../services/monitoringService';
+import { logger } from '../../../lib/browserLogger';
 
 const MonitoringPage: React.FC = () => {
   const [timeRange, setTimeRange] = useState('24h');
   const [activeView, setActiveView] = useState<'dashboard' | 'workflow'>('dashboard');
+  const [metrics, setMetrics] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchMetrics = async () => {
+    try {
+      setLoading(true);
+      const data = await monitoringService.getRealTimeMetrics();
+      setMetrics(data);
+      setError(null);
+    } catch (err) {
+      const errorMessage = (err as Error).message;
+      setError(errorMessage);
+      logger.error('Failed to fetch monitoring metrics', err as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMetrics();
+    // Set up polling interval
+    const interval = setInterval(fetchMetrics, 30000); // 30 seconds
+    return () => clearInterval(interval);
+  }, [timeRange]);
 
   return (
     <div className="space-y-6">
@@ -52,8 +51,12 @@ const MonitoringPage: React.FC = () => {
             <Download className="w-5 h-5 mr-2" />
             Export
           </button>
-          <button className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-            <RefreshCw className="w-5 h-5 mr-2" />
+          <button 
+            className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            onClick={fetchMetrics}
+            disabled={loading}
+          >
+            <RefreshCw className={`w-5 h-5 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
           <button className="flex items-center px-4 py-2 bg-[#8B1538] text-white rounded-lg hover:bg-[#6d102c]">
@@ -62,6 +65,13 @@ const MonitoringPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Error: </strong>
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
 
       <div className="flex space-x-2 mb-6">
         <button
@@ -87,7 +97,17 @@ const MonitoringPage: React.FC = () => {
       </div>
 
       {activeView === 'dashboard' ? (
-        <AIMonitoringDashboard timeRange={timeRange} />
+        <div className="relative">
+          {loading && (
+            <div className="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B1538]"></div>
+            </div>
+          )}
+          <AIMonitoringDashboard 
+            timeRange={timeRange} 
+            metrics={metrics}
+          />
+        </div>
       ) : (
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-4">
@@ -101,6 +121,34 @@ const MonitoringPage: React.FC = () => {
         </div>
       )}
     </div>
+  );
+};
+
+interface TimeRangeSelectorProps {
+  range: string;
+  setRange: (range: string) => void;
+}
+
+const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({ range, setRange }) => {
+  const ranges = [
+    { value: '1h', label: 'Last Hour' },
+    { value: '24h', label: 'Last 24 Hours' },
+    { value: '7d', label: 'Last 7 Days' },
+    { value: '30d', label: 'Last 30 Days' }
+  ];
+
+  return (
+    <select
+      value={range}
+      onChange={(e) => setRange(e.target.value)}
+      className="border border-gray-300 rounded-lg px-4 py-2 bg-white"
+    >
+      {ranges.map((r) => (
+        <option key={r.value} value={r.value}>
+          {r.label}
+        </option>
+      ))}
+    </select>
   );
 };
 

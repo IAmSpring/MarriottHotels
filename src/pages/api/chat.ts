@@ -12,9 +12,9 @@ import {
   checkTransportation
 } from '../../lib/assistantTools';
 import OpenAI from 'openai';
-import { logger } from '../../utils/logger';
+import { logger } from '../../server/logger';
 import { Run } from 'openai/resources/beta/threads/runs';
-import { MessageContentText } from 'openai/resources/beta/threads/messages';
+import { TextContentBlock } from 'openai/resources/beta/threads/messages';
 
 const prisma = new PrismaClient();
 
@@ -198,54 +198,79 @@ const TOOLS = [
   }
 ];
 
-async function handleToolCalls(openai: OpenAI, toolCalls: any[], threadId: string, runId: string) {
-  const toolOutputs = [];
+async function handleToolCalls(openai: OpenAI, run: Run, threadId: string) {
+  const toolCalls = run.required_action?.submit_tool_outputs.tool_calls;
+  if (!toolCalls) return '';
 
-  for (const toolCall of toolCalls) {
-    const { name, arguments: args } = toolCall.function;
-    let output;
+  const toolOutputs = await Promise.all(
+    toolCalls.map(async (toolCall) => {
+      const { function: func, id } = toolCall;
+      let output = '';
 
-    try {
-      switch (name) {
-        case 'search_hotels':
-          output = await searchHotels(JSON.parse(args));
-          break;
-        case 'get_hotel_details':
-          output = await getHotelDetails(JSON.parse(args));
-          break;
-        case 'check_availability':
-          output = await checkAvailability(JSON.parse(args));
-          break;
-        case 'get_local_attractions':
-          output = await getLocalAttractions(JSON.parse(args));
-          break;
-        case 'get_dining_options':
-          output = await getDiningOptions(JSON.parse(args));
-          break;
-        case 'get_bonvoy_info':
-          output = await getBonvoyInfo(JSON.parse(args));
-          break;
-        case 'check_transportation':
-          output = await checkTransportation(JSON.parse(args));
-          break;
-        default:
-          logger.warn(`Unknown tool called: ${name}`);
-          output = { error: 'Tool not implemented' };
+      try {
+        const args = JSON.parse(func.arguments);
+        switch (func.name) {
+          case 'search_hotels':
+            output = JSON.stringify(await searchHotels(args));
+            break;
+          case 'get_hotel_details':
+            output = JSON.stringify(await getHotelDetails(args));
+            break;
+          case 'check_availability':
+            output = JSON.stringify(await checkAvailability(args));
+            break;
+          case 'get_local_attractions':
+            output = JSON.stringify(await getLocalAttractions(args));
+            break;
+          case 'get_dining_options':
+            output = JSON.stringify(await getDiningOptions(args));
+            break;
+          case 'get_bonvoy_info':
+            output = JSON.stringify(await getBonvoyInfo(args));
+            break;
+          case 'check_transportation':
+            output = JSON.stringify(await checkTransportation(args));
+            break;
+          default:
+            logger.warn(`Unknown tool called: ${func.name}`);
+            output = JSON.stringify({ error: 'Tool not implemented' });
+        }
+      } catch (error) {
+        logger.error(`Error executing tool ${func.name}:`, error);
+        output = JSON.stringify({ error: 'Tool execution failed' });
       }
-    } catch (error) {
-      logger.error(`Tool execution error: ${name}`, error);
-      output = { error: 'Tool execution failed' };
-    }
 
-    toolOutputs.push({
-      tool_call_id: toolCall.id,
-      output: JSON.stringify(output)
-    });
-  }
+      return {
+        tool_call_id: id,
+        output
+      };
+    })
+  );
 
-  await openai.beta.threads.runs.submitToolOutputs(runId, {
+  // Submit tool outputs with thread_id
+  await openai.beta.threads.runs.submitToolOutputs(run.id, {
+    thread_id: threadId,
     tool_outputs: toolOutputs
   });
+
+  // Retrieve updated run with proper params
+  const updatedRun = await openai.beta.threads.runs.retrieve(run.id, {
+    thread_id: threadId
+  });
+
+  // Get messages with type guard for text content
+  const messages = await openai.beta.threads.messages.list(threadId, {
+    limit: 1,
+    order: 'desc'
+  });
+  const lastMessage = messages.data[0];
+  
+  const textContent = lastMessage.content.find(
+    (content): content is OpenAI.Beta.Threads.Messages.TextContentBlock => 
+    content.type === 'text'
+  );
+
+  return textContent?.text?.value || '';
 }
 
 interface ChatRequest {
@@ -308,23 +333,29 @@ export default async function handler(
 
     // Create a run with the appropriate assistant
     const run = await openai.beta.threads.runs.create(thread.id, {
-      assistant_id: assistantId,
+        assistant_id: assistantId,
       tools: TOOLS
     });
 
     // Poll for completion
     let response = '';
     while (true) {
-      const runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+      // Retrieve run status
+      const runStatus = await openai.beta.threads.runs.retrieve(run.id, {
+        thread_id: thread.id
+      });
 
       if (runStatus.status === 'completed') {
-        const messages = await openai.beta.threads.messages.list(thread.id);
+        const messages = await openai.beta.threads.messages.list(thread.id, {
+          limit: 1,
+          order: 'desc'
+        });
         const lastMessage = messages.data[0];
-        const textContent = lastMessage.content[0] as MessageContentText;
+        const textContent = lastMessage.content[0] as OpenAI.Beta.Threads.Messages.TextContentBlock;
         response = textContent.text.value;
         break;
       } else if (runStatus.status === 'requires_action') {
-        await handleToolCalls(openai, runStatus.required_action!.submit_tool_outputs.tool_calls, thread.id, run.id);
+        response = await handleToolCalls(openai, runStatus, thread.id);
       } else if (
         runStatus.status === 'failed' ||
         runStatus.status === 'cancelled' ||
