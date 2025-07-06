@@ -191,8 +191,8 @@ async function main() {
         threadId,
         env: {
           OPENAI_API_KEY: process.env.OPENAI_API_KEY ? 'set' : 'not set',
-          AI_ASSISTANT_ID: process.env.AI_ASSISTANT_ID,
-          AI_ADMIN_ID: process.env.AI_ADMIN_ID,
+          AI_ASSISTANT_ID: process.env.AI_ASSISTANT_ID || process.env.VITE_AI_ASSISTANT_ID,
+          AI_ADMIN_ID: process.env.AI_ADMIN_ID || process.env.VITE_AI_ADMIN_ID,
         }
       });
       
@@ -206,11 +206,15 @@ async function main() {
         return res.status(503).json({ error: 'OpenAI service not available' });
       }
 
+      // Try both sets of environment variables
+      process.env.AI_ASSISTANT_ID = process.env.AI_ASSISTANT_ID || process.env.VITE_AI_ASSISTANT_ID;
+      process.env.AI_ADMIN_ID = process.env.AI_ADMIN_ID || process.env.VITE_AI_ADMIN_ID;
+
       const config = openaiModule.getOpenAIConfig();
       logger.info('OpenAI config:', {
         hasApiKey: !!config.apiKey,
-        assistantId: config.assistantId,
-        adminId: config.adminId
+        hasAssistantId: !!config.assistantId,
+        hasAdminId: !!config.adminId
       });
 
       if (!config.apiKey) {

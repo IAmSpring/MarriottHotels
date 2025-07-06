@@ -1,5 +1,6 @@
-// This is a barrel file that exports the appropriate logger based on the environment
-let logger;
+import type { Logger } from './browserLogger';
+
+let logger: Logger;
 
 // Check if we're in a browser environment
 if (typeof window !== 'undefined') {
@@ -8,23 +9,8 @@ if (typeof window !== 'undefined') {
   logger = browserLogger;
 } else {
   // Node.js environment - use server logger
-  const winston = await import('winston');
-  
-  logger = winston.createLogger({
-    level: process.env.LOG_LEVEL || 'info',
-    format: winston.format.combine(
-      winston.format.timestamp(),
-      winston.format.json()
-    ),
-    transports: [
-      new winston.transports.Console({
-        format: winston.format.combine(
-          winston.format.colorize(),
-          winston.format.simple()
-        )
-      })
-    ]
-  });
+  const { logger: serverLogger } = await import('./serverLogger');
+  logger = serverLogger;
 }
 
-export { logger }; 
+export { logger, type Logger }; 

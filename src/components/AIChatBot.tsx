@@ -103,6 +103,21 @@ const MIN_CONFIDENCE_THRESHOLD = 0.7; // Minimum confidence for transcription
 const MIN_WORDS_THRESHOLD = 3; // Minimum words for a valid input
 const MAX_SILENCE_DURATION = 1500; // Max silence duration in ms
 
+const parseResponse = (text: string): string => {
+  if (!text) return '';
+  try {
+    if (text.trim().startsWith('{') && text.trim().endsWith('}')) {
+      const parsed = JSON.parse(text);
+      if (parsed.response) {
+        return parsed.response;
+      }
+    }
+  } catch (e) {
+    console.debug('Not a JSON response');
+  }
+  return text;
+};
+
 const AIChatBot: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -126,14 +141,16 @@ const AIChatBot: React.FC = () => {
     return localStorage.getItem('hasSeenContinuousModal') === 'true';
   });
   const [isAdminMode, setIsAdminMode] = useState(false);
-  const [currentAssistantId, setCurrentAssistantId] = useState<string>(import.meta.env.VITE_AI_ASSISTANT_ID);
+  const [currentAssistantId, setCurrentAssistantId] = useState<string>(
+    import.meta.env.VITE_AI_ASSISTANT_ID || process.env.NEXT_PUBLIC_AI_ASSISTANT_ID
+  );
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Reset admin mode when user is not admin
   useEffect(() => {
     if (!isAdmin()) {
       setIsAdminMode(false);
-      setCurrentAssistantId(import.meta.env.VITE_AI_ASSISTANT_ID);
+      setCurrentAssistantId(import.meta.env.VITE_AI_ASSISTANT_ID || process.env.NEXT_PUBLIC_AI_ASSISTANT_ID);
     }
   }, [isAdmin]);
 
@@ -244,7 +261,7 @@ const AIChatBot: React.FC = () => {
 
   const handleSend = async (text?: string) => {
     const messageText = text || inputText;
-    if (!messageText.trim() || isLoading) return;
+    if (!messageText?.trim() || isLoading) return;
 
     // Check for tour command first
     if (isTourCommand(messageText)) {
@@ -253,9 +270,19 @@ const AIChatBot: React.FC = () => {
       setMessages((prev: Message[]) => [...prev, {
         role: 'user',
         content: messageText,
-      timestamp: new Date()
+        timestamp: new Date()
       }]);
       startGuidedTour();
+      return;
+    }
+
+    if (!currentAssistantId) {
+      logger.error('No assistant ID configured', null, 'AIChatBot');
+      setMessages((prev: Message[]) => [...prev, {
+        role: 'assistant',
+        content: 'I apologize, but I am not properly configured. Please contact support.',
+        timestamp: new Date()
+      }]);
       return;
     }
 
@@ -288,30 +315,32 @@ const AIChatBot: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send message');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to send message');
       }
 
       const data = await response.json();
       logger.debug('Received response', { 
         threadId: data.threadId,
-        responseLength: data.response.length 
+        responseLength: data.response?.length 
       }, 'AIChatBot');
 
       setThreadId(data.threadId);
-
+      
+      const parsedContent = parseResponse(data.response);
       const messageIndex = messages.length;
       const aiMessage = {
         role: 'assistant' as const,
-        content: data.response,
+        content: parsedContent || 'I apologize, but I received an empty response. Please try again.',
         timestamp: new Date()
       };
       setMessages((prev: Message[]) => [...prev, aiMessage]);
 
       // Auto-play TTS if enabled and not in admin mode
-      if (isTTSEnabled && !isAdminMode) {
+      if (isTTSEnabled && !isAdminMode && parsedContent) {
         logger.debug('Auto-playing TTS response', { messageIndex }, 'AIChatBot');
         setTimeout(() => {
-          handlePlayback(messageIndex, stripMarkdown(data.response));
+          handlePlayback(messageIndex, stripMarkdown(parsedContent));
         }, 100); // Small delay to ensure message is rendered
       }
     } catch (error) {

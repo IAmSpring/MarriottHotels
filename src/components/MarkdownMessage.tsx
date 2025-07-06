@@ -48,6 +48,20 @@ const stripMarkdown = (text: string): string => {
     .trim();
 };
 
+const parseJsonResponse = (text: string): string => {
+  try {
+    if (text.trim().startsWith('{') && text.trim().endsWith('}')) {
+      const parsed = JSON.parse(text);
+      if (parsed.response) {
+        return parsed.response;
+      }
+    }
+  } catch (e) {
+    console.debug('Not a JSON response');
+  }
+  return text;
+};
+
 const MarkdownMessage: React.FC<MarkdownMessageProps> = ({
   text,
   isUser,
@@ -65,6 +79,9 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({
   const isCurrentMessage = audioState.messageId === messageId;
   const showControls = isCurrentMessage && !audioState.isLoading;
   const showLoader = isCurrentMessage && audioState.isLoading;
+
+  // Parse JSON responses for assistant messages
+  const displayText = isUser ? text : parseJsonResponse(text);
 
   return (
     <div className={`mb-4 ${isUser ? 'text-right' : 'text-left'}`}>
@@ -92,21 +109,23 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({
                 ),
                 code({ node, className, children, ...props }) {
                   const match = /language-(\w+)/.exec(className || '');
-                  const language = match ? match[1] : '';
-                  return match ? (
+                  if (!match) {
+                    return (
+                      <code className={className} {...props}>
+                        {children}
+                      </code>
+                    );
+                  }
+                  return (
                     <div style={{ margin: 0 }}>
                       <SyntaxHighlighter
-                        language={language}
+                        language={match[1]}
                         style={vscDarkPlus as any}
                         PreTag="div"
                       >
                         {String(children).replace(/\n$/, '')}
                       </SyntaxHighlighter>
                     </div>
-                  ) : (
-                    <code className={className} {...props}>
-                      {children}
-                    </code>
                   );
                 },
                 blockquote: ({ children }) => (
@@ -116,7 +135,7 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({
                 ),
               }}
             >
-              {text}
+              {displayText}
             </ReactMarkdown>
           </div>
           {!isUser && (
@@ -127,25 +146,25 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({
                 </div>
               ) : (
                 <div className="flex items-center space-x-1">
-              <button
-                onClick={handlePlayClick}
+                  <button
+                    onClick={handlePlayClick}
                     className="p-1.5 rounded-full hover:bg-gray-200 transition-colors"
                     title={isCurrentMessage && audioState.isPlaying ? "Pause" : "Play"}
-              >
+                  >
                     {isCurrentMessage && audioState.isPlaying ? (
                       <Pause className="w-5 h-5 text-gray-700" />
-                ) : (
+                    ) : (
                       <Play className="w-5 h-5 text-gray-700" />
-                )}
-              </button>
+                    )}
+                  </button>
                   {showControls && audioState.isPlaying && (
-                <button
-                  onClick={onStop}
+                    <button
+                      onClick={onStop}
                       className="p-1.5 rounded-full hover:bg-gray-200 transition-colors"
                       title="Stop"
-                >
+                    >
                       <Square className="w-5 h-5 text-gray-700" />
-                </button>
+                    </button>
                   )}
                 </div>
               )}

@@ -2,6 +2,16 @@ import React from 'react';
 import { Play, Pause, Square, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
+const parseJsonResponse = (text: string): string => {
+  try {
+    if (text.trim().startsWith('{') && text.trim().endsWith('}')) {
+      const parsed = JSON.parse(text);
+      if (parsed.response) return parsed.response;
+    }
+  } catch (e) {}
+  return text;
+};
+
 interface MessageBubbleProps {
   text: string;
   isUser: boolean;
@@ -28,6 +38,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   const isCurrentMessage = audioState.messageId === messageId;
   const showControls = !isUser && (isCurrentMessage || !audioState.messageId);
   const showLoader = !isUser && isCurrentMessage && audioState.isLoading;
+  const displayText = isUser ? text : parseJsonResponse(text);
 
   return (
     <div className={`mb-4 ${isUser ? 'text-right' : 'text-left'}`}>
@@ -40,7 +51,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-grow whitespace-pre-wrap">
-            <ReactMarkdown>{text}</ReactMarkdown>
+            <ReactMarkdown>{displayText}</ReactMarkdown>
           </div>
           {!isUser && (
             <div className="flex items-center space-x-2 ml-2">
@@ -51,7 +62,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
               ) : showControls && (
                 <div className="flex items-center space-x-1">
                   <button
-                    onClick={() => onPlayPause(messageId, text)}
+                    onClick={() => onPlayPause(messageId, displayText)}
                     className="p-1.5 rounded-full hover:bg-gray-200 transition-colors"
                     title={isCurrentMessage && audioState.isPlaying ? "Pause" : "Play"}
                   >

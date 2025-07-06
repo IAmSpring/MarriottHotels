@@ -87,20 +87,33 @@ export const getOpenAIConfig = (): OpenAIConfig => {
     };
   }
 
-  // In the browser, use import.meta.env
+  let apiKey, assistantId, adminId;
+
+  // Try both sets of environment variables in both environments
   if (typeof window !== 'undefined') {
-    return {
-      apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-      assistantId: import.meta.env.VITE_AI_ASSISTANT_ID,
-      adminId: import.meta.env.VITE_AI_ADMIN_ID
-    };
+    // Browser environment
+    apiKey = import.meta.env.VITE_OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+    assistantId = import.meta.env.VITE_AI_ASSISTANT_ID || process.env.NEXT_PUBLIC_AI_ASSISTANT_ID;
+    adminId = import.meta.env.VITE_AI_ADMIN_ID || process.env.NEXT_PUBLIC_AI_ADMIN_ID;
+  } else {
+    // Server environment - try both standard and VITE_ prefixed variables
+    apiKey = process.env.OPENAI_API_KEY;
+    assistantId = process.env.AI_ASSISTANT_ID || process.env.VITE_AI_ASSISTANT_ID;
+    adminId = process.env.AI_ADMIN_ID || process.env.VITE_AI_ADMIN_ID;
   }
-  
-  // On the server, use process.env
+
+  // Log configuration status (without exposing sensitive values)
+  logger.info('OpenAI config:', {
+    hasApiKey: !!apiKey,
+    hasAssistantId: !!assistantId,
+    hasAdminId: !!adminId,
+    environment: typeof window !== 'undefined' ? 'browser' : 'server'
+  });
+
   return {
-    apiKey: process.env.OPENAI_API_KEY,
-    assistantId: process.env.AI_ASSISTANT_ID,
-    adminId: process.env.AI_ADMIN_ID
+    apiKey,
+    assistantId,
+    adminId
   };
 };
 
@@ -113,6 +126,7 @@ export const getOpenAIClient = (apiKey?: string): OpenAI => {
     }
     
     if (!apiKey && !isStaticBuild()) {
+      logger.error('OpenAI API key is missing');
       throw new Error('OpenAI API key is required');
     }
 
@@ -120,6 +134,8 @@ export const getOpenAIClient = (apiKey?: string): OpenAI => {
       apiKey: apiKey || 'dummy-key-for-static-build',
       dangerouslyAllowBrowser: typeof window !== 'undefined'
     });
+
+    logger.info('OpenAI client initialized');
   }
   return openaiInstance;
 };

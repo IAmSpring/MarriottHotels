@@ -28,6 +28,8 @@ import TourController from './components/TourController';
 import AdminApp from './pages/admin';
 import { initializeAnalytics } from './lib/frontendMetrics';
 import { logger } from './lib/browserLogger';
+import { ApolloProvider } from '@apollo/client';
+import { apolloClient } from './lib/apollo';
 
 // Wrapper component to handle conditional rendering of TourController
 const TourControllerWrapper = () => {
@@ -53,38 +55,40 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <AuthProvider>
-      <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <QueryClientProvider client={queryClient}>
-          <div className="min-h-screen bg-gray-50">
-            <Navbar />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/hotels" element={<HotelsPage />} />
-              <Route path="/hotels/:id" element={<HotelDetails />} />
-              <Route path="/deals" element={<DealsPage />} />
-              <Route path="/bookings" element={<BookingsPage />} />
-              <Route path="/account-settings" element={<AccountSettings />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/dining" element={<DiningPage />} />
-              <Route path="/dining/:id" element={<RestaurantDetails />} />
-              <Route path="/adventures" element={<AdventuresPage />} />
-              <Route path="/boutique" element={<BoutiquePage />} />
-              <Route path="/rewards" element={<RewardsPage />} />
-              <Route path="/experiences" element={<ExperiencesPage />} />
-              <Route path="/experiences/:id" element={<ExperienceDetails />} />
-              <Route path="/destinations" element={<DestinationsPage />} />
-              <Route path="/destinations/:id" element={<DestinationDetails />} />
-              <Route path="/app" element={<AppPage />} />
-              <Route path="/docs/*" element={<DocsPage />} />
-              <Route path="/admin/*" element={<AdminApp />} />
-            </Routes>
-            <TourControllerWrapper />
-            <AIChatBot />
-          </div>
-        </QueryClientProvider>
-      </trpc.Provider>
-    </AuthProvider>
+    <ApolloProvider client={apolloClient}>
+      <AuthProvider>
+        <trpc.Provider client={trpcClient} queryClient={queryClient}>
+          <QueryClientProvider client={queryClient}>
+            <div className="min-h-screen bg-gray-50">
+              <Navbar />
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/hotels" element={<HotelsPage />} />
+                <Route path="/hotels/:id" element={<HotelDetails />} />
+                <Route path="/deals" element={<DealsPage />} />
+                <Route path="/bookings" element={<BookingsPage />} />
+                <Route path="/account-settings" element={<AccountSettings />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/dining" element={<DiningPage />} />
+                <Route path="/dining/:id" element={<RestaurantDetails />} />
+                <Route path="/adventures" element={<AdventuresPage />} />
+                <Route path="/boutique" element={<BoutiquePage />} />
+                <Route path="/rewards" element={<RewardsPage />} />
+                <Route path="/experiences" element={<ExperiencesPage />} />
+                <Route path="/experiences/:id" element={<ExperienceDetails />} />
+                <Route path="/destinations" element={<DestinationsPage />} />
+                <Route path="/destinations/:id" element={<DestinationDetails />} />
+                <Route path="/app" element={<AppPage />} />
+                <Route path="/docs/*" element={<DocsPage />} />
+                <Route path="/admin/*" element={<AdminApp />} />
+              </Routes>
+              <TourControllerWrapper />
+              <AIChatBot />
+            </div>
+          </QueryClientProvider>
+        </trpc.Provider>
+      </AuthProvider>
+    </ApolloProvider>
   );
 };
 
