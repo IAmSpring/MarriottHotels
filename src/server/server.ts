@@ -372,6 +372,138 @@ async function main() {
     }
   });
 
+  // Check Coherence API endpoint
+  app.post('/api/check-coherence', async (req, res) => {
+    try {
+      logger.info('Check Coherence API request received');
+      
+      // Import the check-coherence handler
+      const { default: coherenceHandler } = await import('../pages/api/check-coherence');
+      
+      // Create a mock Next.js request and response
+      const mockReq = {
+        method: 'POST',
+        body: req.body,
+        query: {},
+        cookies: {},
+        env: {},
+        headers: {},
+        url: '/api/check-coherence'
+      } as any as NextApiRequest;
+      
+      let responseData: any;
+      const mockRes = {
+        status: (code: number) => ({
+          json: (data: any) => {
+            responseData = data;
+            return mockRes;
+          }
+        }),
+        json: (data: any) => {
+          responseData = data;
+          return mockRes;
+        }
+      } as unknown as NextApiResponse;
+
+      // Call the coherence handler
+      await coherenceHandler(mockReq, mockRes);
+      
+      // Send the actual response
+      res.json(responseData);
+    } catch (error) {
+      logger.error('Check Coherence API Error:', error);
+      res.status(500).json({ error: 'Internal server error', details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  // Navigation API endpoint
+  app.post('/api/navigation', async (req, res) => {
+    try {
+      logger.info('Navigation API request received');
+      
+      // Import the navigation handler
+      const { default: navigationHandler } = await import('../pages/api/navigation');
+      
+      // Create a mock Next.js request and response
+      const mockReq = {
+        method: 'POST',
+        body: req.body,
+        query: {},
+        cookies: {},
+        env: {},
+        headers: {},
+        url: '/api/navigation'
+      } as any as NextApiRequest;
+      
+      let responseData: any;
+      const mockRes = {
+        status: (code: number) => ({
+          json: (data: any) => {
+            responseData = data;
+            return mockRes;
+          }
+        }),
+        json: (data: any) => {
+          responseData = data;
+          return mockRes;
+        }
+      } as unknown as NextApiResponse;
+
+      // Call the navigation handler
+      await navigationHandler(mockReq, mockRes);
+      
+      // Send the actual response
+      res.json(responseData);
+    } catch (error) {
+      logger.error('Navigation API Error:', error);
+      res.status(500).json({ error: 'Internal server error', details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  // Transcribe API endpoint
+  app.post('/api/transcribe', async (req, res) => {
+    try {
+      logger.info('Transcribe API request received');
+      
+      // Import the transcribe handler
+      const { default: transcribeHandler } = await import('../pages/api/transcribe');
+      
+      // Create a mock Next.js request and response
+      const mockReq = {
+        method: 'POST',
+        body: req.body,
+        query: {},
+        cookies: {},
+        env: {},
+        headers: {},
+        url: '/api/transcribe'
+      } as any as NextApiRequest;
+      
+      let responseData: any;
+      const mockRes = {
+        status: (code: number) => ({
+          json: (data: any) => {
+            responseData = data;
+            return mockRes;
+          }
+        }),
+        json: (data: any) => {
+          responseData = data;
+          return mockRes;
+        }
+      } as unknown as NextApiResponse;
+
+      // Call the transcribe handler
+      await transcribeHandler(mockReq, mockRes);
+      
+      // Send the actual response
+      res.json(responseData);
+    } catch (error) {
+      logger.error('Transcribe API Error:', error);
+      res.status(500).json({ error: 'Internal server error', details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
   // Add tRPC middleware
   app.use(
     '/api/trpc',
@@ -400,6 +532,11 @@ async function main() {
     logger.info('\n🚀 Server ready:');
     logger.info(`🔌 tRPC API: http://localhost:${port}/api/trpc`);
     logger.info(`💬 Chat API: http://localhost:${port}/api/chat`);
+    logger.info(`🎤 TTS API: http://localhost:${port}/api/tts`);
+    logger.info(`📊 Metrics API: http://localhost:${port}/api/metrics`);
+    logger.info(`🔍 Check Coherence API: http://localhost:${port}/api/check-coherence`);
+    logger.info(`🧭 Navigation API: http://localhost:${port}/api/navigation`);
+    logger.info(`🎵 Transcribe API: http://localhost:${port}/api/transcribe`);
     logger.info(`📝 GraphQL Playground: http://localhost:${port}/api/graphql`);
     logger.info(`🌐 Frontend: http://localhost:5173/MarriottHotels/`);
     logger.info(`📚 Documentation: http://localhost:${port}/MarriottHotels/docs`);
