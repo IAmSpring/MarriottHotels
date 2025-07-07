@@ -15,7 +15,8 @@ export default defineConfig(({ command, mode }) => ({
       // Add aliases for Node built-ins to handle browser compatibility
       'fs': false,
       'util': false,
-      'winston': false
+      'winston': false,
+      'prom-client': false
     },
   },
   server: {
@@ -93,7 +94,8 @@ export default defineConfig(({ command, mode }) => ({
       // Add Node.js built-ins to exclude list
       'fs',
       'util',
-      'winston'
+      'winston',
+      'prom-client'
     ]
   },
   define: {

@@ -140,7 +140,7 @@ const AIMonitoringDashboard: React.FC<AIMonitoringDashboardProps> = ({ timeRange
     }
 
     return {
-      status: 'healthy',
+    status: 'healthy',
       message: 'All systems operational'
     };
   };
@@ -211,22 +211,22 @@ const AIMonitoringDashboard: React.FC<AIMonitoringDashboardProps> = ({ timeRange
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {metricCards.map((metric, index) => (
           <div key={index} className="bg-white rounded-lg shadow p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center">
-                <div className="w-8 h-8 rounded-lg bg-[#8B1538] bg-opacity-10 text-[#8B1538] flex items-center justify-center mr-3">
-                  {metric.icon}
-                </div>
-                <h3 className="text-sm text-gray-600">{metric.title}</h3>
-              </div>
+    <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center">
+        <div className="w-8 h-8 rounded-lg bg-[#8B1538] bg-opacity-10 text-[#8B1538] flex items-center justify-center mr-3">
+          {metric.icon}
+        </div>
+        <h3 className="text-sm text-gray-600">{metric.title}</h3>
+      </div>
               {metric.trend && (
-                <span className={`flex items-center text-sm ${
+      <span className={`flex items-center text-sm ${
                   metric.trend.isPositive ? 'text-green-600' : 'text-red-600'
-                }`}>
+      }`}>
                   {metric.trend.isPositive ? '+' : '-'}{metric.trend.value}%
-                </span>
+      </span>
               )}
-            </div>
-            <p className="text-2xl font-semibold">{metric.value}</p>
+    </div>
+    <p className="text-2xl font-semibold">{metric.value}</p>
           </div>
         ))}
       </div>

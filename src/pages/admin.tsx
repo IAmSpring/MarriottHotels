@@ -8,6 +8,7 @@ import {
   InfrastructurePage,
   LogsPage,
   ModelsPage,
+  MonitoringPage,
   NewAssistantPage,
   PerformancePage,
   SearchPage,
@@ -50,6 +51,8 @@ const AdminRouter: React.FC = () => {
         <Route path="/ai/assistants" element={<AssistantsPage />} />
         <Route path="/ai/assistants/new" element={<NewAssistantPage />} />
         <Route path="/ai/assistants/:assistantId/conversations" element={<ConversationsPage />} />
+        <Route path="/ai/conversations" element={<ConversationsPage />} />
+        <Route path="/ai/monitoring" element={<MonitoringPage />} />
         <Route path="/ai/performance" element={<PerformancePage />} />
 
         {/* Catch any unmatched routes and redirect to admin dashboard */}

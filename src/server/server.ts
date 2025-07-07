@@ -328,6 +328,50 @@ async function main() {
     }
   });
 
+  // Metrics API endpoint
+  app.get('/api/metrics', async (req, res) => {
+    try {
+      logger.info('Metrics API request received');
+      
+      // Import the metrics handler
+      const { default: metricsHandler } = await import('../pages/api/metrics');
+      
+      // Create a mock Next.js request and response
+      const mockReq = {
+        method: 'GET',
+        body: {},
+        query: req.query,
+        cookies: {},
+        env: {},
+        headers: {},
+        url: '/api/metrics'
+      } as any as NextApiRequest;
+      
+      let responseData: any;
+      const mockRes = {
+        status: (code: number) => ({
+          json: (data: any) => {
+            responseData = data;
+            return mockRes;
+          }
+        }),
+        json: (data: any) => {
+          responseData = data;
+          return mockRes;
+        }
+      } as unknown as NextApiResponse;
+
+      // Call the metrics handler
+      await metricsHandler(mockReq, mockRes);
+      
+      // Send the actual response
+      res.json(responseData);
+    } catch (error) {
+      logger.error('Metrics API Error:', error);
+      res.status(500).json({ error: 'Internal server error', details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
   // Add tRPC middleware
   app.use(
     '/api/trpc',

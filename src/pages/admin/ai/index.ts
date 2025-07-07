@@ -2,6 +2,7 @@
 export { default as DashboardPage } from './DashboardPage';
 export { default as LogsPage } from './LogsPage';
 export { default as PerformancePage } from './PerformancePage';
+export { default as MonitoringPage } from './MonitoringPage';
 
 // Model Management
 export { default as ModelsPage } from './ModelsPage';

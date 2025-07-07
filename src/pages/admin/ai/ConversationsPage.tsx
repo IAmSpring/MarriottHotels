@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Bot, User, Clock, ThumbsUp, ThumbsDown, Filter, Download, Search } from 'lucide-react';
 
 interface Message {
@@ -19,74 +19,113 @@ interface Conversation {
   messages: Message[];
   status: 'active' | 'completed';
   topic: string;
+  assistantId: string;
 }
 
-// Mock conversation data
-const mockConversations: { [key: string]: Conversation[] } = {
-  'asst_1': [
-    {
-      id: 'conv_1',
-      userId: 'user_123',
-      userName: 'John Smith',
-      startTime: '2024-03-27 10:15',
-      lastActive: '2024-03-27 10:30',
-      status: 'completed',
-      topic: 'Room Service Inquiry',
-      messages: [
-        {
-          id: 'msg_1',
-          role: 'user',
-          content: "I'd like to order room service for dinner tonight.",
-          timestamp: '2024-03-27 10:15',
-        },
-        {
-          id: 'msg_2',
-          role: 'assistant',
-          content: "I'd be happy to help you with room service. Our dinner menu is available from 6 PM to 11 PM. Would you like me to share the menu with you?",
-          timestamp: '2024-03-27 10:15',
-          rating: 'positive',
-        },
-        {
-          id: 'msg_3',
-          role: 'user',
-          content: 'Yes, please show me the menu.',
-          timestamp: '2024-03-27 10:16',
-        },
-        {
-          id: 'msg_4',
-          role: 'assistant',
-          content: "Here's our dinner menu:\n\n🍽️ Main Courses:\n- Grilled Salmon ($32)\n- Filet Mignon ($45)\n- Vegetarian Pasta ($28)\n\n🥗 Starters:\n- Caesar Salad ($14)\n- Soup of the Day ($12)\n\nWould you like to place an order?",
-          timestamp: '2024-03-27 10:16',
-          rating: 'positive',
-        },
-      ],
-    },
-    {
-      id: 'conv_2',
-      userId: 'user_456',
-      userName: 'Emma Wilson',
-      startTime: '2024-03-27 11:00',
-      lastActive: '2024-03-27 11:10',
-      status: 'completed',
-      topic: 'Spa Booking Request',
-      messages: [
-        {
-          id: 'msg_5',
-          role: 'user',
-          content: "I'd like to book a spa treatment for tomorrow.",
-          timestamp: '2024-03-27 11:00',
-        },
-        {
-          id: 'msg_6',
-          role: 'assistant',
-          content: "I'll help you book a spa treatment. We offer various services including massages, facials, and body treatments. What type of treatment are you interested in?",
-          timestamp: '2024-03-27 11:00',
-          rating: 'positive',
-        },
-      ],
-    },
-  ],
-};
+// Mock conversation data - all conversations
+const mockConversations: Conversation[] = [
+  {
+    id: 'conv_1',
+    userId: 'user_123',
+    userName: 'John Smith',
+    startTime: '2024-03-27 10:15',
+    lastActive: '2024-03-27 10:30',
+    status: 'completed',
+    topic: 'Room Service Inquiry',
+    assistantId: 'asst_1',
+    messages: [
+      {
+        id: 'msg_1',
+        role: 'user',
+        content: "I'd like to order room service for dinner tonight.",
+        timestamp: '2024-03-27 10:15',
+      },
+      {
+        id: 'msg_2',
+        role: 'assistant',
+        content: "I'd be happy to help you with room service. Our dinner menu is available from 6 PM to 11 PM. Would you like me to share the menu with you?",
+        timestamp: '2024-03-27 10:15',
+        rating: 'positive',
+      },
+      {
+        id: 'msg_3',
+        role: 'user',
+        content: 'Yes, please show me the menu.',
+        timestamp: '2024-03-27 10:16',
+      },
+      {
+        id: 'msg_4',
+        role: 'assistant',
+        content: "Here's our dinner menu:\n\n🍽️ Main Courses:\n- Grilled Salmon ($32)\n- Filet Mignon ($45)\n- Vegetarian Pasta ($28)\n\n🥗 Starters:\n- Caesar Salad ($14)\n- Soup of the Day ($12)\n\nWould you like to place an order?",
+        timestamp: '2024-03-27 10:16',
+        rating: 'positive',
+      },
+    ],
+  },
+  {
+    id: 'conv_2',
+    userId: 'user_456',
+    userName: 'Emma Wilson',
+    startTime: '2024-03-27 11:00',
+    lastActive: '2024-03-27 11:10',
+    status: 'completed',
+    topic: 'Spa Booking Request',
+    assistantId: 'asst_1',
+    messages: [
+      {
+        id: 'msg_5',
+        role: 'user',
+        content: "I'd like to book a spa treatment for tomorrow.",
+        timestamp: '2024-03-27 11:00',
+      },
+      {
+        id: 'msg_6',
+        role: 'assistant',
+        content: "I'll help you book a spa treatment. We offer various services including massages, facials, and body treatments. What type of treatment are you interested in?",
+        timestamp: '2024-03-27 11:00',
+        rating: 'positive',
+      },
+    ],
+  },
+  {
+    id: 'conv_3',
+    userId: 'user_789',
+    userName: 'Michael Brown',
+    startTime: '2024-03-27 14:30',
+    lastActive: '2024-03-27 14:45',
+    status: 'completed',
+    topic: 'Hotel Booking Inquiry',
+    assistantId: 'asst_1',
+    messages: [
+      {
+        id: 'msg_7',
+        role: 'user',
+        content: "I need to book a room for next weekend in Miami Beach.",
+        timestamp: '2024-03-27 14:30',
+      },
+      {
+        id: 'msg_8',
+        role: 'assistant',
+        content: "I can help you find the perfect hotel in Miami Beach. What dates are you looking for and how many guests?",
+        timestamp: '2024-03-27 14:30',
+        rating: 'positive',
+      },
+      {
+        id: 'msg_9',
+        role: 'user',
+        content: "August 1st to 5th, 2 adults.",
+        timestamp: '2024-03-27 14:31',
+      },
+      {
+        id: 'msg_10',
+        role: 'assistant',
+        content: "Perfect! I found several great options for you. The Ritz-Carlton Miami Beach has availability for those dates at $420/night. Would you like me to show you more details?",
+        timestamp: '2024-03-27 14:32',
+        rating: 'positive',
+      },
+    ],
+  },
+];
 
 const ConversationList: React.FC<{ conversations: Conversation[], onSelect: (conv: Conversation) => void }> = ({ conversations, onSelect }) => (
   <div className="bg-white rounded-lg shadow">
@@ -182,22 +221,19 @@ const MessageThread: React.FC<{ conversation: Conversation }> = ({ conversation 
 );
 
 const ConversationsPage: React.FC = () => {
-  const { assistantId } = useParams<{ assistantId: string }>();
   const navigate = useNavigate();
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
 
-  const conversations = mockConversations[assistantId || ''] || [];
-
-  if (conversations.length === 0) {
+  if (mockConversations.length === 0) {
     return (
       <div className="p-8 text-center">
         <h2 className="text-2xl font-semibold mb-4">No conversations found</h2>
-        <p className="text-gray-600">This assistant hasn't had any conversations yet.</p>
+        <p className="text-gray-600">No conversations have been recorded yet.</p>
         <button
-          onClick={() => navigate('/admin/ai/assistants')}
+          onClick={() => navigate('/admin/ai')}
           className="mt-4 px-4 py-2 bg-[#8B1538] text-white rounded-lg hover:bg-[#6d102c]"
         >
-          Back to Assistants
+          Back to AI Dashboard
         </button>
       </div>
     );
@@ -212,17 +248,17 @@ const ConversationsPage: React.FC = () => {
             <p className="text-gray-600">View and manage assistant conversations</p>
           </div>
           <button
-            onClick={() => navigate('/admin/ai/assistants')}
+            onClick={() => navigate('/admin/ai')}
             className="px-4 py-2 bg-[#8B1538] text-white rounded-lg hover:bg-[#6d102c]"
           >
-            Back to Assistants
+            Back to AI Dashboard
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <ConversationList
-          conversations={conversations}
+          conversations={mockConversations}
           onSelect={setSelectedConversation}
         />
         {selectedConversation ? (
