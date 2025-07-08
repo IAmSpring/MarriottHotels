@@ -26,6 +26,7 @@ import DocsPage from './pages/DocsPage';
 import AccountSettings from './pages/AccountSettings';
 import TourController from './components/TourController';
 import AdminApp from './pages/admin';
+import GraphQLPlayground from './pages/GraphQLPlayground';
 import { initializeAnalytics } from './lib/frontendMetrics';
 import { logger } from './lib/browserLogger';
 import { ApolloProvider } from '@apollo/client';
@@ -81,6 +82,7 @@ const App: React.FC = () => {
                 <Route path="/app" element={<AppPage />} />
                 <Route path="/docs/*" element={<DocsPage />} />
                 <Route path="/admin/*" element={<AdminApp />} />
+                <Route path="/graphql" element={<GraphQLPlayground />} />
               </Routes>
               <TourControllerWrapper />
               <AIChatBot />

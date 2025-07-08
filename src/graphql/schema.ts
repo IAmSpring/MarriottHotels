@@ -1,130 +1,55 @@
 import { gql } from 'apollo-server-express';
 import { prisma } from '../lib/prisma';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { hotels } from '../data/hotels';
-import type { Hotel as HotelType, Room as RoomType, Booking as BookingType, Price } from '../types/hotel';
-import type { Prisma } from '@prisma/client';
-
-interface Context {
-  hotels: typeof hotels;
-  rooms: RoomType[];
-  bookings: BookingType[];
-  users: any[]; // We'll keep this as any for now since we don't have a full User type
-}
-
-interface QueryResolvers {
-  hotel: (_: unknown, { id }: { id: string }, context: Context) => HotelType | undefined;
-  hotels: (_: unknown, args: unknown, context: Context) => HotelType[];
-  room: (_: unknown, { id }: { id: string }, context: Context) => RoomType | undefined;
-  hotelRooms: (_: unknown, { hotelId }: { hotelId: string }, context: Context) => RoomType[];
-  booking: (_: unknown, { id }: { id: string }, context: Context) => BookingType | undefined;
-  userBookings: (_: unknown, { userId }: { userId: string }, context: Context) => BookingType[];
-}
-
-interface MutationResolvers {
-  createHotel: (_: unknown, { input }: { input: Partial<HotelType> }, context: Context) => HotelType;
-  updateHotel: (_: unknown, { id, input }: { id: string; input: Partial<HotelType> }, context: Context) => HotelType;
-  deleteHotel: (_: unknown, { id }: { id: string }, context: Context) => boolean;
-  createRoom: (_: unknown, { input }: { input: Partial<RoomType> }, context: Context) => RoomType;
-  updateRoom: (_: unknown, { id, input }: { id: string; input: Partial<RoomType> }, context: Context) => RoomType;
-  deleteRoom: (_: unknown, { id }: { id: string }, context: Context) => boolean;
-  createBooking: (_: unknown, { input }: { input: Partial<BookingType> }, context: Context) => BookingType;
-  updateBooking: (_: unknown, { id, status }: { id: string; status: string }, context: Context) => BookingType;
-  deleteBooking: (_: unknown, { id }: { id: string }, context: Context) => boolean;
-}
-
-interface UserInput {
-  name: string;
-  email: string;
-  password: string;
-}
-
-interface HotelInput {
-  name: string;
-  type: string;
-  location: string;
-  description: string;
-  price: {
-    base: number;
-    currency: string;
-  };
-  amenities: string[];
-}
-
-interface RoomInput {
-  hotelId: string;
-  type: string;
-  price: number;
-  description: string;
-  beds: string;
-  occupancy: string;
-  size: string;
-}
-
-interface BookingInput {
-  userId: string;
-  hotelId: string;
-  roomId: string;
-  checkIn: string;
-  checkOut: string;
-  guests: number;
-}
-
-interface ReviewInput {
-  userId: number;
-  hotelId: string;
-  rating: number;
-  comment: string;
-}
 
 export const typeDefs = gql`
-  scalar Int
-  scalar Float
-  scalar ID
+  scalar DateTime
 
   type User {
     id: Int!
     name: String
     email: String!
+    password: String!
     role: String!
     bonvoyNumber: String
-    bonvoyPoints: Int
-    bonvoyStatus: String
-    createdAt: String!
-    updatedAt: String!
-    bookings: [Booking!]
-    orders: [Order!]
-    reviews: [Review!]
-    conversations: [Conversation!]
+    bonvoyPoints: Int!
+    bonvoyStatus: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    bookings: [Booking!]!
+    orders: [Order!]!
+    reviews: [Review!]!
+    conversations: [Conversation!]!
   }
 
   type Hotel {
-    id: ID!
+    id: String!
     name: String!
-    type: String!
     location: String!
+    address: String!
     description: String!
-    price: Price!
+    imageUrl: String!
     rating: Float!
-    reviews: Int!
-    image: String!
-    amenities: [String!]!
+    amenities: [Amenity!]!
     rooms: [Room!]!
+    restaurants: [Restaurant!]!
+    experiences: [Experience!]!
+    reviews: [Review!]!
+    bookings: [Booking!]!
   }
 
   type Room {
-    id: ID!
+    id: String!
+    hotelId: String!
+    hotel: Hotel!
     type: String!
-    price: Float!
     description: String!
-    beds: String!
-    occupancy: String!
-    size: String!
-  }
-
-  type Price {
-    base: Float!
-    currency: String!
+    price: Float!
+    capacity: Int!
+    amenities: String!
+    imageUrl: String!
+    available: Boolean!
+    bookings: [Booking!]!
   }
 
   type Amenity {
@@ -148,19 +73,19 @@ export const typeDefs = gql`
     closeTime: String!
     description: String!
     imageUrl: String!
-    reservations: [Reservation!]
+    reservations: [Reservation!]!
   }
 
   type Reservation {
     id: String!
     restaurantId: String!
     restaurant: Restaurant!
-    date: String!
+    date: DateTime!
     time: String!
     partySize: Int!
     status: String!
-    createdAt: String!
-    updatedAt: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
   }
 
   type Experience {
@@ -174,44 +99,51 @@ export const typeDefs = gql`
     duration: Int!
     imageUrl: String!
     available: Boolean!
-    bookings: [ExperienceBooking!]
+    bookings: [ExperienceBooking!]!
   }
 
   type ExperienceBooking {
     id: String!
     experienceId: String!
     experience: Experience!
-    date: String!
+    date: DateTime!
     participants: Int!
     status: String!
     specialRequests: String
-    createdAt: String!
-    updatedAt: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
   }
 
   type Booking {
-    id: ID!
-    userId: ID!
-    hotelId: ID!
-    roomId: ID!
-    checkIn: String!
-    checkOut: String!
+    id: Int!
+    userId: Int!
+    user: User!
+    hotelId: String!
+    hotel: Hotel!
+    roomId: String!
+    room: Room!
+    checkIn: DateTime!
+    checkOut: DateTime!
     guests: Int!
     totalPrice: Float!
     status: String!
+    orderId: Int
+    order: Order
+    createdAt: DateTime!
+    updatedAt: DateTime!
   }
 
   type Order {
     id: Int!
     userId: Int!
     user: User!
-    bookings: [Booking!]
+    bookings: [Booking!]!
     stripeId: String!
     amount: Float!
     currency: String!
     status: String!
-    createdAt: String!
-    updatedAt: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
   }
 
   type Review {
@@ -222,8 +154,8 @@ export const typeDefs = gql`
     hotel: Hotel!
     rating: Int!
     comment: String!
-    createdAt: String!
-    updatedAt: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
   }
 
   type Conversation {
@@ -233,27 +165,79 @@ export const typeDefs = gql`
     userMessage: String!
     aiResponse: String!
     threadId: String
-    timestamp: String!
+    timestamp: DateTime!
   }
 
   type Query {
+    # User queries
     users: [User!]!
     user(id: Int!): User
+    userByEmail(email: String!): User
+    
+    # Hotel queries
     hotels: [Hotel!]!
-    hotel(id: ID!): Hotel
-    rooms(hotelId: ID!): [Room!]!
-    room(id: ID!): Room
-    bookings(userId: ID): [Booking!]!
-    booking(id: ID!): Booking
-    experiences(hotelId: String!): [Experience!]!
-    experience(id: String!): Experience
-    restaurants(hotelId: String!): [Restaurant!]!
+    hotel(id: String!): Hotel
+    hotelsByLocation(location: String!): [Hotel!]!
+    hotelsByRating(minRating: Float!): [Hotel!]!
+    
+    # Room queries
+    rooms: [Room!]!
+    room(id: String!): Room
+    roomsByHotel(hotelId: String!): [Room!]!
+    availableRooms(hotelId: String!, checkIn: DateTime!, checkOut: DateTime!): [Room!]!
+    
+    # Amenity queries
+    amenities: [Amenity!]!
+    amenity(id: String!): Amenity
+    amenitiesByHotel(hotelId: String!): [Amenity!]!
+    amenitiesByCategory(category: String!): [Amenity!]!
+    
+    # Restaurant queries
+    restaurants: [Restaurant!]!
     restaurant(id: String!): Restaurant
-    reviews(hotelId: String!): [Review!]!
+    restaurantsByHotel(hotelId: String!): [Restaurant!]!
+    restaurantsByCuisine(cuisine: String!): [Restaurant!]!
+    
+    # Reservation queries
+    reservations: [Reservation!]!
+    reservation(id: String!): Reservation
+    reservationsByRestaurant(restaurantId: String!): [Reservation!]!
+    reservationsByDate(date: DateTime!): [Reservation!]!
+    
+    # Experience queries
+    experiences: [Experience!]!
+    experience(id: String!): Experience
+    experiencesByHotel(hotelId: String!): [Experience!]!
+    experiencesByType(type: String!): [Experience!]!
+    
+    # Experience Booking queries
+    experienceBookings: [ExperienceBooking!]!
+    experienceBooking(id: String!): ExperienceBooking
+    experienceBookingsByExperience(experienceId: String!): [ExperienceBooking!]!
+    
+    # Booking queries
+    bookings: [Booking!]!
+    booking(id: Int!): Booking
+    bookingsByUser(userId: Int!): [Booking!]!
+    bookingsByHotel(hotelId: String!): [Booking!]!
+    bookingsByStatus(status: String!): [Booking!]!
+    
+    # Order queries
+    orders: [Order!]!
+    order(id: Int!): Order
+    ordersByUser(userId: Int!): [Order!]!
+    ordersByStatus(status: String!): [Order!]!
+    
+    # Review queries
+    reviews: [Review!]!
     review(id: String!): Review
-    conversations(userId: Int!): [Conversation!]!
-    hotelRooms(hotelId: ID!): [Room!]!
-    userBookings(userId: ID!): [Booking!]!
+    reviewsByHotel(hotelId: String!): [Review!]!
+    reviewsByUser(userId: Int!): [Review!]!
+    
+    # Conversation queries
+    conversations: [Conversation!]!
+    conversation(id: String!): Conversation
+    conversationsByUser(userId: Int!): [Conversation!]!
   }
 
   input UserInput {
@@ -261,42 +245,94 @@ export const typeDefs = gql`
     email: String!
     password: String!
     role: String
+    bonvoyNumber: String
+    bonvoyPoints: Int
+    bonvoyStatus: String
   }
 
   input HotelInput {
     name: String!
-    type: String!
     location: String!
+    address: String!
     description: String!
-    price: PriceInput!
-    rating: Float!
-    reviews: Int!
-    image: String!
-    amenities: [String!]!
-  }
-
-  input PriceInput {
-    base: Float!
-    currency: String!
+    imageUrl: String!
+    rating: Float
   }
 
   input RoomInput {
+    hotelId: String!
     type: String!
-    price: Float!
     description: String!
-    beds: String!
-    occupancy: String!
-    size: String!
+    price: Float!
+    capacity: Int!
+    amenities: String!
+    imageUrl: String!
+    available: Boolean
+  }
+
+  input AmenityInput {
+    name: String!
+    category: String!
+    description: String!
+    imageUrl: String
+    hotelId: String!
+  }
+
+  input RestaurantInput {
+    name: String!
+    hotelId: String!
+    cuisine: String!
+    priceRange: String!
+    openTime: String!
+    closeTime: String!
+    description: String!
+    imageUrl: String!
+  }
+
+  input ReservationInput {
+    restaurantId: String!
+    date: DateTime!
+    time: String!
+    partySize: Int!
+    status: String
+  }
+
+  input ExperienceInput {
+    name: String!
+    hotelId: String!
+    type: String!
+    description: String!
+    price: Float!
+    duration: Int!
+    imageUrl: String!
+    available: Boolean
+  }
+
+  input ExperienceBookingInput {
+    experienceId: String!
+    date: DateTime!
+    participants: Int!
+    status: String
+    specialRequests: String
   }
 
   input BookingInput {
-    userId: ID!
-    hotelId: ID!
-    roomId: ID!
-    checkIn: String!
-    checkOut: String!
+    userId: Int!
+    hotelId: String!
+    roomId: String!
+    checkIn: DateTime!
+    checkOut: DateTime!
     guests: Int!
     totalPrice: Float!
+    status: String
+  }
+
+  input OrderInput {
+    userId: Int!
+    stripeId: String!
+    amount: Float!
+    currency: String
+    status: String
   }
 
   input ReviewInput {
@@ -306,145 +342,646 @@ export const typeDefs = gql`
     comment: String!
   }
 
+  input ConversationInput {
+    userId: Int!
+    userMessage: String!
+    aiResponse: String!
+    threadId: String
+  }
+
   type Mutation {
-    createUser(input: UserInput!): User
-    updateUser(id: Int!, input: UserInput!): User
-    deleteUser(id: Int!): User
+    # User mutations
+    createUser(input: UserInput!): User!
+    updateUser(id: Int!, input: UserInput!): User!
+    deleteUser(id: Int!): User!
+    
+    # Hotel mutations
     createHotel(input: HotelInput!): Hotel!
-    updateHotel(id: ID!, input: HotelInput!): Hotel!
-    deleteHotel(id: ID!): Boolean!
+    updateHotel(id: String!, input: HotelInput!): Hotel!
+    deleteHotel(id: String!): Hotel!
+    
+    # Room mutations
     createRoom(input: RoomInput!): Room!
-    updateRoom(id: ID!, input: RoomInput!): Room!
-    deleteRoom(id: ID!): Boolean!
+    updateRoom(id: String!, input: RoomInput!): Room!
+    deleteRoom(id: String!): Room!
+    
+    # Amenity mutations
+    createAmenity(input: AmenityInput!): Amenity!
+    updateAmenity(id: String!, input: AmenityInput!): Amenity!
+    deleteAmenity(id: String!): Amenity!
+    
+    # Restaurant mutations
+    createRestaurant(input: RestaurantInput!): Restaurant!
+    updateRestaurant(id: String!, input: RestaurantInput!): Restaurant!
+    deleteRestaurant(id: String!): Restaurant!
+    
+    # Reservation mutations
+    createReservation(input: ReservationInput!): Reservation!
+    updateReservation(id: String!, input: ReservationInput!): Reservation!
+    deleteReservation(id: String!): Reservation!
+    
+    # Experience mutations
+    createExperience(input: ExperienceInput!): Experience!
+    updateExperience(id: String!, input: ExperienceInput!): Experience!
+    deleteExperience(id: String!): Experience!
+    
+    # Experience Booking mutations
+    createExperienceBooking(input: ExperienceBookingInput!): ExperienceBooking!
+    updateExperienceBooking(id: String!, input: ExperienceBookingInput!): ExperienceBooking!
+    deleteExperienceBooking(id: String!): ExperienceBooking!
+    
+    # Booking mutations
     createBooking(input: BookingInput!): Booking!
-    updateBooking(id: ID!, status: String!): Booking!
-    deleteBooking(id: ID!): Boolean!
-    createReview(input: ReviewInput!): Review
+    updateBooking(id: Int!, input: BookingInput!): Booking!
+    deleteBooking(id: Int!): Booking!
+    
+    # Order mutations
+    createOrder(input: OrderInput!): Order!
+    updateOrder(id: Int!, input: OrderInput!): Order!
+    deleteOrder(id: Int!): Order!
+    
+    # Review mutations
+    createReview(input: ReviewInput!): Review!
+    updateReview(id: String!, input: ReviewInput!): Review!
+    deleteReview(id: String!): Review!
+    
+    # Conversation mutations
+    createConversation(input: ConversationInput!): Conversation!
+    updateConversation(id: String!, input: ConversationInput!): Conversation!
+    deleteConversation(id: String!): Conversation!
   }
 `;
 
 export const resolvers = {
   Query: {
+    // User queries
     users: async () => {
       return prisma.user.findMany();
     },
     user: async (_: unknown, { id }: { id: number }) => {
       return prisma.user.findUnique({ where: { id } });
     },
-    hotels: (_: unknown, _args: unknown, context: Context): HotelType[] => {
-      return context.hotels;
+    userByEmail: async (_: unknown, { email }: { email: string }) => {
+      return prisma.user.findUnique({ where: { email } });
     },
-    hotel: (_: unknown, { id }: { id: string }, context: Context): HotelType | undefined => {
-      return context.hotels.find((h: HotelType) => h.id === id);
+
+    // Hotel queries - include related data
+    hotels: async () => {
+      return prisma.hotel.findMany({
+        include: {
+          amenities: true,
+          rooms: true,
+          restaurants: true,
+          experiences: true,
+          reviews: true,
+          bookings: true,
+        },
+      });
     },
-    rooms: async (_: unknown, { hotelId }: { hotelId: string }, context: Context) => {
-      return context.rooms.filter((r: RoomType) => r.hotelId === hotelId);
+    hotel: async (_: unknown, { id }: { id: string }) => {
+      return prisma.hotel.findUnique({
+        where: { id },
+        include: {
+          amenities: true,
+          rooms: true,
+          restaurants: true,
+          experiences: true,
+          reviews: true,
+          bookings: true,
+        },
+      });
     },
-    room: (_: unknown, { id }: { id: string }, context: Context): RoomType | undefined => {
-      return context.rooms.find((r: RoomType) => r.id === id);
+    hotelsByLocation: async (_: unknown, { location }: { location: string }) => {
+      return prisma.hotel.findMany({
+        where: { location },
+        include: {
+          amenities: true,
+          rooms: true,
+          restaurants: true,
+          experiences: true,
+          reviews: true,
+          bookings: true,
+        },
+      });
     },
-    bookings: async (_: unknown, { userId }: { userId?: string }) => {
+    hotelsByRating: async (_: unknown, { minRating }: { minRating: number }) => {
+      return prisma.hotel.findMany({
+        where: { rating: { gte: minRating } },
+        include: {
+          amenities: true,
+          rooms: true,
+          restaurants: true,
+          experiences: true,
+          reviews: true,
+          bookings: true,
+        },
+      });
+    },
+
+    // Room queries - include related data
+    rooms: async () => {
+      return prisma.room.findMany({
+        include: {
+          hotel: true,
+          bookings: true,
+        },
+      });
+    },
+    room: async (_: unknown, { id }: { id: string }) => {
+      return prisma.room.findUnique({
+        where: { id },
+        include: {
+          hotel: true,
+          bookings: true,
+        },
+      });
+    },
+    roomsByHotel: async (_: unknown, { hotelId }: { hotelId: string }) => {
+      return prisma.room.findMany({
+        where: { hotelId },
+        include: {
+          hotel: true,
+          bookings: true,
+        },
+      });
+    },
+    availableRooms: async (_: unknown, { hotelId, checkIn, checkOut }: { hotelId: string; checkIn: Date; checkOut: Date }) => {
+      return prisma.room.findMany({
+        where: {
+          hotelId,
+          available: true,
+          bookings: {
+            none: {
+              OR: [
+                { checkIn: { lte: checkOut }, checkOut: { gte: checkIn } }
+              ]
+            }
+          }
+        },
+        include: {
+          hotel: true,
+          bookings: true,
+        },
+      });
+    },
+
+    // Amenity queries - include related data
+    amenities: async () => {
+      return prisma.amenity.findMany({
+        include: {
+          hotel: true,
+        },
+      });
+    },
+    amenity: async (_: unknown, { id }: { id: string }) => {
+      return prisma.amenity.findUnique({
+        where: { id },
+        include: {
+          hotel: true,
+        },
+      });
+    },
+    amenitiesByHotel: async (_: unknown, { hotelId }: { hotelId: string }) => {
+      return prisma.amenity.findMany({
+        where: { hotelId },
+        include: {
+          hotel: true,
+        },
+      });
+    },
+    amenitiesByCategory: async (_: unknown, { category }: { category: string }) => {
+      return prisma.amenity.findMany({
+        where: { category },
+        include: {
+          hotel: true,
+        },
+      });
+    },
+
+    // Restaurant queries - include related data
+    restaurants: async () => {
+      return prisma.restaurant.findMany({
+        include: {
+          hotel: true,
+          reservations: true,
+        },
+      });
+    },
+    restaurant: async (_: unknown, { id }: { id: string }) => {
+      return prisma.restaurant.findUnique({
+        where: { id },
+        include: {
+          hotel: true,
+          reservations: true,
+        },
+      });
+    },
+    restaurantsByHotel: async (_: unknown, { hotelId }: { hotelId: string }) => {
+      return prisma.restaurant.findMany({
+        where: { hotelId },
+        include: {
+          hotel: true,
+          reservations: true,
+        },
+      });
+    },
+    restaurantsByCuisine: async (_: unknown, { cuisine }: { cuisine: string }) => {
+      return prisma.restaurant.findMany({
+        where: { cuisine },
+        include: {
+          hotel: true,
+          reservations: true,
+        },
+      });
+    },
+
+    // Reservation queries - include related data
+    reservations: async () => {
+      return prisma.reservation.findMany({
+        include: {
+          restaurant: true,
+        },
+      });
+    },
+    reservation: async (_: unknown, { id }: { id: string }) => {
+      return prisma.reservation.findUnique({
+        where: { id },
+        include: {
+          restaurant: true,
+        },
+      });
+    },
+    reservationsByRestaurant: async (_: unknown, { restaurantId }: { restaurantId: string }) => {
+      return prisma.reservation.findMany({
+        where: { restaurantId },
+        include: {
+          restaurant: true,
+        },
+      });
+    },
+    reservationsByDate: async (_: unknown, { date }: { date: Date }) => {
+      return prisma.reservation.findMany({
+        where: { date },
+        include: {
+          restaurant: true,
+        },
+      });
+    },
+
+    // Experience queries - include related data
+    experiences: async () => {
+      return prisma.experience.findMany({
+        include: {
+          hotel: true,
+          bookings: true,
+        },
+      });
+    },
+    experience: async (_: unknown, { id }: { id: string }) => {
+      return prisma.experience.findUnique({
+        where: { id },
+        include: {
+          hotel: true,
+          bookings: true,
+        },
+      });
+    },
+    experiencesByHotel: async (_: unknown, { hotelId }: { hotelId: string }) => {
+      return prisma.experience.findMany({
+        where: { hotelId },
+        include: {
+          hotel: true,
+          bookings: true,
+        },
+      });
+    },
+    experiencesByType: async (_: unknown, { type }: { type: string }) => {
+      return prisma.experience.findMany({
+        where: { type },
+        include: {
+          hotel: true,
+          bookings: true,
+        },
+      });
+    },
+
+    // Experience Booking queries - include related data
+    experienceBookings: async () => {
+      return prisma.experienceBooking.findMany({
+        include: {
+          experience: true,
+        },
+      });
+    },
+    experienceBooking: async (_: unknown, { id }: { id: string }) => {
+      return prisma.experienceBooking.findUnique({
+        where: { id },
+        include: {
+          experience: true,
+        },
+      });
+    },
+    experienceBookingsByExperience: async (_: unknown, { experienceId }: { experienceId: string }) => {
+      return prisma.experienceBooking.findMany({
+        where: { experienceId },
+        include: {
+          experience: true,
+        },
+      });
+    },
+
+    // Booking queries - include related data
+    bookings: async () => {
       return prisma.booking.findMany({
-        where: userId ? { userId: parseInt(userId, 10) } : undefined,
         include: {
           user: true,
           hotel: true,
           room: true,
+          order: true,
         },
       });
     },
-    booking: (_: unknown, { id }: { id: string }, context: Context): BookingType | undefined => {
-      return context.bookings.find((b: BookingType) => b.id === id);
-    },
-    experiences: async (_: unknown, { hotelId }: { hotelId: string }) => {
-      return prisma.experience.findMany({ where: { hotelId } });
-    },
-    experience: async (_: unknown, { id }: { id: string }) => {
-      return prisma.experience.findUnique({ where: { id } });
-    },
-    restaurants: async (_: unknown, { hotelId }: { hotelId: string }) => {
-      return prisma.restaurant.findMany({ where: { hotelId } });
-    },
-    restaurant: async (_: unknown, { id }: { id: string }) => {
-      return prisma.restaurant.findUnique({ where: { id } });
-    },
-    reviews: async (_: unknown, { hotelId }: { hotelId: string }) => {
-      return prisma.review.findMany({ where: { hotelId } });
-    },
-    review: async (_: unknown, { id }: { id: string }) => {
-      return prisma.review.findUnique({ where: { id } });
-    },
-    conversations: async (_: unknown, { userId }: { userId: number }) => {
-      return prisma.conversation.findMany({ where: { userId } });
-    },
-    hotelRooms: (_: unknown, { hotelId }: { hotelId: string }, context: Context): RoomType[] => {
-      return context.rooms.filter((r: RoomType) => r.hotelId === hotelId);
-    },
-    userBookings: (_: unknown, { userId }: { userId: string }, context: Context): BookingType[] => {
-      return context.bookings.filter((b: BookingType) => b.userId === userId);
-    },
-  },
-  Mutation: {
-    createUser: async (_: unknown, { input }: { input: UserInput }) => {
-      return prisma.user.create({ data: input });
-    },
-    updateUser: async (_: unknown, { id, input }: { id: number; input: UserInput }) => {
-      return prisma.user.update({
+    booking: async (_: unknown, { id }: { id: number }) => {
+      return prisma.booking.findUnique({
         where: { id },
-        data: input,
+        include: {
+          user: true,
+          hotel: true,
+          room: true,
+          order: true,
+        },
       });
     },
-    deleteUser: async (_: unknown, { id }: { id: number }) => {
-      return prisma.user.delete({ where: { id } });
-    },
-    createHotel: (_: unknown, { input }: { input: Partial<HotelType> }, context: Context): HotelType => {
-      return input as HotelType;
-    },
-    updateHotel: (_: unknown, { id, input }: { id: string; input: Partial<HotelType> }, context: Context): HotelType => {
-      return input as HotelType;
-    },
-    deleteHotel: (_: unknown, { id }: { id: string }, context: Context): boolean => {
-      return true;
-    },
-    createRoom: (_: unknown, { input }: { input: Partial<RoomType> }, context: Context): RoomType => {
-      return input as RoomType;
-    },
-    updateRoom: (_: unknown, { id, input }: { id: string; input: Partial<RoomType> }, context: Context): RoomType => {
-      return input as RoomType;
-    },
-    deleteRoom: (_: unknown, { id }: { id: string }, context: Context): boolean => {
-      return true;
-    },
-    createBooking: (_: unknown, { input }: { input: Partial<BookingType> }, context: Context): BookingType => {
-      return input as BookingType;
-    },
-    updateBooking: (_: unknown, { id, status }: { id: string; status: string }, context: Context): BookingType => {
-      return {} as BookingType;
-    },
-    deleteBooking: (_: unknown, { id }: { id: string }, context: Context): boolean => {
-      return true;
-    },
-    createReview: async (_: unknown, { input }: { input: ReviewInput }) => {
-      const { userId, hotelId, rating, comment } = input;
-      return prisma.review.create({
-        data: {
-          userId,
-          hotelId,
-          rating,
-          comment,
+    bookingsByUser: async (_: unknown, { userId }: { userId: number }) => {
+      return prisma.booking.findMany({
+        where: { userId },
+        include: {
+          user: true,
+          hotel: true,
+          room: true,
+          order: true,
         },
+      });
+    },
+    bookingsByHotel: async (_: unknown, { hotelId }: { hotelId: string }) => {
+      return prisma.booking.findMany({
+        where: { hotelId },
+        include: {
+          user: true,
+          hotel: true,
+          room: true,
+          order: true,
+        },
+      });
+    },
+    bookingsByStatus: async (_: unknown, { status }: { status: string }) => {
+      return prisma.booking.findMany({
+        where: { status },
+        include: {
+          user: true,
+          hotel: true,
+          room: true,
+          order: true,
+        },
+      });
+    },
+
+    // Order queries - include related data
+    orders: async () => {
+      return prisma.order.findMany({
+        include: {
+          user: true,
+          bookings: true,
+        },
+      });
+    },
+    order: async (_: unknown, { id }: { id: number }) => {
+      return prisma.order.findUnique({
+        where: { id },
+        include: {
+          user: true,
+          bookings: true,
+        },
+      });
+    },
+    ordersByUser: async (_: unknown, { userId }: { userId: number }) => {
+      return prisma.order.findMany({
+        where: { userId },
+        include: {
+          user: true,
+          bookings: true,
+        },
+      });
+    },
+    ordersByStatus: async (_: unknown, { status }: { status: string }) => {
+      return prisma.order.findMany({
+        where: { status },
+        include: {
+          user: true,
+          bookings: true,
+        },
+      });
+    },
+
+    // Review queries - include related data
+    reviews: async () => {
+      return prisma.review.findMany({
         include: {
           user: true,
           hotel: true,
         },
       });
     },
+    review: async (_: unknown, { id }: { id: string }) => {
+      return prisma.review.findUnique({
+        where: { id },
+        include: {
+          user: true,
+          hotel: true,
+        },
+      });
+    },
+    reviewsByHotel: async (_: unknown, { hotelId }: { hotelId: string }) => {
+      return prisma.review.findMany({
+        where: { hotelId },
+        include: {
+          user: true,
+          hotel: true,
+        },
+      });
+    },
+    reviewsByUser: async (_: unknown, { userId }: { userId: number }) => {
+      return prisma.review.findMany({
+        where: { userId },
+        include: {
+          user: true,
+          hotel: true,
+        },
+      });
+    },
+
+    // Conversation queries - include related data
+    conversations: async () => {
+      return prisma.conversation.findMany({
+        include: {
+          user: true,
+        },
+      });
+    },
+    conversation: async (_: unknown, { id }: { id: string }) => {
+      return prisma.conversation.findUnique({
+        where: { id },
+        include: {
+          user: true,
+        },
+      });
+    },
+    conversationsByUser: async (_: unknown, { userId }: { userId: number }) => {
+      return prisma.conversation.findMany({
+        where: { userId },
+        include: {
+          user: true,
+        },
+      });
+    },
   },
-}; 
+
+  Mutation: {
+    // User mutations
+    createUser: async (_: unknown, { input }: { input: any }) => {
+      return prisma.user.create({ data: input });
+    },
+    updateUser: async (_: unknown, { id, input }: { id: number; input: any }) => {
+      return prisma.user.update({ where: { id }, data: input });
+    },
+    deleteUser: async (_: unknown, { id }: { id: number }) => {
+      return prisma.user.delete({ where: { id } });
+    },
+
+    // Hotel mutations
+    createHotel: async (_: unknown, { input }: { input: any }) => {
+      return prisma.hotel.create({ data: input });
+    },
+    updateHotel: async (_: unknown, { id, input }: { id: string; input: any }) => {
+      return prisma.hotel.update({ where: { id }, data: input });
+    },
+    deleteHotel: async (_: unknown, { id }: { id: string }) => {
+      return prisma.hotel.delete({ where: { id } });
+    },
+
+    // Room mutations
+    createRoom: async (_: unknown, { input }: { input: any }) => {
+      return prisma.room.create({ data: input });
+    },
+    updateRoom: async (_: unknown, { id, input }: { id: string; input: any }) => {
+      return prisma.room.update({ where: { id }, data: input });
+    },
+    deleteRoom: async (_: unknown, { id }: { id: string }) => {
+      return prisma.room.delete({ where: { id } });
+    },
+
+    // Amenity mutations
+    createAmenity: async (_: unknown, { input }: { input: any }) => {
+      return prisma.amenity.create({ data: input });
+    },
+    updateAmenity: async (_: unknown, { id, input }: { id: string; input: any }) => {
+      return prisma.amenity.update({ where: { id }, data: input });
+    },
+    deleteAmenity: async (_: unknown, { id }: { id: string }) => {
+      return prisma.amenity.delete({ where: { id } });
+    },
+
+    // Restaurant mutations
+    createRestaurant: async (_: unknown, { input }: { input: any }) => {
+      return prisma.restaurant.create({ data: input });
+    },
+    updateRestaurant: async (_: unknown, { id, input }: { id: string; input: any }) => {
+      return prisma.restaurant.update({ where: { id }, data: input });
+    },
+    deleteRestaurant: async (_: unknown, { id }: { id: string }) => {
+      return prisma.restaurant.delete({ where: { id } });
+    },
+
+    // Reservation mutations
+    createReservation: async (_: unknown, { input }: { input: any }) => {
+      return prisma.reservation.create({ data: input });
+    },
+    updateReservation: async (_: unknown, { id, input }: { id: string; input: any }) => {
+      return prisma.reservation.update({ where: { id }, data: input });
+    },
+    deleteReservation: async (_: unknown, { id }: { id: string }) => {
+      return prisma.reservation.delete({ where: { id } });
+    },
+
+    // Experience mutations
+    createExperience: async (_: unknown, { input }: { input: any }) => {
+      return prisma.experience.create({ data: input });
+    },
+    updateExperience: async (_: unknown, { id, input }: { id: string; input: any }) => {
+      return prisma.experience.update({ where: { id }, data: input });
+    },
+    deleteExperience: async (_: unknown, { id }: { id: string }) => {
+      return prisma.experience.delete({ where: { id } });
+    },
+
+    // Experience Booking mutations
+    createExperienceBooking: async (_: unknown, { input }: { input: any }) => {
+      return prisma.experienceBooking.create({ data: input });
+    },
+    updateExperienceBooking: async (_: unknown, { id, input }: { id: string; input: any }) => {
+      return prisma.experienceBooking.update({ where: { id }, data: input });
+    },
+    deleteExperienceBooking: async (_: unknown, { id }: { id: string }) => {
+      return prisma.experienceBooking.delete({ where: { id } });
+    },
+
+    // Booking mutations
+    createBooking: async (_: unknown, { input }: { input: any }) => {
+      return prisma.booking.create({ data: input });
+    },
+    updateBooking: async (_: unknown, { id, input }: { id: number; input: any }) => {
+      return prisma.booking.update({ where: { id }, data: input });
+    },
+    deleteBooking: async (_: unknown, { id }: { id: number }) => {
+      return prisma.booking.delete({ where: { id } });
+    },
+
+    // Order mutations
+    createOrder: async (_: unknown, { input }: { input: any }) => {
+      return prisma.order.create({ data: input });
+    },
+    updateOrder: async (_: unknown, { id, input }: { id: number; input: any }) => {
+      return prisma.order.update({ where: { id }, data: input });
+    },
+    deleteOrder: async (_: unknown, { id }: { id: number }) => {
+      return prisma.order.delete({ where: { id } });
+    },
+
+    // Review mutations
+    createReview: async (_: unknown, { input }: { input: any }) => {
+      return prisma.review.create({ data: input });
+    },
+    updateReview: async (_: unknown, { id, input }: { id: string; input: any }) => {
+      return prisma.review.update({ where: { id }, data: input });
+    },
+    deleteReview: async (_: unknown, { id }: { id: string }) => {
+      return prisma.review.delete({ where: { id } });
+    },
+
+    // Conversation mutations
+    createConversation: async (_: unknown, { input }: { input: any }) => {
+      return prisma.conversation.create({ data: input });
+    },
+    updateConversation: async (_: unknown, { id, input }: { id: string; input: any }) => {
+      return prisma.conversation.update({ where: { id }, data: input });
+    },
+    deleteConversation: async (_: unknown, { id }: { id: string }) => {
+      return prisma.conversation.delete({ where: { id } });
+    },
+  },
+};
 
 export const schema = makeExecutableSchema({
   typeDefs,
   resolvers,
-});
-
-export type { QueryResolvers, MutationResolvers }; 
+}); 

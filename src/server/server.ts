@@ -25,7 +25,7 @@ import cookieParser from 'cookie-parser';
 import fileUpload from 'express-fileupload';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { ApolloServer } from 'apollo-server-express';
-import { typeDefs, resolvers } from '../graphql/schema.js';
+import { typeDefs, resolvers } from '../graphql/schema';
 import { appRouter, createContext } from '@/trpc/router';
 import querystring from 'querystring';
 import fs from 'fs';
