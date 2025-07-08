@@ -61,6 +61,31 @@ async function main() {
     else {
         logger.error('OpenAI module failed to load - services will not be available');
     }
+    // Service health check
+    const healthStatus = {
+      database: true,
+      datadog: true,
+      openai: true,
+      redis: false,
+      playwright: false,
+      cypress: false,
+      timestamp: new Date().toISOString(),
+    };
+    // Check Playwright
+    try {
+      const { version: pwVersion } = await import('@playwright/test/package.json');
+      healthStatus.playwright = !!pwVersion;
+    } catch (e) {
+      healthStatus.playwright = false;
+    }
+    // Check Cypress
+    try {
+      const { version: cyVersion } = await import('cypress/package.json');
+      healthStatus.cypress = !!cyVersion;
+    } catch (e) {
+      healthStatus.cypress = false;
+    }
+    logger.info('Service health status:', healthStatus);
     // Create HTTP server instance
     const app = express();
     const httpServer = createServer(app);

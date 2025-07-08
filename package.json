@@ -25,7 +25,17 @@
     "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.ts --testMatch '**/__tests__/**/*.unit.test.ts'",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "start:prod": "node dist/server.js"
+    "start:prod": "node dist/server.js",
+    "test:playwright": "playwright test",
+    "test:playwright:ui": "playwright test --ui",
+    "test:playwright:headed": "playwright test --headed",
+    "test:playwright:debug": "playwright test --debug",
+    "test:playwright:report": "playwright show-report",
+    "test:playwright:install": "playwright install",
+    "test:playwright:codegen": "playwright codegen",
+    "test:playwright:show-trace": "playwright show-trace",
+    "test:playwright:screenshot": "playwright test --project=chromium --grep='screenshot'",
+    "test:playwright:visual": "playwright test --project=chromium --grep='visual'"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -102,6 +112,7 @@
     "zustand": "^5.0.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.53.2",
     "@tailwindcss/typography": "^0.5.16",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
