@@ -96,6 +96,8 @@ A sophisticated, enterprise-grade AI system designed for Marriott's hospitality 
 - **Workflow Engine**: LangGraph with React Flow integration
 - **Monitoring System**: Real-time metrics dashboard
 - **Security Layer**: Enterprise-grade encryption
+ 
+![graphql walkthrough](https://github.com/user-attachments/assets/cab96647-bf1d-4ff1-89f5-7ed4c036dddd)
 
 ## 🚀 Development Approach
 
