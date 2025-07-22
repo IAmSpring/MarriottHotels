@@ -7,7 +7,7 @@ export default defineConfig(({ command, mode }) => ({
   plugins: [react({
     jsxRuntime: 'automatic'
   })],
-  base: command === 'serve' ? '/' : '/MarriottHotels/',
+  base: '/MarriottHotels/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

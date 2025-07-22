@@ -1,0 +1,134 @@
+# Get users with comprehensive filtering and Bonvoy information
+# Supports filtering by role, Bonvoy status, and pagination
+# Returns detailed user information with booking history
+query GetUsers($role: String, $bonvoyStatus: String, $limit: Int = 20, $offset: Int = 0) {
+  users(role: $role, bonvoyStatus: $bonvoyStatus, limit: $limit, offset: $offset) {
+    id
+    name
+    email
+    role
+    bonvoyNumber
+    bonvoyPoints
+    bonvoyStatus
+    createdAt
+    updatedAt
+    bookings {
+      id
+      hotelId
+      checkIn
+      checkOut
+      totalPrice
+      status
+    }
+    reviews {
+      id
+      hotelId
+      rating
+      comment
+    }
+  }
+}
+
+# Get detailed user information with analytics
+# Returns comprehensive user profile with booking and review history
+query GetUserDetails($id: Int!) {
+  user(id: $id) {
+    id
+    name
+    email
+    role
+    bonvoyNumber
+    bonvoyPoints
+    bonvoyStatus
+    createdAt
+    updatedAt
+    bookings {
+      id
+      hotelId
+      roomId
+      checkIn
+      checkOut
+      guests
+      totalPrice
+      status
+      specialRequests
+      hotel {
+        name
+        location
+        rating
+      }
+      room {
+        type
+        price
+      }
+    }
+    reviews {
+      id
+      hotelId
+      rating
+      comment
+      createdAt
+      hotel {
+        name
+        location
+      }
+    }
+    orders {
+      id
+      totalAmount
+      status
+      paymentMethod
+      createdAt
+      items {
+        name
+        price
+        quantity
+      }
+    }
+  }
+}
+
+# Get user analytics and insights
+# Returns comprehensive analytics for user behavior and preferences
+query GetUserAnalytics($userId: Int!) {
+  userAnalytics(userId: $userId) {
+    userId
+    totalBookings
+    totalSpent
+    averageRating
+    bonvoyPoints
+    favoriteHotels
+  }
+}
+
+# Create a new user account
+# Requires basic user information and optional Bonvoy details
+# Returns the created user with confirmation
+mutation CreateUser($input: CreateUserInput!) {
+  createUser(input: $input) {
+    id
+    name
+    email
+    role
+    bonvoyNumber
+    bonvoyPoints
+    bonvoyStatus
+    createdAt
+  }
+}
+
+# Update user information
+# Supports partial updates of user profile
+# Returns the updated user information
+mutation UpdateUser($id: Int!, $input: UpdateUserInput!) {
+  updateUser(id: $id, input: $input) {
+    id
+    name
+    email
+    role
+    bonvoyNumber
+    bonvoyPoints
+    bonvoyStatus
+    updatedAt
+  }
+} 

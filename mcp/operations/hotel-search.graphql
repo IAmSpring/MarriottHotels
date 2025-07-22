@@ -1,0 +1,43 @@
+# Search for hotels with filtering and pagination
+# Supports location, rating, and amenity filtering
+# Returns hotels with basic information and available rooms
+query SearchHotels($location: String, $rating: Float, $amenities: [String], $limit: Int = 10, $offset: Int = 0) {
+  hotels(location: $location, rating: $rating, amenities: $amenities, limit: $limit, offset: $offset) {
+    id
+    name
+    location
+    address
+    rating
+    imageUrl
+    description
+    amenities {
+      id
+      name
+      category
+      description
+    }
+    rooms {
+      id
+      type
+      price
+      capacity
+      available
+      imageUrl
+    }
+    restaurants {
+      id
+      name
+      cuisine
+      priceRange
+      openTime
+      closeTime
+    }
+    experiences {
+      id
+      name
+      type
+      price
+      duration
+    }
+  }
+} 

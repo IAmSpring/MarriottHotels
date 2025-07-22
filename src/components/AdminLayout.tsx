@@ -1,35 +1,48 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Activity, Book, Box, Database, HardDrive, Home, MessageSquare, Monitor, Search, Settings, Terminal, Users, LineChart, GitBranch } from 'lucide-react';
+import { Activity, Book, Box, Database, HardDrive, Home, MessageSquare, Monitor, Search, Settings, Terminal, Users, LineChart, GitBranch, Zap, Code, BarChart3 } from 'lucide-react';
 
 const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
 
   const navItems = [
-    { path: '/admin', icon: <Home size={20} />, label: 'Dashboard' },
-    { path: '/admin/bookings', icon: <Book size={20} />, label: 'Bookings' },
-    { path: '/admin/hotels', icon: <Box size={20} />, label: 'Hotels' },
-    { path: '/admin/users', icon: <Users size={20} />, label: 'Users' },
-    { path: '/admin/revenue', icon: <Activity size={20} />, label: 'Revenue' },
-    { path: '/admin/maintenance', icon: <Settings size={20} />, label: 'Maintenance' },
-    { path: '/admin/complaints', icon: <MessageSquare size={20} />, label: 'Complaints' },
-    { path: '/admin/inventory', icon: <Database size={20} />, label: 'Inventory' },
-    { path: '/admin/staff', icon: <Users size={20} />, label: 'Staff Schedule' },
+    { path: '', icon: <Home size={20} />, label: 'Dashboard' },
+    { path: 'bookings', icon: <Book size={20} />, label: 'Bookings' },
+    { path: 'hotels', icon: <Box size={20} />, label: 'Hotels' },
+    { path: 'users', icon: <Users size={20} />, label: 'Users' },
+    { path: 'revenue', icon: <Activity size={20} />, label: 'Revenue' },
+    { path: 'maintenance', icon: <Settings size={20} />, label: 'Maintenance' },
+    { path: 'complaints', icon: <MessageSquare size={20} />, label: 'Complaints' },
+    { path: 'inventory', icon: <Database size={20} />, label: 'Inventory' },
+    { path: 'staff', icon: <Users size={20} />, label: 'Staff Schedule' },
     { 
       label: 'AI Management',
       children: [
-        { path: '/admin/ai', icon: <Terminal size={20} />, label: 'Dashboard' },
-        { path: '/admin/ai/assistants', icon: <MessageSquare size={20} />, label: 'Assistants' },
-        { path: '/admin/ai/conversations', icon: <MessageSquare size={20} />, label: 'Conversations' },
-        { path: '/admin/ai/models', icon: <Box size={20} />, label: 'Models' },
-        { path: '/admin/ai/monitoring', icon: <Monitor size={20} />, label: 'Monitoring' },
-        { path: '/admin/ai/performance', icon: <Activity size={20} />, label: 'Performance' },
-        { path: '/admin/ai/infrastructure', icon: <HardDrive size={20} />, label: 'Infrastructure' },
-        { path: '/admin/ai/logs', icon: <Terminal size={20} />, label: 'Logs' },
-        { path: '/admin/ai/search', icon: <Search size={20} />, label: 'Search' },
-        { path: '/admin/ai/storage', icon: <Database size={20} />, label: 'Storage' },
-        { path: '/admin/ai/training', icon: <LineChart size={20} />, label: 'Training' },
-        { path: '/admin/ai/tracing', icon: <GitBranch size={20} />, label: 'Tracing' }
+        { path: 'ai', icon: <Terminal size={20} />, label: 'Dashboard' },
+        { path: 'ai/assistants', icon: <MessageSquare size={20} />, label: 'Assistants' },
+        { path: 'ai/conversations', icon: <MessageSquare size={20} />, label: 'Conversations' },
+        { path: 'ai/models', icon: <Box size={20} />, label: 'Models' },
+        { path: 'ai/monitoring', icon: <Monitor size={20} />, label: 'Monitoring' },
+        { path: 'ai/performance', icon: <Activity size={20} />, label: 'Performance' },
+        { path: 'ai/infrastructure', icon: <HardDrive size={20} />, label: 'Infrastructure' },
+        { path: 'ai/logs', icon: <Terminal size={20} />, label: 'Logs' },
+        { path: 'ai/search', icon: <Search size={20} />, label: 'Search' },
+        { path: 'ai/storage', icon: <Database size={20} />, label: 'Storage' },
+        { path: 'ai/training', icon: <LineChart size={20} />, label: 'Training' },
+        { path: 'ai/tracing', icon: <GitBranch size={20} />, label: 'Tracing' }
+      ]
+    },
+    { 
+      label: 'Apollo MCP',
+      children: [
+        { path: 'apollo-mcp', icon: <Zap size={20} />, label: 'Dashboard' },
+        { path: 'apollo-mcp/test', icon: <Terminal size={20} />, label: 'Test' },
+        { path: 'apollo-mcp/operations', icon: <Code size={20} />, label: 'Operations' },
+        { path: 'apollo-mcp/schema', icon: <Database size={20} />, label: 'Schema' },
+        { path: 'apollo-mcp/playground', icon: <Terminal size={20} />, label: 'Playground' },
+        { path: 'apollo-mcp/analytics', icon: <BarChart3 size={20} />, label: 'Analytics' },
+        { path: 'apollo-mcp/monitoring', icon: <Monitor size={20} />, label: 'Monitoring' },
+        { path: 'apollo-mcp/logs', icon: <Terminal size={20} />, label: 'Logs' }
       ]
     }
   ];

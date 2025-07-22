@@ -1,0 +1,100 @@
+# Get bookings with comprehensive filtering and user/hotel information
+# Supports filtering by user, hotel, status, and date ranges
+# Returns detailed booking information with related data
+query GetBookings($userId: Int, $hotelId: String, $status: String, $limit: Int = 20, $offset: Int = 0) {
+  bookings(userId: $userId, hotelId: $hotelId, status: $status, limit: $limit, offset: $offset) {
+    id
+    userId
+    hotelId
+    roomId
+    checkIn
+    checkOut
+    guests
+    totalPrice
+    status
+    specialRequests
+    createdAt
+    updatedAt
+    user {
+      id
+      name
+      email
+      bonvoyNumber
+      bonvoyPoints
+      bonvoyStatus
+    }
+    hotel {
+      id
+      name
+      location
+      address
+      rating
+    }
+    room {
+      id
+      type
+      price
+      capacity
+      amenities
+    }
+  }
+}
+
+# Create a new booking with validation
+# Requires user, hotel, room, and booking details
+# Returns the created booking with confirmation
+mutation CreateBooking($input: CreateBookingInput!) {
+  createBooking(input: $input) {
+    id
+    userId
+    hotelId
+    roomId
+    checkIn
+    checkOut
+    guests
+    totalPrice
+    status
+    specialRequests
+    createdAt
+    user {
+      name
+      email
+      bonvoyNumber
+    }
+    hotel {
+      name
+      location
+    }
+    room {
+      type
+      price
+    }
+  }
+}
+
+# Update an existing booking
+# Supports partial updates of booking details
+# Returns the updated booking information
+mutation UpdateBooking($id: String!, $input: UpdateBookingInput!) {
+  updateBooking(id: $id, input: $input) {
+    id
+    checkIn
+    checkOut
+    guests
+    totalPrice
+    status
+    specialRequests
+    updatedAt
+  }
+}
+
+# Cancel a booking
+# Changes booking status to cancelled
+# Returns the cancelled booking
+mutation CancelBooking($id: String!) {
+  cancelBooking(id: $id) {
+    id
+    status
+    updatedAt
+  }
+} 

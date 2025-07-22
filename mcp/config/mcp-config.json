@@ -1,0 +1,68 @@
+{
+  "server": {
+    "port": 5000,
+    "host": "localhost",
+    "transport": "sse",
+    "cors": {
+      "origin": ["http://localhost:3000", "http://localhost:5173"],
+      "credentials": true
+    }
+  },
+  "graphql": {
+    "endpoint": "http://localhost:4000/graphql",
+    "schema": "./mcp/schema.graphql",
+    "introspection": true,
+    "playground": true,
+    "tracing": true,
+    "cacheControl": true
+  },
+  "operations": {
+    "directory": "./mcp/operations",
+    "hotReload": true,
+    "autoDiscover": true,
+    "validation": true
+  },
+  "logging": {
+    "level": "info",
+    "file": "./mcp/logs/mcp-server.log",
+    "maxSize": "10m",
+    "maxFiles": 5
+  },
+  "monitoring": {
+    "enabled": true,
+    "metrics": {
+      "responseTime": true,
+      "errorRate": true,
+      "throughput": true,
+      "operationUsage": true
+    },
+    "alerts": {
+      "highErrorRate": 0.05,
+      "slowResponseTime": 5000,
+      "serverDown": true
+    }
+  },
+  "security": {
+    "rateLimit": {
+      "enabled": true,
+      "windowMs": 900000,
+      "max": 100
+    },
+    "authentication": {
+      "enabled": false,
+      "type": "bearer"
+    }
+  },
+  "ai": {
+    "tools": {
+      "introspection": true,
+      "execute": true,
+      "operationDiscovery": true
+    },
+    "context": {
+      "maxTokens": 100000,
+      "includeSchema": false,
+      "operationComments": true
+    }
+  }
+} 

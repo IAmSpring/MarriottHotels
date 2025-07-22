@@ -1,0 +1,117 @@
+# Get comprehensive hotel analytics and performance metrics
+# Returns detailed analytics for hotel performance, bookings, and revenue
+query GetHotelAnalytics($hotelId: String!) {
+  hotelAnalytics(hotelId: $hotelId) {
+    hotelId
+    totalBookings
+    averageRating
+    totalRevenue
+    occupancyRate
+    popularAmenities
+  }
+}
+
+# Get booking analytics with date range filtering
+# Returns comprehensive booking trends and performance metrics
+query GetBookingAnalytics($startDate: DateTime, $endDate: DateTime) {
+  bookingAnalytics(startDate: $startDate, endDate: $endDate) {
+    totalBookings
+    totalRevenue
+    averageBookingValue
+    topHotels {
+      hotelId
+      hotelName
+      totalBookings
+      totalRevenue
+    }
+    bookingTrends {
+      date
+      bookings
+      revenue
+    }
+  }
+}
+
+# Get comprehensive hotel performance comparison
+# Returns detailed comparison of multiple hotels
+query GetHotelPerformanceComparison($hotelIds: [String!]!) {
+  hotels(limit: 100) {
+    id
+    name
+    location
+    rating
+    amenities {
+      name
+      category
+    }
+    rooms {
+      type
+      price
+      available
+    }
+    bookings {
+      id
+      totalPrice
+      status
+      createdAt
+    }
+    reviews {
+      id
+      rating
+      comment
+      createdAt
+    }
+  }
+}
+
+# Get revenue analytics and trends
+# Returns detailed revenue analysis with trends and projections
+query GetRevenueAnalytics($startDate: DateTime, $endDate: DateTime) {
+  bookingAnalytics(startDate: $startDate, endDate: $endDate) {
+    totalRevenue
+    averageBookingValue
+    bookingTrends {
+      date
+      revenue
+      bookings
+    }
+    topHotels {
+      hotelId
+      hotelName
+      totalRevenue
+      totalBookings
+    }
+  }
+}
+
+# Get user behavior analytics
+# Returns insights into user booking patterns and preferences
+query GetUserBehaviorAnalytics($limit: Int = 50) {
+  users(limit: $limit) {
+    id
+    name
+    bonvoyPoints
+    bonvoyStatus
+    bookings {
+      id
+      totalPrice
+      status
+      createdAt
+      hotel {
+        name
+        location
+        rating
+      }
+    }
+    reviews {
+      id
+      rating
+      comment
+      createdAt
+      hotel {
+        name
+        location
+      }
+    }
+  }
+} 

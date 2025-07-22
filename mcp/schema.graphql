@@ -1,0 +1,343 @@
+scalar DateTime
+
+type User {
+  id: Int!
+  name: String
+  email: String!
+  password: String!
+  role: String!
+  bonvoyNumber: String
+  bonvoyPoints: Int!
+  bonvoyStatus: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  bookings: [Booking!]!
+  orders: [Order!]!
+  reviews: [Review!]!
+  conversations: [Conversation!]!
+}
+
+type Hotel {
+  id: String!
+  name: String!
+  location: String!
+  address: String!
+  description: String!
+  imageUrl: String!
+  rating: Float!
+  amenities: [Amenity!]!
+  rooms: [Room!]!
+  restaurants: [Restaurant!]!
+  experiences: [Experience!]!
+  reviews: [Review!]!
+  bookings: [Booking!]!
+}
+
+type Room {
+  id: String!
+  hotelId: String!
+  hotel: Hotel!
+  type: String!
+  description: String!
+  price: Float!
+  capacity: Int!
+  amenities: String!
+  imageUrl: String!
+  available: Boolean!
+  bookings: [Booking!]!
+}
+
+type Amenity {
+  id: String!
+  name: String!
+  category: String!
+  description: String!
+  imageUrl: String
+  hotelId: String!
+  hotel: Hotel!
+}
+
+type Restaurant {
+  id: String!
+  name: String!
+  hotelId: String!
+  hotel: Hotel!
+  cuisine: String!
+  priceRange: String!
+  openTime: String!
+  closeTime: String!
+  description: String!
+  imageUrl: String!
+  reservations: [Reservation!]!
+}
+
+type Reservation {
+  id: String!
+  restaurantId: String!
+  restaurant: Restaurant!
+  date: DateTime!
+  time: String!
+  partySize: Int!
+  status: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Experience {
+  id: String!
+  name: String!
+  hotelId: String!
+  hotel: Hotel!
+  type: String!
+  description: String!
+  price: Float!
+  duration: Int!
+  imageUrl: String!
+  bookings: [ExperienceBooking!]!
+}
+
+type ExperienceBooking {
+  id: String!
+  experienceId: String!
+  experience: Experience!
+  userId: Int!
+  user: User!
+  date: DateTime!
+  participants: Int!
+  totalPrice: Float!
+  status: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Booking {
+  id: String!
+  userId: Int!
+  user: User!
+  hotelId: String!
+  hotel: Hotel!
+  roomId: String!
+  room: Room!
+  checkIn: DateTime!
+  checkOut: DateTime!
+  guests: Int!
+  totalPrice: Float!
+  status: String!
+  specialRequests: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Order {
+  id: String!
+  userId: Int!
+  user: User!
+  items: [OrderItem!]!
+  totalAmount: Float!
+  status: String!
+  paymentMethod: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type OrderItem {
+  id: String!
+  orderId: String!
+  order: Order!
+  name: String!
+  description: String!
+  price: Float!
+  quantity: Int!
+}
+
+type Review {
+  id: String!
+  userId: Int!
+  user: User!
+  hotelId: String!
+  hotel: Hotel!
+  rating: Int!
+  comment: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Conversation {
+  id: String!
+  userId: Int!
+  user: User!
+  messages: [Message!]!
+  status: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Message {
+  id: String!
+  conversationId: String!
+  conversation: Conversation!
+  content: String!
+  sender: String!
+  timestamp: DateTime!
+}
+
+type Query {
+  # User queries
+  users(role: String, bonvoyStatus: String, limit: Int, offset: Int): [User!]!
+  user(id: Int!): User
+  
+  # Hotel queries
+  hotels(location: String, rating: Float, amenities: [String], limit: Int, offset: Int): [Hotel!]!
+  hotel(id: String!): Hotel
+  
+  # Room queries
+  rooms(hotelId: String, type: String, available: Boolean, limit: Int, offset: Int): [Room!]!
+  room(id: String!): Room
+  
+  # Booking queries
+  bookings(userId: Int, hotelId: String, status: String, limit: Int, offset: Int): [Booking!]!
+  booking(id: String!): Booking
+  
+  # Restaurant queries
+  restaurants(hotelId: String, cuisine: String, limit: Int, offset: Int): [Restaurant!]!
+  restaurant(id: String!): Restaurant
+  
+  # Experience queries
+  experiences(hotelId: String, type: String, limit: Int, offset: Int): [Experience!]!
+  experience(id: String!): Experience
+  
+  # Review queries
+  reviews(hotelId: String, userId: Int, rating: Int, limit: Int, offset: Int): [Review!]!
+  review(id: String!): Review
+  
+  # Analytics queries
+  hotelAnalytics(hotelId: String!): HotelAnalytics
+  userAnalytics(userId: Int!): UserAnalytics
+  bookingAnalytics(startDate: DateTime, endDate: DateTime): BookingAnalytics
+}
+
+type Mutation {
+  # User mutations
+  createUser(input: CreateUserInput!): User!
+  updateUser(id: Int!, input: UpdateUserInput!): User!
+  deleteUser(id: Int!): Boolean!
+  
+  # Hotel mutations
+  createHotel(input: CreateHotelInput!): Hotel!
+  updateHotel(id: String!, input: UpdateHotelInput!): Hotel!
+  deleteHotel(id: String!): Boolean!
+  
+  # Booking mutations
+  createBooking(input: CreateBookingInput!): Booking!
+  updateBooking(id: String!, input: UpdateBookingInput!): Booking!
+  cancelBooking(id: String!): Booking!
+  
+  # Review mutations
+  createReview(input: CreateReviewInput!): Review!
+  updateReview(id: String!, input: UpdateReviewInput!): Review!
+  deleteReview(id: String!): Boolean!
+}
+
+# Input types
+input CreateUserInput {
+  name: String!
+  email: String!
+  password: String!
+  role: String!
+  bonvoyNumber: String
+}
+
+input UpdateUserInput {
+  name: String
+  email: String
+  role: String
+  bonvoyNumber: String
+}
+
+input CreateHotelInput {
+  name: String!
+  location: String!
+  address: String!
+  description: String!
+  imageUrl: String!
+  rating: Float!
+}
+
+input UpdateHotelInput {
+  name: String
+  location: String
+  address: String
+  description: String
+  imageUrl: String
+  rating: Float
+}
+
+input CreateBookingInput {
+  userId: Int!
+  hotelId: String!
+  roomId: String!
+  checkIn: DateTime!
+  checkOut: DateTime!
+  guests: Int!
+  specialRequests: String
+}
+
+input UpdateBookingInput {
+  checkIn: DateTime
+  checkOut: DateTime
+  guests: Int
+  status: String
+  specialRequests: String
+}
+
+input CreateReviewInput {
+  userId: Int!
+  hotelId: String!
+  rating: Int!
+  comment: String!
+}
+
+input UpdateReviewInput {
+  rating: Int
+  comment: String
+}
+
+# Analytics types
+type HotelAnalytics {
+  hotelId: String!
+  totalBookings: Int!
+  averageRating: Float!
+  totalRevenue: Float!
+  occupancyRate: Float!
+  popularAmenities: [String!]!
+}
+
+type UserAnalytics {
+  userId: Int!
+  totalBookings: Int!
+  totalSpent: Float!
+  averageRating: Float!
+  bonvoyPoints: Int!
+  favoriteHotels: [String!]!
+}
+
+type BookingAnalytics {
+  totalBookings: Int!
+  totalRevenue: Float!
+  averageBookingValue: Float!
+  topHotels: [HotelBookingStats!]!
+  bookingTrends: [BookingTrend!]!
+}
+
+type HotelBookingStats {
+  hotelId: String!
+  hotelName: String!
+  totalBookings: Int!
+  totalRevenue: Float!
+}
+
+type BookingTrend {
+  date: DateTime!
+  bookings: Int!
+  revenue: Float!
+} 

@@ -35,7 +35,12 @@
     "test:playwright:codegen": "playwright codegen",
     "test:playwright:show-trace": "playwright show-trace",
     "test:playwright:screenshot": "playwright test --project=chromium --grep='screenshot'",
-    "test:playwright:visual": "playwright test --project=chromium --grep='visual'"
+    "test:playwright:visual": "playwright test --project=chromium --grep='visual'",
+    "mcp:dev": "tsx mcp/apollo-mcp-server.ts",
+    "mcp:build": "tsc mcp/apollo-mcp-server.ts --outDir dist/mcp",
+    "mcp:start": "node dist/mcp/apollo-mcp-server.js",
+    "mcp:official": "./mcp/apollo-mcp-server ./mcp/apollo-mcp-config.json",
+    "apollo:publish": "./scripts/publish-schema.sh"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -50,6 +55,7 @@
     "@graphql-tools/utils": "^10.8.6",
     "@headlessui/react": "^1.7.18",
     "@langchain/core": "^0.3.61",
+    "@modelcontextprotocol/sdk": "^0.4.0",
     "@pinecone-database/pinecone": "^6.1.1",
     "@prisma/client": "^5.22.0",
     "@stripe/stripe-js": "^2.4.0",
@@ -88,6 +94,7 @@
     "next": "^15.3.3",
     "next-auth": "^4.24.11",
     "openai": "^5.7.0",
+    "pg": "^8.16.3",
     "posthog-js": "^1.96.1",
     "prom-client": "^14.2.0",
     "qs": "^6.14.0",
